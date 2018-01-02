@@ -9,6 +9,67 @@ $(document).ready(function() {
 
 	var socket = io({ query: "&name=" + myName});
 
+	var myId = 'bla';
+	socket.on('myId', function(id){
+		myId = id;
+	});
+
+	var sentTime = Date.now();
+	var lag = 0;
+	setInterval(function() {
+		sentTime = Date.now();
+		socket.emit('myPing', 'Ping');
+	}, 1000);
+	socket.on('myPong', function(data){
+		lag = Date.now() - sentTime;
+		// show lag
+		$('#lag').text(lag + 'ms');
+	});
+
+	var myKing = {
+		x: 0,
+		y: 0,
+		count: 0,
+		path: [],
+		selected: false,
+		move: false
+	};
+	var myLegions = [];
+	var enemyKing = {
+		x: 0,
+		y: 0,
+		count: 0,
+		path: [],
+		selected: false,
+		move: false
+	};
+	var enemyLegions = [];
+
+	socket.on('game update', function(data){
+		var players = data.allPlayers;
+		// get my king and legions
+		var myPlayer = players.find(function(player) {
+			return player.id == myId;
+		});
+		// don't update my coordinates
+		if (myLegions.length == 0) {
+			myKing = myPlayer.king;
+			myLegions = myPlayer.legions;
+		}
+
+		// get enemies (FOR NOW ONLY ONE ENEMY)
+		var enemyPlayers = players.filter(function(player) {
+			return player.id != myId;
+		});
+		for (var i = 0; i < enemyPlayers.length; i++) {
+			enemyKing = enemyPlayers[i].king;
+			enemyLegions = enemyPlayers[i].legions;
+		}
+
+		battleBeams = data.battleBeams;
+		deadPixelsAnimations = deadPixelsAnimations.concat(data.deadPixelsAnimations);
+	});
+
 	var canvas = document.getElementById("gameCanvas");
 	var ctx = canvas.getContext("2d");
 
@@ -37,18 +98,10 @@ $(document).ready(function() {
 	const LEGION_MINIMAL_PX = 30;
 	const LEGION_BORDER_WIDTH = 3;
 
-	const MY_LEGION_COLOR_NORMAL = "rgba(76, 103, 214, 0.5)";
-	const MY_LEGION_BORDER_COLOR_NORMAL = "rgba(76, 103, 214, 1)";
-	const MY_LEGION_COLOR_SELECTED = "rgba(122, 143, 214, 0.5)";
-	const MY_LEGION_BORDER_COLOR_SELECTED = "rgba(122, 143, 214, 1)";
-
 	const ENEMY_KING_BORDER1_COLOR_NORMAL = "#fff";
 	const ENEMY_KING_BORDER2_COLOR_NORMAL = "#000";
 	const ENEMY_KING_COLOR_STEM = "rgba(248, 6, 42, ";
 	const ENEMY_KING_BORDER2_COLOR_SELECTED = "#333";
-
-	const ENEMY_COLOR_NORMAL = "rgba(248, 6, 42, 0.5)";
-	const ENEMY_BORDER_COLOR_NORMAL = "rgba(248, 6, 42, 1)";
 
 	const BATTLE_BEAM_COLOR = "#bbb";
 	const BATTLE_BEAM_WIDTH = 1;
@@ -61,64 +114,12 @@ $(document).ready(function() {
 
 	const HULL_SPACE_PX = 10;
 
-	const AI_LOOP_INTERVAL = 2 * 1000;
-	const SPAWN_INTERVAL_MY = 12 * 1000;
-	const SPAWN_INTERVAL_ENEMY = 10 * 1000;
-	const SPAWN_AREA_WIDTH = 200;
-
 	const BATTLE_COUNT_LOSE = 0.04;
 	const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 	const BATTLE_DISTANCE = 100;
 
-	var myKing = {
-		x: 350,
-		y: 500,
-		count: KING_COUNT,
-		path: [],
-		selected: false,
-		move: false
-	};
-
-	var enemyKing = {
-		x: 300,
-		y: 120,
-		count: KING_COUNT
-	};
-
-	function MyLegion(x, y, count) {
-		this.x = x;
-		this.y = y;
-		this.count = count;
-		this.path = [];
-		this.selected = false;
-		this.move = false;
-		this.pixels = createPixels(x, y, legionCountToWidth(count), legionCountToWidth(count), count);
-		this.hull = calculateHull(this.pixels, x, y);
-		this.nearbyEnemies = [];
-	}
-
-	function EnemyLegion(x, y, count) {
-		this.x = x;
-		this.y = y;
-		this.count = count;
-		this.AIPath = [];
-		this.pixels = createPixels(x, y, legionCountToWidth(count), legionCountToWidth(count), count);
-		this.hull = calculateHull(this.pixels, x, y);
-		this.nearbyEnemies = [];
-		this.defending = false;
-	}
-
-	var myLegions = [
-		new MyLegion(400, 400, LEGION_COUNT),
-		new MyLegion(200, 500, LEGION_COUNT)
-	];
-
-	var enemyLegions = [
-		new EnemyLegion(300, 180, LEGION_COUNT),
-		new EnemyLegion(460, 180, LEGION_COUNT)
-	];
-
 	var battleBeams = [];
+	var deadPixelsAnimations = [];
 
 	function win() {
 		window.location.href = '/win';
@@ -132,28 +133,8 @@ $(document).ready(function() {
 		return count * LEGION_COUNT_TO_WIDTH + LEGION_MINIMAL_PX;
 	}
 
-	function myKingCountToColor(count) {
-		return MY_KING_COLOR_STEM + count / KING_COUNT + ')';
-	}
-
-	function enemyKingCountToColor(count) {
-		return ENEMY_KING_COLOR_STEM + count / KING_COUNT + ')';
-	}
-
-	function createPixels(x, y, w, h, count) {
-
-		var pixels = [];
-		var num = count + PIXELS_NUM_MIN;
-
-		for (var i = 0; i < num; i++) {
-			var pixelX = Math.random() * (w - 2 * HULL_SPACE_PX) + x - w/2 + HULL_SPACE_PX;
-			var pixelY = Math.random() * h + y - h/2;
-			var pixelMoveDirectionX = Math.floor(Math.random() * 2);
-			var pixelMoveDirectionY = Math.floor(Math.random() * 2);
-			pixels.push([pixelX, pixelY, pixelMoveDirectionX, pixelMoveDirectionY]);
-		}
-
-		return pixels;
+	function kingCountToColor(count, colorStem) {
+		return colorStem + count / KING_COUNT + ')';
 	}
 
 	function updatePixelsPosition(pixels, dx, dy) {
@@ -382,194 +363,7 @@ $(document).ready(function() {
 		}
 	}
 
-	function AIDefenceAfterSpawnPath(legion) {
-
-		var dxKings = myKing.x - enemyKing.x;
-		var dyKings = myKing.y - enemyKing.y;
-		var goToX = 0;
-		var goToY = 0;
-		if (dyKings > dxKings) {
-			var kx = Math.floor(Math.random() * 300 - 150);
-			var ky = Math.floor(Math.random() * 40 - 20);
-			goToX = enemyKing.x + dxKings*0.2 + kx;
-			goToY = enemyKing.y + dyKings*0.2 + ky;
-		} else {
-			var kx = Math.floor(Math.random() * 40 - 20);
-			var ky = Math.floor(Math.random() * 300 - 150);
-			goToX = enemyKing.x + dxKings*0.2 + kx;
-			goToY = enemyKing.y + dyKings*0.2 + ky;
-		}
-
-		var dx = goToX - legion.x;
-		var dy = goToY - legion.y;
-		var distance = Math.sqrt(dx * dx + dy * dy);
-		var repeat = Math.floor(distance / Math.sqrt(10));
-		legion.AIPath = [[goToX, goToY]];
-		for (var i = 0; i < repeat; i++) {
-			var goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
-			legion.AIPath.unshift(goTo);
-		}
-
-	}
-
-	function AIDefend(x, y) {
-		if (enemyLegions.length > 0) {
-			var defendersIndexes = [];
-			var defendingNum = Math.ceil(enemyLegions.length/2);
-
-			var defendingLegionsIndexes = [];
-			for (var i = 0; i < enemyLegions.length; i++) {
-				var dx = x - enemyLegions[i].x;
-				var dy = y - enemyLegions[i].y;
-				var distance = Math.sqrt(dx*dx + dy*dy);
-				if (enemyLegions[i].defending || distance < BATTLE_DISTANCE) {
-					defendingLegionsIndexes.push(i);
-				}
-			}
-
-			var reinforcementsNum = defendingNum - defendingLegionsIndexes.length;
-			if (reinforcementsNum > 0) {
-				var index = 0;
-				for (var i = 0; i < defendingNum; i++) {
-					while (defendingLegionsIndexes.indexOf(index) != -1 && defendersIndexes.indexOf(index) != -1) {
-						index = Math.floor(Math.random() * enemyLegions.length);
-					}
-					defendersIndexes.push(index);
-					enemyLegions[index].defending = true;
-
-					AIDefendPath(enemyLegions[index], x, y);
-				}
-			}
-		}
-	}
-
-	function AIDefendPath(legion, x, y) {
-
-		var ax = Math.random()*BATTLE_DISTANCE - BATTLE_DISTANCE/2;
-		var ay = Math.random()*BATTLE_DISTANCE - BATTLE_DISTANCE/2;
-		var goToX = x + ax;
-		var goToY = y + ay;
-
-		var dx = goToX - legion.x;
-		var dy = goToY - legion.y;
-		var distance = Math.sqrt(dx * dx + dy * dy);
-		var repeat = Math.floor(distance / Math.sqrt(10));
-		legion.AIPath = [[goToX, goToY]];
-		for (var i = 0; i < repeat; i++) {
-			var goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
-			legion.AIPath.unshift(goTo);
-		}
-
-	}
-
-	function AIAttackCheck() {
-		if (enemyLegions.length > 1 && enemyLegions.length > myLegions.length) {
-			var index1 = Math.floor(Math.random() * enemyLegions.length);
-			var index2 = Math.floor(Math.random() * enemyLegions.length);
-
-			do {
-				index2 = Math.floor(Math.random() * enemyLegions.length);
-			} while (index2 == index1)
-
-			if (!enemyLegions[index1].spawning) {
-				AIAttackPath(enemyLegions[index1]);
-			}
-			if (!enemyLegions[index2].spawning) {
-				AIAttackPath(enemyLegions[index2]);
-			}
-		}
-	}
-
-	function AIAttackPath(legion) {
-
-		var a = Math.random()*BATTLE_DISTANCE;
-		var goToX = myKing.x + a - BATTLE_DISTANCE/2;
-		var goToY = myKing.y + a - BATTLE_DISTANCE/2;
-
-		var dx = goToX - legion.x;
-		var dy = goToY - legion.y;
-		var distance = Math.sqrt(dx * dx + dy * dy);
-		var repeat = Math.floor(distance / Math.sqrt(10));
-		legion.AIPath = [[goToX, goToY]];
-		for (var i = 0; i < repeat; i++) {
-			var goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
-			legion.AIPath.unshift(goTo);
-		}
-
-	}
-
-	function AIClearDefending() {
-		for (var i = 0; i < enemyLegions.length; i++) {
-			enemyLegions[i].defending = false;
-		}
-	}
-
-	// AI loop
-	setInterval(function(){
-		AIAttackCheck();
-		AIClearDefending();
-	}, AI_LOOP_INTERVAL);
-
-	// spawning my new legions
-	setInterval(function(){
-		var startX = myKing.x;
-		var startY = myKing.y;
-		var spawnX = Math.random() * SPAWN_AREA_WIDTH + myKing.x - SPAWN_AREA_WIDTH/2;
-		var spawnY = Math.random() * SPAWN_AREA_WIDTH + myKing.y - SPAWN_AREA_WIDTH/2;
-		var spawnCount = LEGION_COUNT;
-		var spawnPath = [];
-		var spawnSelected = false;
-		var spawnMove = false;
-		var spawnPixels = createPixels(startX, startY, legionCountToWidth(spawnCount), legionCountToWidth(spawnCount), spawnCount);
-		var spawnHull = calculateHull(spawnPixels, startX, startY);
-		var spawnNearbyEnemies = [];
-		myLegions.push({
-			x: startX,
-			y: startY,
-			count: spawnCount,
-			path: spawnPath,
-			selected: spawnSelected,
-			move: spawnMove,
-			pixels: spawnPixels,
-			hull: spawnHull,
-			nearbyEnemies: spawnNearbyEnemies,
-			spawning: true,
-			spawnX: spawnX,
-			spawnY: spawnY
-		});
-	}, SPAWN_INTERVAL_MY);
-
-	// spawning enemy new legions
-	setInterval(function(){
-		var startX = enemyKing.x;
-		var startY = enemyKing.y;
-		var spawnX = Math.random() * SPAWN_AREA_WIDTH + enemyKing.x - SPAWN_AREA_WIDTH/2;
-		var spawnY = Math.random() * SPAWN_AREA_WIDTH + enemyKing.y - SPAWN_AREA_WIDTH/2;
-		var spawnCount = LEGION_COUNT;
-		var spawnPixels = createPixels(startX, startY, legionCountToWidth(spawnCount), legionCountToWidth(spawnCount), spawnCount);
-		var spawnHull = calculateHull(spawnPixels, startX, startY);
-		var spawnNearbyEnemies = [];
-		enemyLegions.push({
-			x: startX,
-			y: startY,
-			count: spawnCount,
-			nearbyEnemies: spawnNearbyEnemies,
-			pixels: spawnPixels,
-			hull: spawnHull,
-			spawning: true,
-			spawnX: spawnX,
-			spawnY: spawnY,
-			AIPath: [],
-			defending: false
-		});
-
-		// Check if enemy should attack
-		AIAttackCheck();
-	}, SPAWN_INTERVAL_ENEMY);
-
 	function update() {
-
-		battle();
 
 		movePixels();
 
@@ -581,132 +375,13 @@ $(document).ready(function() {
 	}
 	requestAnimationFrame(update);
 
-	function battle() {
-		for (var i = 0; i < enemyLegions.length; i++) {
-			for (var j = 0; j < myLegions.length; j++) {
+	// send my move loop
+	setInterval(function() {
+		emitMove();
+	}, 1000/66);
 
-				if (i == 0) {
-					myLegions[j].nearbyEnemies = [];
-
-					// distance to enemy king
-					var kingDistanceX = Math.abs(enemyKing.x - myLegions[j].x);
-					var kingDistanceY = Math.abs(enemyKing.y - myLegions[j].y);
-
-					if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {
-						AIDefend(myLegions[j].x, myLegions[j].y);
-
-						enemyKing.count -= BATTLE_COUNT_LOSE;
-						myLegions[j].count -= BATTLE_COUNT_LOSE;
-						if (enemyKing.count <= 0) {
-							win();
-						}
-					}
-				}
-
-				// distance to legion
-				var legionsDistanceX = Math.abs(myLegions[j].x - enemyLegions[i].x);
-				var legionsDistanceY = Math.abs(myLegions[j].y - enemyLegions[i].y);
-
-				if (legionsDistanceX < BATTLE_DISTANCE && legionsDistanceY < BATTLE_DISTANCE) {
-					battleBeams.push([myLegions[j].x, myLegions[j].y, enemyLegions[i].x, enemyLegions[i].y]);
-					myLegions[j].count -= BATTLE_COUNT_LOSE;
-					enemyLegions[i].count -= BATTLE_COUNT_LOSE;
-
-					// find nearby enemies position
-					var enemyHalfWidth = legionCountToWidth(enemyLegions[i].count) / 2;
-					if (legionsDistanceX > enemyHalfWidth) {
-						// is myLegion on the left or right of enemy
-						if ((myLegions[j].x - enemyLegions[i].x) > 0) {
-							pushIfNotIn(enemyLegions[i].nearbyEnemies, 2);
-							pushIfNotIn(myLegions[j].nearbyEnemies, 4);
-						} else {
-							pushIfNotIn(enemyLegions[i].nearbyEnemies, 4);
-							pushIfNotIn(myLegions[j].nearbyEnemies, 2);
-						}
-					}
-
-					if (legionsDistanceY > enemyHalfWidth) {
-						// is myLegion on the top or bottom of enemy
-						if ((myLegions[j].y - enemyLegions[i].y) > 0) {
-							pushIfNotIn(enemyLegions[i].nearbyEnemies, 3);
-							pushIfNotIn(myLegions[j].nearbyEnemies, 1);
-						} else {
-							pushIfNotIn(enemyLegions[i].nearbyEnemies, 1);
-							pushIfNotIn(myLegions[j].nearbyEnemies, 3);
-						}
-					}
-
-					function pushIfNotIn(array, value) {
-						if (array.indexOf(value) == -1) {
-							array.push(value);
-						}
-					}
-
-					// check for ambush
-					if (enemyLegions[i].nearbyEnemies.indexOf(2) != -1 && enemyLegions[i].nearbyEnemies.indexOf(4) != -1) {
-						enemyLegions[i].count -= BATTLE_AMBUSH_COUNT_LOSE;
-					}
-					if (enemyLegions[i].nearbyEnemies.indexOf(1) != -1 && enemyLegions[i].nearbyEnemies.indexOf(3) != -1) {
-						enemyLegions[i].count -= BATTLE_AMBUSH_COUNT_LOSE;
-					}
-
-					if (myLegions[j].nearbyEnemies.indexOf(2) != -1 && myLegions[j].nearbyEnemies.indexOf(4) != -1) {
-						myLegions[j].count -= BATTLE_AMBUSH_COUNT_LOSE;
-					}
-					if (myLegions[j].nearbyEnemies.indexOf(1) != -1 && myLegions[j].nearbyEnemies.indexOf(3) != -1) {
-						myLegions[j].count -= BATTLE_AMBUSH_COUNT_LOSE;
-					}
-				}
-
-				// remove my dead pixels
-				var deadPixelsCount = Math.floor(myLegions[j].pixels.length - PIXELS_NUM_MIN - myLegions[j].count);
-				if (deadPixelsCount > 0) {
-					for (var d = 0; d < deadPixelsCount; d++) {
-						var deadPixel = myLegions[j].pixels.pop();
-						deadPixelAnimation(deadPixel[0], deadPixel[1]);
-					}
-					myLegions[j].hull = calculateHull(myLegions[j].pixels, myLegions[j].x, myLegions[j].y);
-				}
-			}
-
-			// distance to my king
-			var kingDistanceX = Math.abs(myKing.x - enemyLegions[i].x);
-			var kingDistanceY = Math.abs(myKing.y - enemyLegions[i].y);
-
-			if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {				
-				myKing.count -= BATTLE_COUNT_LOSE;
-				enemyLegions[i].count -= BATTLE_COUNT_LOSE;
-				if (myKing.count <= 0) {
-					lose();
-				}
-			}
-
-			// remove locations
-			enemyLegions[i].nearbyEnemies = [];
-
-			// remove my dead pixels
-			var deadPixelsCount = Math.floor(enemyLegions[i].pixels.length - PIXELS_NUM_MIN - enemyLegions[i].count);
-			if (deadPixelsCount > 0) {
-				for (var d = 0; d < deadPixelsCount; d++) {
-					var deadPixel = enemyLegions[i].pixels.pop();
-					deadPixelAnimation(deadPixel[0], deadPixel[1]);
-				}
-				enemyLegions[i].hull = calculateHull(enemyLegions[i].pixels, enemyLegions[i].x, enemyLegions[i].y);
-			}
-
-			// remove enemy's dead legions
-			if (enemyLegions[i].count <= 0) {
-				enemyLegions.splice(i, 1);
-			}
-
-		}
-
-		// remove my dead legions
-		for (var j = 0; j < myLegions.length; j++) {
-			if (myLegions[j].count <= 0) {
-				myLegions.splice(j, 1);
-			}
-		}
+	function emitMove() {
+		socket.emit('move', {id: myId, king: myKing, legions: myLegions});
 	}
 
 	function movePixels() {
@@ -789,22 +464,11 @@ $(document).ready(function() {
 		}
 	}
 
-	var deadPixelsAnimations = [];
-	function deadPixelAnimation(x, y) {
-		var x1 = x;
-		var y1 = y - PIXEL_SIZE_PX;
-		var x2 = x + PIXEL_SIZE_PX;
-		var y2 = y;
-		var x3 = x;
-		var y3 = y + PIXEL_SIZE_PX;
-		var x4 = x - PIXEL_SIZE_PX;
-		var y4 = y;
-		deadPixelsAnimations.push([[x1, y1], [x2, y2], [x3, y3], [x4, y4]]);
-	}
-
 	function updateDeadPixelsAnimations() {
+		console.log(deadPixelsAnimations);
 		var moveBy = 1;
 		for (var i = 0; i < deadPixelsAnimations.length; i++) {
+			
 			deadPixelsAnimations[i][0][1] -= moveBy;
 			deadPixelsAnimations[i][1][0] += moveBy;
 			deadPixelsAnimations[i][2][1] += moveBy;
@@ -823,20 +487,6 @@ $(document).ready(function() {
 		ctx.strokeStyle = BATTLE_BEAM_COLOR;
 		ctx.lineWidth = BATTLE_BEAM_WIDTH;
 		for (var i = 0; i < battleBeams.length; i++) {
-			/*
-			var startX = battleBeams[i][0];
-			var startY = battleBeams[i][1];
-			var endX = battleBeams[i][2];
-			var endY = battleBeams[i][3];
-			var cp1x = startX;
-			var cp1y = startY + 50;
-			var cp2x = endX;
-			var cp2y = endY - 50;
-			ctx.beginPath();
-			ctx.moveTo(startX, startY);
-			ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
-			ctx.stroke();
-			*/
 			var startX = battleBeams[i][0] + Math.random()*4 - 2;
 			var startY = battleBeams[i][1] + Math.random()*4 - 2;
 			var endX = battleBeams[i][2] + Math.random()*4 - 2;
@@ -881,7 +531,7 @@ $(document).ready(function() {
 			ctx.fillStyle = MY_KING_BORDER2_COLOR_NORMAL;
 			ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		}
-		ctx.fillStyle = myKingCountToColor(myKing.count);
+		ctx.fillStyle = kingCountToColor(myKing.count);
 		ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
 
 		// draw my legions
@@ -938,11 +588,11 @@ $(document).ready(function() {
 			
 			var myLegionWidth = legionCountToWidth(myLegions[i].count);
 			if (myLegions[i].selected) {
-				ctx.strokeStyle = MY_LEGION_BORDER_COLOR_SELECTED;
-				ctx.fillStyle = MY_LEGION_COLOR_SELECTED;
+				ctx.strokeStyle = myLegions[i].borderSelected;
+				ctx.fillStyle = myLegions[i].colorSelected;
 			} else {
-				ctx.strokeStyle = MY_LEGION_BORDER_COLOR_NORMAL;
-				ctx.fillStyle = MY_LEGION_COLOR_NORMAL;
+				ctx.strokeStyle = myLegions[i].borderNormal;
+				ctx.fillStyle = myLegions[i].colorNormal;
 			}
 			ctx.lineWidth = LEGION_BORDER_WIDTH;
 			ctx.beginPath();
@@ -965,7 +615,7 @@ $(document).ready(function() {
 
 			// draw pixels in legion
 			for (var p = 0; p < myLegions[i].pixels.length; p++) {
-				ctx.fillStyle = MY_LEGION_BORDER_COLOR_NORMAL;
+				ctx.fillStyle = myLegions[i].colorNormal;
 				ctx.fillRect(myLegions[i].pixels[p][0] - PIXEL_SIZE_PX/2, myLegions[i].pixels[p][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
 		}
@@ -980,7 +630,7 @@ $(document).ready(function() {
 			ctx.fillStyle = ENEMY_KING_BORDER2_COLOR_NORMAL;
 			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		}
-		ctx.fillStyle = enemyKingCountToColor(enemyKing.count);
+		ctx.fillStyle = kingCountToColor(enemyKing.count);
 		ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
 
 
@@ -999,22 +649,14 @@ $(document).ready(function() {
 					enemyLegions[i].y += dy;
 				} else {
 					enemyLegions[i].spawning = false;
-					AIDefenceAfterSpawnPath(enemyLegions[i]);
+					//AIDefenceAfterSpawnPath(enemyLegions[i]);
 				}
-				updatePixelsPosition(enemyLegions[i].pixels, dx, dy);
-			}
-			if (enemyLegions[i].AIPath.length > 0) {
-				var newPosition = enemyLegions[i].AIPath.shift();
-				var dx = newPosition[0] - enemyLegions[i].x;
-				var dy = newPosition[1] - enemyLegions[i].y;
-				enemyLegions[i].x = newPosition[0];
-				enemyLegions[i].y = newPosition[1];
 				updatePixelsPosition(enemyLegions[i].pixels, dx, dy);
 			}
 
 			var enemyLegionWidth = legionCountToWidth(enemyLegions[i].count);
-			ctx.strokeStyle = ENEMY_BORDER_COLOR_NORMAL;
-			ctx.fillStyle = ENEMY_COLOR_NORMAL;
+			ctx.strokeStyle = enemyLegions[i].borderNormal;
+			ctx.fillStyle = enemyLegions[i].colorNormal;
 			ctx.lineWidth = LEGION_BORDER_WIDTH;
 			ctx.beginPath();
 
@@ -1035,7 +677,7 @@ $(document).ready(function() {
 
 			// draw pixels in legion
 			for (var p = 0; p < enemyLegions[i].pixels.length; p++) {
-				ctx.fillStyle = ENEMY_BORDER_COLOR_NORMAL;
+				ctx.fillStyle = enemyLegions[i].borderNormal;
 				ctx.fillRect(enemyLegions[i].pixels[p][0] - PIXEL_SIZE_PX/2, enemyLegions[i].pixels[p][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
 

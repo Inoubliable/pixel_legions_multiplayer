@@ -1,2 +1,19 @@
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Arial"}#gameCanvas{display:block;background-color:black}#lag{position:absolute;right:50px;top:50px;font-weight:700;font-size:18px}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial"; }
+
+#gameCanvas {
+  display: block;
+  background-color: #000; }
+
+#lag {
+  position: absolute;
+  right: 50px;
+  top: 50px;
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff; }
+
 /*# sourceMappingURL=game.css.map */
