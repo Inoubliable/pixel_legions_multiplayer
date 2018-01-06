@@ -32,7 +32,8 @@ $(document).ready(function() {
 		count: 0,
 		path: [],
 		selected: false,
-		move: false
+		move: false,
+		color: "#000"
 	};
 	var myLegions = [];
 	var enemyKing = {
@@ -41,30 +42,46 @@ $(document).ready(function() {
 		count: 0,
 		path: [],
 		selected: false,
-		move: false
+		move: false,
+		color: "#000"
 	};
 	var enemyLegions = [];
 
 	socket.on('game update', function(data){
-		var players = data.allPlayers;
+		var allKings = data.allKings;
+		var allLegions = data.allLegions;
 		// get my king and legions
-		var myPlayer = players.find(function(player) {
-			return player.id == myId;
+		myKing = allKings.find(function(king) {
+			return king.playerId == myId;
 		});
+
 		// don't update my coordinates
-		if (myLegions.length == 0) {
-			myKing = myPlayer.king;
-			myLegions = myPlayer.legions;
+		for (var i = 0; i < allLegions.length; i++) {
+			if (allLegions[i].playerId == myId) {
+				var foundLegion = myLegions.find(myLegion => myLegion.id == allLegions[i].id);
+				if (foundLegion) {
+					foundLegion.count = allLegions[i].count;
+					foundLegion.pixels = foundLegion.pixels.slice(0, allLegions[i].pixels.length);
+				} else {
+					myLegions.push(allLegions[i]);
+				}
+			}
+		}
+		// remove myLegions that are not in legions --> are dead
+		for (var i = 0; i < myLegions.length; i++) {
+			var leg = allLegions.find(legion => legion.id == myLegions[i].id);
+			if (!leg) {
+				myLegions.splice(i, 1);
+			}
 		}
 
 		// get enemies (FOR NOW ONLY ONE ENEMY)
-		var enemyPlayers = players.filter(function(player) {
-			return player.id != myId;
+		enemyKing = allKings.find(function(king) {
+			return king.playerId != myId;
 		});
-		for (var i = 0; i < enemyPlayers.length; i++) {
-			enemyKing = enemyPlayers[i].king;
-			enemyLegions = enemyPlayers[i].legions;
-		}
+		enemyLegions = allLegions.filter(function(legion) {
+			return legion.playerId != myId;
+		});
 
 		battleBeams = data.battleBeams;
 		deadPixelsAnimations = deadPixelsAnimations.concat(data.deadPixelsAnimations);
@@ -133,8 +150,8 @@ $(document).ready(function() {
 		return count * LEGION_COUNT_TO_WIDTH + LEGION_MINIMAL_PX;
 	}
 
-	function kingCountToColor(count, colorStem) {
-		return colorStem + count / KING_COUNT + ')';
+	function kingCountToColor(count, color) {
+		return color.replace(/\d+\.?\d*\)/, (count / KING_COUNT) + ')');
 	}
 
 	function updatePixelsPosition(pixels, dx, dy) {
@@ -465,7 +482,6 @@ $(document).ready(function() {
 	}
 
 	function updateDeadPixelsAnimations() {
-		console.log(deadPixelsAnimations);
 		var moveBy = 1;
 		for (var i = 0; i < deadPixelsAnimations.length; i++) {
 			
@@ -531,7 +547,7 @@ $(document).ready(function() {
 			ctx.fillStyle = MY_KING_BORDER2_COLOR_NORMAL;
 			ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		}
-		ctx.fillStyle = kingCountToColor(myKing.count);
+		ctx.fillStyle = kingCountToColor(myKing.count, myKing.color);
 		ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
 
 		// draw my legions
@@ -630,7 +646,7 @@ $(document).ready(function() {
 			ctx.fillStyle = ENEMY_KING_BORDER2_COLOR_NORMAL;
 			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		}
-		ctx.fillStyle = kingCountToColor(enemyKing.count);
+		ctx.fillStyle = kingCountToColor(enemyKing.count, enemyKing.color);
 		ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
 
 
