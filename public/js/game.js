@@ -67,7 +67,7 @@ $(document).ready(function() {
 				}
 			}
 		}
-		// remove myLegions that are not in legions --> are dead
+		// remove myLegions that are not in allLegions --> are dead
 		for (var i = 0; i < myLegions.length; i++) {
 			var leg = allLegions.find(legion => legion.id == myLegions[i].id);
 			if (!leg) {
@@ -99,7 +99,7 @@ $(document).ready(function() {
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 
-	const SHOW_BOUNDING_RECTANGLES = false;
+	const SHOW_BOUNDING_RECTANGLES = true;
 
 	const KING_COUNT = 50;
 	const KING_WIDTH = 30;
@@ -107,7 +107,6 @@ $(document).ready(function() {
 	const KING_BORDER2_WIDTH = 8;
 	const MY_KING_BORDER1_COLOR_NORMAL = "#fff";
 	const MY_KING_BORDER2_COLOR_NORMAL = "#000";
-	const MY_KING_COLOR_STEM = "rgba(76, 103, 214, ";
 	const MY_KING_BORDER2_COLOR_SELECTED = "#333";
 
 	const LEGION_COUNT = 25;
@@ -117,7 +116,6 @@ $(document).ready(function() {
 
 	const ENEMY_KING_BORDER1_COLOR_NORMAL = "#fff";
 	const ENEMY_KING_BORDER2_COLOR_NORMAL = "#000";
-	const ENEMY_KING_COLOR_STEM = "rgba(248, 6, 42, ";
 	const ENEMY_KING_BORDER2_COLOR_SELECTED = "#333";
 
 	const BATTLE_BEAM_COLOR = "#bbb";
@@ -656,7 +654,7 @@ $(document).ready(function() {
 			// move spawning legions
 			if (enemyLegions[i].spawning) {
 				var pathPart = 0.06;
-				var minD = 0.005;
+				var minD = 0.05;
 				var dx = (enemyLegions[i].spawnX - enemyLegions[i].x) * pathPart;
 				var dy = (enemyLegions[i].spawnY - enemyLegions[i].y) * pathPart;
 

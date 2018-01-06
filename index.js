@@ -38,13 +38,24 @@ const PIXELS_NUM_MIN = 8;
 const HULL_SPACE_PX = 10;
 
 const AI_LOOP_INTERVAL = 2 * 1000;
-const SPAWN_INTERVAL = 50 * 1000;
+const SPAWN_INTERVAL = 10 * 1000;
 
 const SPAWN_AREA_WIDTH = 200;
 
 const BATTLE_COUNT_LOSE = 0.04;
 const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 const BATTLE_DISTANCE = 100;
+
+const COLORS = {
+	blue: {
+		normal: 'rgba(76, 103, 214, 1)',
+		selected: 'rgba(122, 143, 214, 1)'
+	},
+	red: {
+		normal: 'rgba(248, 6, 42, 1)',
+		selected: 'rgba(254, 76, 112, 1)'
+	}
+};
 
 var allKings = [];
 var allLegions = [];
@@ -59,12 +70,12 @@ function onConnection(socket) {
 	if (allLegions.length == 0) {
 		io.to(socket.id).emit('myId', 'me');
 
-		allKings.push(new King('me', 350, 500, KING_COUNT, 'rgba(76, 103, 214, 1)'));
-		allLegions.push(new Legion('me', 400, 400, LEGION_COUNT, 'rgba(76, 103, 214, 1)', 'rgba(122, 143, 214, 1)', false, 0, 0));
-		allLegions.push(new Legion('me', 200, 500, LEGION_COUNT, 'rgba(76, 103, 214, 1)', 'rgba(122, 143, 214, 1)', false, 0, 0));
-		allKings.push(new King('enemy', 300, 120, KING_COUNT, 'rgba(248, 6, 42, 1)'));
-		allLegions.push(new Legion('enemy', 300, 180, LEGION_COUNT, 'rgba(248, 6, 42, 1)', 'rgba(254, 46, 82, 1)', false, 0, 0));
-		allLegions.push(new Legion('enemy', 460, 180, LEGION_COUNT, 'rgba(248, 6, 42, 1)', 'rgba(254, 46, 82, 1)', false, 0, 0));
+		allKings.push(new King('me', 350, 500, KING_COUNT, 'blue'));
+		allLegions.push(new Legion('me', 400, 400, LEGION_COUNT, 'blue', false, 0, 0));
+		allLegions.push(new Legion('me', 200, 500, LEGION_COUNT, 'blue', false, 0, 0));
+		allKings.push(new King('enemy', 300, 120, KING_COUNT, 'red'));
+		allLegions.push(new Legion('enemy', 300, 180, LEGION_COUNT, 'red', false, 0, 0));
+		allLegions.push(new Legion('enemy', 460, 180, LEGION_COUNT, 'red', false, 0, 0));
 	} else {
 		io.to(socket.id).emit('myId', 'enemy');
 	}
@@ -82,6 +93,7 @@ function onConnection(socket) {
 					foundLegion.y = legions[i].y;
 					foundLegion.path = legions[i].path;
 					foundLegion.pixels = legions[i].pixels.slice(0, foundLegion.pixels.length);
+					foundLegion.spawning = legions[i].spawning;
 				}
 			}
 		}
@@ -112,7 +124,7 @@ setInterval(function() {
 	deadPixelsAnimations = [];
 }, 1000/60);
 
-function Legion(playerId, x, y, count, colorNormal, colorSelected, spawning, spawnX, spawnY) {
+function Legion(playerId, x, y, count, color, spawning, spawnX, spawnY) {
 	this.id = uuidv1();
 	this.playerId = playerId;
 	this.x = x;
@@ -124,10 +136,10 @@ function Legion(playerId, x, y, count, colorNormal, colorSelected, spawning, spa
 	this.pixels = createPixels(x, y, legionCountToWidth(count), legionCountToWidth(count), count);
 	this.hull = calculateHull(this.pixels, x, y);
 	this.nearbyEnemies = [];
-	this.borderNormal = colorNormal;
-	this.colorNormal = colorNormal.replace('1)', '0.5)');
-	this.borderSelected = colorSelected;
-	this.colorSelected = colorSelected.replace('1)', '0.5)');
+	this.borderNormal = COLORS[color].normal;
+	this.colorNormal = COLORS[color].normal.replace('1)', '0.5)');
+	this.borderSelected = COLORS[color].selected;
+	this.colorSelected = COLORS[color].selected.replace('1)', '0.5)');
 	this.spawning = spawning;
 	this.spawnX = spawnX;
 	this.spawnY = spawnY;
@@ -142,7 +154,8 @@ function King(playerId, x, y, count, color) {
 	this.path = [];
 	this.selected = false;
 	this.move = false;
-	this.color = color;
+	this.color = COLORS[color].normal;
+	this.spawnedColor = color;
 }
 
 function legionCountToWidth(count) {
@@ -257,11 +270,10 @@ setInterval(function(){
 		var playerId = king.playerId;
 		var startX = king.x;
 		var startY = king.y;
-		var colorNormal = king.color;
-		var colorSelected = king.color;
+		var color = king.spawnedColor;
 		var spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
 		var spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
-		allLegions.push(new Legion(playerId, startX, startY, LEGION_COUNT, colorNormal, colorSelected, true, spawnX, spawnY));
+		allLegions.push(new Legion(playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY));
 	}
 }, SPAWN_INTERVAL);
 
