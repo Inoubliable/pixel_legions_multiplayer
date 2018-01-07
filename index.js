@@ -26,6 +26,8 @@ app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
 
+const LAG_SIMULATION = 0;
+
 const KING_COUNT = 50;
 
 const LEGION_COUNT = 25;
@@ -81,22 +83,24 @@ function onConnection(socket) {
 	}
 
 	socket.on('move', function(data){
-		var playerId = data.playerId;
-		var king = data.king;
-		var legions = data.legions;
+		setTimeout(function() {
+			var playerId = data.playerId;
+			var king = data.king;
+			var legions = data.legions;
 
-		if (legions.length > 0) {
-			for (var i = 0; i < legions.length; i++){
-				var foundLegion = allLegions.find(legion => legion.id == legions[i].id);
-				if (foundLegion) {
-					foundLegion.x = legions[i].x;
-					foundLegion.y = legions[i].y;
-					foundLegion.path = legions[i].path;
-					foundLegion.pixels = legions[i].pixels.slice(0, foundLegion.pixels.length);
-					foundLegion.spawning = legions[i].spawning;
+			if (legions.length > 0) {
+				for (var i = 0; i < legions.length; i++){
+					var foundLegion = allLegions.find(legion => legion.id == legions[i].id);
+					if (foundLegion) {
+						foundLegion.x = legions[i].x;
+						foundLegion.y = legions[i].y;
+						foundLegion.path = legions[i].path;
+						foundLegion.pixels = legions[i].pixels.slice(0, foundLegion.pixels.length);
+						foundLegion.spawning = legions[i].spawning;
+					}
 				}
 			}
-		}
+		}, LAG_SIMULATION/2);
 	});
 
 	socket.on('myPing', function(){
@@ -119,7 +123,11 @@ setInterval(function() {
 
 // send game state loop
 setInterval(function() {
-	io.emit('game update', {allKings: allKings, allLegions: allLegions, battleBeams: battleBeams, deadPixelsAnimations: deadPixelsAnimations});
+	//var gameUpdate = {allKings: allKings, allLegions: allLegions, battleBeams: battleBeams, deadPixelsAnimations: deadPixelsAnimations};
+	var gameUpdate = {allKings: allKings, allLegions: allLegions};
+	setTimeout(function() {
+		io.emit('game update', gameUpdate);
+	}, LAG_SIMULATION/2);
 	battleBeams = [];
 	deadPixelsAnimations = [];
 }, 1000/60);
@@ -262,7 +270,7 @@ function addDeadPixelAnimation(x, y) {
 	deadPixelsAnimations.push([[x1, y1], [x2, y2], [x3, y3], [x4, y4]]);
 }
 
-// spawning my new legions
+// spawning new legions
 setInterval(function(){
 	for (var i = 0; i < allKings.length; i++) {
 		var king = allKings[i];
@@ -296,7 +304,7 @@ function battle() {
 					// find nearby enemies position
 					var enemyHalfWidth = legionCountToWidth(legion1.count) / 2;
 					if (legionsDistanceX > enemyHalfWidth) {
-						// is myLegion on the left or right of enemy
+						// is legion on the left or right of enemy
 						if ((legion2.x - legion1.x) > 0) {
 							pushIfNotIn(legion1.nearbyEnemies, 2);
 							pushIfNotIn(legion2.nearbyEnemies, 4);
@@ -307,7 +315,7 @@ function battle() {
 					}
 
 					if (legionsDistanceY > enemyHalfWidth) {
-						// is myLegion on the top or bottom of enemy
+						// is legion on the top or bottom of enemy
 						if ((legion2.y - legion1.y) > 0) {
 							pushIfNotIn(legion1.nearbyEnemies, 3);
 							pushIfNotIn(legion2.nearbyEnemies, 1);
@@ -357,7 +365,7 @@ function battle() {
 		// remove locations
 		legion1.nearbyEnemies = [];
 
-		// remove my dead pixels
+		// remove dead pixels
 		var deadPixelsCount = Math.floor(legion1.pixels.length - PIXELS_NUM_MIN - legion1.count);
 		if (deadPixelsCount > 0) {
 			for (var d = 0; d < deadPixelsCount; d++) {
@@ -369,7 +377,7 @@ function battle() {
 
 	}
 
-	// remove my dead legions
+	// remove dead legions
 	for (var i = 0; i < allLegions.length; i++) {
 		if (allLegions[i].count <= 0) {
 			allLegions.splice(i, 1);
