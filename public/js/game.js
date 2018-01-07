@@ -769,23 +769,6 @@ $(document).ready(function() {
 		// draw enemy legions
 		for (var i = 0; i < enemyLegions.length; i++) {
 
-			// move spawning legions
-			if (enemyLegions[i].spawning) {
-				var pathPart = 0.06;
-				var minD = 0.05;
-				var dx = (enemyLegions[i].spawnX - enemyLegions[i].x) * pathPart;
-				var dy = (enemyLegions[i].spawnY - enemyLegions[i].y) * pathPart;
-
-				if (Math.abs(dx) > minD && Math.abs(dy) > minD) {
-					enemyLegions[i].x += dx;
-					enemyLegions[i].y += dy;
-				} else {
-					enemyLegions[i].spawning = false;
-					//AIDefenceAfterSpawnPath(enemyLegions[i]);
-				}
-				updatePixelsPosition(enemyLegions[i].pixels, dx, dy);
-			}
-
 			var enemyLegionWidth = legionCountToWidth(enemyLegions[i].count);
 			ctx.strokeStyle = enemyLegions[i].borderNormal;
 			ctx.fillStyle = enemyLegions[i].colorNormal;
