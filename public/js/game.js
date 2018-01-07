@@ -113,7 +113,7 @@ $(document).ready(function() {
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 
-	const SHOW_BOUNDING_RECTANGLES = true;
+	const SHOW_BOUNDING_RECTANGLES = false;
 
 	const KING_COUNT = 50;
 	const KING_WIDTH = 30;
