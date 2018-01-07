@@ -130,7 +130,7 @@ setInterval(function() {
 	}, LAG_SIMULATION/2);
 	battleBeams = [];
 	deadPixelsAnimations = [];
-}, 1000/0.5);
+}, 1000/20);
 
 function Legion(playerId, x, y, count, color, spawning, spawnX, spawnY) {
 	this.id = uuidv1();
