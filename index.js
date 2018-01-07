@@ -26,7 +26,7 @@ app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
 
-const LAG_SIMULATION = 0;
+const LAG_SIMULATION = 500;
 
 const KING_COUNT = 50;
 
@@ -370,9 +370,9 @@ function battle() {
 		if (deadPixelsCount > 0) {
 			for (var d = 0; d < deadPixelsCount; d++) {
 				var deadPixel = legion1.pixels.pop();
-				addDeadPixelAnimation(deadPixel[0], deadPixel[1]);
+				//addDeadPixelAnimation(deadPixel[0], deadPixel[1]);
 			}
-			legion1.hull = calculateHull(legion1.pixels, legion1.x, legion1.y);
+			//legion1.hull = calculateHull(legion1.pixels, legion1.x, legion1.y);
 		}
 
 	}

@@ -64,7 +64,7 @@ $(document).ready(function() {
 				var foundLegion = myLegions.find(myLegion => myLegion.id == allLegions[i].id);
 				if (foundLegion) {
 					foundLegion.count = allLegions[i].count;
-					foundLegion.pixels = foundLegion.pixels.slice(0, allLegions[i].pixels.length);
+					//foundLegion.pixels = foundLegion.pixels.slice(0, allLegions[i].pixels.length);
 					allLegions[i] = foundLegion;
 				} else {
 					myLegions.push(allLegions[i]);
