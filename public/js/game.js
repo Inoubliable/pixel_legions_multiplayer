@@ -53,21 +53,36 @@ $(document).ready(function() {
 	socket.on('game update', function(data){
 		allKings = data.allKings;
 		allLegions = data.allLegions;
-		// get my king and legions
+		// get my and enemy's king and legions
 		myKing = allKings.find(function(king) {
 			return king.playerId == myId;
 		});
+		enemyKing = allKings.find(function(king) {
+			return king.playerId != myId;
+		});
 
-		// don't update my coordinates
 		for (var i = 0; i < allLegions.length; i++) {
 			if (allLegions[i].playerId == myId) {
 				var foundLegion = myLegions.find(myLegion => myLegion.id == allLegions[i].id);
 				if (foundLegion) {
+					// don't update my coordinates
 					foundLegion.count = allLegions[i].count;
-					//foundLegion.pixels = foundLegion.pixels.slice(0, allLegions[i].pixels.length);
 					allLegions[i] = foundLegion;
 				} else {
 					myLegions.push(allLegions[i]);
+				}
+			} else {
+				var foundLegion = enemyLegions.find(enemyLegion => enemyLegion.id == allLegions[i].id);
+				if (foundLegion) {
+					var dx = allLegions[i].x - foundLegion.x;
+					var dy = allLegions[i].y - foundLegion.y;
+					foundLegion.x = allLegions[i].x;
+					foundLegion.y = allLegions[i].y;
+					foundLegion.count = allLegions[i].count;
+					updatePixelsPosition(foundLegion.pixels, dx, dy);
+					allLegions[i] = foundLegion;
+				} else {
+					enemyLegions.push(allLegions[i]);
 				}
 			}
 		}
@@ -78,17 +93,12 @@ $(document).ready(function() {
 				myLegions.splice(i, 1);
 			}
 		}
-
-		// get enemies (FOR NOW ONLY ONE ENEMY)
-		enemyKing = allKings.find(function(king) {
-			return king.playerId != myId;
-		});
-		enemyLegions = allLegions.filter(function(legion) {
-			return legion.playerId != myId;
-		});
-
-		//battleBeams = data.battleBeams;
-		//deadPixelsAnimations = deadPixelsAnimations.concat(data.deadPixelsAnimations);
+		for (var i = 0; i < enemyLegions.length; i++) {
+			var leg = allLegions.find(legion => legion.id == enemyLegions[i].id);
+			if (!leg) {
+				enemyLegions.splice(i, 1);
+			}
+		}
 	});
 
 	var canvas = document.getElementById("gameCanvas");
@@ -103,7 +113,7 @@ $(document).ready(function() {
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 
-	const SHOW_BOUNDING_RECTANGLES = false;
+	const SHOW_BOUNDING_RECTANGLES = true;
 
 	const KING_COUNT = 50;
 	const KING_WIDTH = 30;
@@ -592,20 +602,20 @@ $(document).ready(function() {
 			// remove locations
 			legion1.nearbyEnemies = [];
 
-			// remove my dead pixels
-			var deadPixelsCount = Math.floor(legion1.pixels.length - PIXELS_NUM_MIN - legion1.count);
-			if (deadPixelsCount > 0) {
-				for (var d = 0; d < deadPixelsCount; d++) {
-					var deadPixel = legion1.pixels.pop();
-					addDeadPixelAnimation(deadPixel[0], deadPixel[1]);
-				}
-				legion1.hull = calculateHull(legion1.pixels, legion1.x, legion1.y);
-			}
-
 		}
 
-		// remove my dead legions
+		// remove dead legions
 		for (var i = 0; i < allLegions.length; i++) {
+			// remove dead pixels
+			var deadPixelsCount = Math.floor(allLegions[i].pixels.length - PIXELS_NUM_MIN - allLegions[i].count);
+			if (deadPixelsCount > 0) {
+				for (var d = 0; d < deadPixelsCount; d++) {
+					var deadPixel = allLegions[i].pixels.pop();
+					addDeadPixelAnimation(deadPixel[0], deadPixel[1]);
+				}
+				allLegions[i].hull = calculateHull(allLegions[i].pixels, allLegions[i].x, allLegions[i].y);
+			}
+
 			if (allLegions[i].count <= 0) {
 				allLegions.splice(i, 1);
 			}

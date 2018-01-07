@@ -26,7 +26,7 @@ app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
 
-const LAG_SIMULATION = 0;
+const LAG_SIMULATION = 500;
 
 const KING_COUNT = 50;
 
@@ -63,7 +63,6 @@ var allKings = [];
 var allLegions = [];
 
 var battleBeams = [];
-var deadPixelsAnimations = [];
 
 io.on('connection', onConnection);
 
@@ -95,7 +94,7 @@ function onConnection(socket) {
 						foundLegion.x = legions[i].x;
 						foundLegion.y = legions[i].y;
 						foundLegion.path = legions[i].path;
-						foundLegion.pixels = legions[i].pixels.slice(0, foundLegion.pixels.length);
+						//foundLegion.pixels = legions[i].pixels.slice(0, foundLegion.pixels.length);
 						foundLegion.spawning = legions[i].spawning;
 					}
 				}
@@ -123,13 +122,12 @@ setInterval(function() {
 
 // send game state loop
 setInterval(function() {
-	//var gameUpdate = {allKings: allKings, allLegions: allLegions, battleBeams: battleBeams, deadPixelsAnimations: deadPixelsAnimations};
+	//var gameUpdate = {allKings: allKings, allLegions: allLegions, battleBeams: battleBeams};
 	var gameUpdate = {allKings: allKings, allLegions: allLegions};
 	setTimeout(function() {
 		io.emit('game update', gameUpdate);
 	}, LAG_SIMULATION/2);
 	battleBeams = [];
-	deadPixelsAnimations = [];
 }, 1000/20);
 
 function Legion(playerId, x, y, count, color, spawning, spawnX, spawnY) {
@@ -258,18 +256,6 @@ function orientation(p, q, r) {
     return (val > 0) ? 1 : 2;	// clock or counterclock wise
 }
 
-function addDeadPixelAnimation(x, y) {
-	var x1 = x;
-	var y1 = y - PIXEL_SIZE_PX;
-	var x2 = x + PIXEL_SIZE_PX;
-	var y2 = y;
-	var x3 = x;
-	var y3 = y + PIXEL_SIZE_PX;
-	var x4 = x - PIXEL_SIZE_PX;
-	var y4 = y;
-	deadPixelsAnimations.push([[x1, y1], [x2, y2], [x3, y3], [x4, y4]]);
-}
-
 // spawning new legions
 setInterval(function(){
 	for (var i = 0; i < allKings.length; i++) {
@@ -365,15 +351,16 @@ function battle() {
 		// remove locations
 		legion1.nearbyEnemies = [];
 
+		/*
 		// remove dead pixels
 		var deadPixelsCount = Math.floor(legion1.pixels.length - PIXELS_NUM_MIN - legion1.count);
 		if (deadPixelsCount > 0) {
 			for (var d = 0; d < deadPixelsCount; d++) {
 				var deadPixel = legion1.pixels.pop();
-				//addDeadPixelAnimation(deadPixel[0], deadPixel[1]);
 			}
 			//legion1.hull = calculateHull(legion1.pixels, legion1.x, legion1.y);
 		}
+		*/
 
 	}
 
