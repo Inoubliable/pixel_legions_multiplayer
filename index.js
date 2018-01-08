@@ -110,7 +110,7 @@ setInterval(function() {
 	if (allLegions.length > 0) {
 		battle();
 	}
-}, 1000/60);
+}, 1000/20);
 
 // send game state loop
 setInterval(function() {
@@ -118,7 +118,7 @@ setInterval(function() {
 	setTimeout(function() {
 		io.emit('game update', gameUpdate);
 	}, LAG_SIMULATION/2);
-}, 1000/20);
+}, 1000/10);
 
 function initiatePlayer(name, x, y, color, numOfLegions) {
 	// TODO: is it AI or human?

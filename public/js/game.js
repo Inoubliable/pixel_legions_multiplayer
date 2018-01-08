@@ -4,7 +4,7 @@ $(document).ready(function() {
 		var myName = localStorage.getItem('pixelLegionsName');
 		localStorage.removeItem('pixelLegionsName');
 	} else {
-		$.post('/game', function(data) {});
+		//$.post('/game', function(data) {});
 	}
 
 	var socket = io({ query: "&name=" + myName});
@@ -424,7 +424,7 @@ $(document).ready(function() {
 	// send my move loop
 	setInterval(function() {
 		emitMove();
-	}, 1000/66);
+	}, 1000/60);
 
 	function emitMove() {
 		socket.emit('move', {id: myId, king: myKing, legions: myLegions});
