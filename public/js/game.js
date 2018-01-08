@@ -154,11 +154,11 @@ $(document).ready(function() {
 	var deadPixelsAnimations = [];
 
 	function win() {
-		window.location.href = '/win';
+		//window.location.href = '/win';
 	}
 
 	function lose() {
-		window.location.href = '/lose';
+		//window.location.href = '/lose';
 	}
 
 	function legionCountToWidth(count) {
@@ -766,18 +766,19 @@ $(document).ready(function() {
 		}
 
 		// draw enemy king
-		ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
-		ctx.fillRect(enemyKing.x - KING_WIDTH/2, enemyKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
-		if (enemyKing.selected) {
-			ctx.fillStyle = KING_BORDER2_COLOR_SELECTED;
-			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
-		} else {
-			ctx.fillStyle = KING_BORDER2_COLOR_NORMAL;
-			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
+		if (enemyKing) {
+			ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
+			ctx.fillRect(enemyKing.x - KING_WIDTH/2, enemyKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
+			if (enemyKing.selected) {
+				ctx.fillStyle = KING_BORDER2_COLOR_SELECTED;
+				ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
+			} else {
+				ctx.fillStyle = KING_BORDER2_COLOR_NORMAL;
+				ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
+			}
+			ctx.fillStyle = kingCountToColor(enemyKing.count, enemyKing.color);
+			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
 		}
-		ctx.fillStyle = kingCountToColor(enemyKing.count, enemyKing.color);
-		ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
-
 
 		// draw enemy legions
 		for (var i = 0; i < enemyLegions.length; i++) {

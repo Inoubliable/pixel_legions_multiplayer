@@ -26,7 +26,7 @@ app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
 
-const LAG_SIMULATION = 0;
+const LAG_SIMULATION = 500;
 
 const KING_COUNT = 50;
 
@@ -66,12 +66,11 @@ io.on('connection', onConnection);
 
 function onConnection(socket) {
 	var playerId = uuidv1();
+	io.to(socket.id).emit('myId', playerId);
 
 	if (allLegions.length == 0) {
-		io.to(socket.id).emit('myId', playerId);
 		initiatePlayer(playerId, 350, 500, 'blue', 2);
 	} else {
-		io.to(socket.id).emit('myId', playerId);
 		initiatePlayer(playerId, 300, 120, 'red', 2);
 	}
 
