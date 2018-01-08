@@ -26,7 +26,7 @@ app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
 
-const LAG_SIMULATION = 500;
+const LAG_SIMULATION = 0;
 
 const KING_COUNT = 50;
 
