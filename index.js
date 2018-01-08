@@ -62,23 +62,17 @@ const COLORS = {
 var allKings = [];
 var allLegions = [];
 
-var battleBeams = [];
-
 io.on('connection', onConnection);
 
 function onConnection(socket) {
+	var playerId = uuidv1();
 
 	if (allLegions.length == 0) {
-		io.to(socket.id).emit('myId', 'me');
-
-		allKings.push(new King('me', 350, 500, KING_COUNT, 'blue'));
-		allLegions.push(new Legion('me', 400, 400, LEGION_COUNT, 'blue', false, 0, 0));
-		allLegions.push(new Legion('me', 200, 500, LEGION_COUNT, 'blue', false, 0, 0));
-		allKings.push(new King('enemy', 300, 120, KING_COUNT, 'red'));
-		allLegions.push(new Legion('enemy', 300, 180, LEGION_COUNT, 'red', false, 0, 0));
-		allLegions.push(new Legion('enemy', 460, 180, LEGION_COUNT, 'red', false, 0, 0));
+		io.to(socket.id).emit('myId', playerId);
+		initiatePlayer(playerId, 350, 500, 'blue', 2);
 	} else {
-		io.to(socket.id).emit('myId', 'enemy');
+		io.to(socket.id).emit('myId', playerId);
+		initiatePlayer(playerId, 300, 120, 'red', 2);
 	}
 
 	socket.on('move', function(data){
@@ -94,7 +88,6 @@ function onConnection(socket) {
 						foundLegion.x = legions[i].x;
 						foundLegion.y = legions[i].y;
 						foundLegion.path = legions[i].path;
-						//foundLegion.pixels = legions[i].pixels.slice(0, foundLegion.pixels.length);
 						foundLegion.spawning = legions[i].spawning;
 					}
 				}
@@ -122,13 +115,24 @@ setInterval(function() {
 
 // send game state loop
 setInterval(function() {
-	//var gameUpdate = {allKings: allKings, allLegions: allLegions, battleBeams: battleBeams};
 	var gameUpdate = {allKings: allKings, allLegions: allLegions};
 	setTimeout(function() {
 		io.emit('game update', gameUpdate);
 	}, LAG_SIMULATION/2);
-	battleBeams = [];
 }, 1000/20);
+
+function initiatePlayer(name, x, y, color, numOfLegions) {
+	// TODO: is it AI or human?
+	// initiate king
+	allKings.push(new King(name, x, y, KING_COUNT, color));
+
+	// initiate legions
+	for (var i = 0; i < numOfLegions; i++) {
+		var legionX = Math.random() * SPAWN_AREA_WIDTH + x - SPAWN_AREA_WIDTH/2;
+		var legionY = Math.random() * SPAWN_AREA_WIDTH + y - SPAWN_AREA_WIDTH/2;
+		allLegions.push(new Legion(name, legionX, legionY, LEGION_COUNT, color, false, 0, 0));
+	}
+}
 
 function Legion(playerId, x, y, count, color, spawning, spawnX, spawnY) {
 	this.id = uuidv1();
@@ -283,7 +287,6 @@ function battle() {
 				var legionsDistanceY = Math.abs(legion2.y - legion1.y);
 
 				if (legionsDistanceX < BATTLE_DISTANCE && legionsDistanceY < BATTLE_DISTANCE) {
-					battleBeams.push([legion2.x, legion2.y, legion1.x, legion1.y]);
 					legion2.count -= BATTLE_COUNT_LOSE;
 					legion1.count -= BATTLE_COUNT_LOSE;
 
@@ -345,22 +348,15 @@ function battle() {
 					allKings[k].count -= BATTLE_COUNT_LOSE;
 					legion1.count -= BATTLE_COUNT_LOSE;
 				}
+
+				if (allKings[k].count <= 0) {
+					allKings.splice(k, 1);
+				}
 			}
 		}
 
 		// remove locations
 		legion1.nearbyEnemies = [];
-
-		/*
-		// remove dead pixels
-		var deadPixelsCount = Math.floor(legion1.pixels.length - PIXELS_NUM_MIN - legion1.count);
-		if (deadPixelsCount > 0) {
-			for (var d = 0; d < deadPixelsCount; d++) {
-				var deadPixel = legion1.pixels.pop();
-			}
-			//legion1.hull = calculateHull(legion1.pixels, legion1.x, legion1.y);
-		}
-		*/
 
 	}
 

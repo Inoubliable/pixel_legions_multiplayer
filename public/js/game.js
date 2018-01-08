@@ -57,9 +57,16 @@ $(document).ready(function() {
 		myKing = allKings.find(function(king) {
 			return king.playerId == myId;
 		});
+		if (!myKing) {
+			lose();
+		}
+
 		enemyKing = allKings.find(function(king) {
 			return king.playerId != myId;
 		});
+		if (!enemyKing) {
+			win();
+		}
 
 		for (var i = 0; i < allLegions.length; i++) {
 			if (allLegions[i].playerId == myId) {
@@ -86,7 +93,7 @@ $(document).ready(function() {
 				}
 			}
 		}
-		// remove myLegions that are not in allLegions --> are dead
+		// remove legions that are not in allLegions --> are dead
 		for (var i = 0; i < myLegions.length; i++) {
 			var leg = allLegions.find(legion => legion.id == myLegions[i].id);
 			if (!leg) {
@@ -119,18 +126,14 @@ $(document).ready(function() {
 	const KING_WIDTH = 30;
 	const KING_BORDER1_WIDTH = 4;
 	const KING_BORDER2_WIDTH = 8;
-	const MY_KING_BORDER1_COLOR_NORMAL = "#fff";
-	const MY_KING_BORDER2_COLOR_NORMAL = "#000";
-	const MY_KING_BORDER2_COLOR_SELECTED = "#333";
+	const KING_BORDER1_COLOR_NORMAL = "#fff";
+	const KING_BORDER2_COLOR_NORMAL = "#000";
+	const KING_BORDER2_COLOR_SELECTED = "#333";
 
 	const LEGION_COUNT = 25;
 	const LEGION_COUNT_TO_WIDTH = 1.6;
 	const LEGION_MINIMAL_PX = 30;
 	const LEGION_BORDER_WIDTH = 3;
-
-	const ENEMY_KING_BORDER1_COLOR_NORMAL = "#fff";
-	const ENEMY_KING_BORDER2_COLOR_NORMAL = "#000";
-	const ENEMY_KING_BORDER2_COLOR_SELECTED = "#333";
 
 	const BATTLE_BEAM_COLOR = "#bbb";
 	const BATTLE_BEAM_WIDTH = 1;
@@ -588,12 +591,14 @@ $(document).ready(function() {
 
 			// battle with king
 			for (var k = 0; k < allKings.length; k++) {
-				if (allKings[k].playerId != legion1.playerId) {
-					var kingDistanceX = Math.abs(allKings[k].x - legion1.x);
-					var kingDistanceY = Math.abs(allKings[k].y - legion1.y);
+				var king = allKings[k];
+				if (king.playerId != legion1.playerId) {
+					var kingDistanceX = Math.abs(king.x - legion1.x);
+					var kingDistanceY = Math.abs(king.y - legion1.y);
 		
-					if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {				
-						allKings[k].count -= BATTLE_COUNT_LOSE;
+					if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {
+						battleBeams.push([king.x, king.y, legion1.x, legion1.y]);				
+						king.count -= BATTLE_COUNT_LOSE;
 						legion1.count -= BATTLE_COUNT_LOSE;
 					}
 				}
@@ -604,20 +609,18 @@ $(document).ready(function() {
 
 		}
 
-		// remove dead legions
+		// remove dead legions and pixels
 		for (var i = 0; i < allLegions.length; i++) {
-			// remove dead pixels
 			var deadPixelsCount = Math.floor(allLegions[i].pixels.length - PIXELS_NUM_MIN - allLegions[i].count);
-			if (deadPixelsCount > 0) {
+
+			if (allLegions[i].count <= 0) {
+				allLegions.splice(i, 1);
+			} else if (deadPixelsCount > 0) {
 				for (var d = 0; d < deadPixelsCount; d++) {
 					var deadPixel = allLegions[i].pixels.pop();
 					addDeadPixelAnimation(deadPixel[0], deadPixel[1]);
 				}
 				allLegions[i].hull = calculateHull(allLegions[i].pixels, allLegions[i].x, allLegions[i].y);
-			}
-
-			if (allLegions[i].count <= 0) {
-				allLegions.splice(i, 1);
 			}
 		}
 	}
@@ -664,13 +667,13 @@ $(document).ready(function() {
 			}
 		}
 
-		ctx.fillStyle = MY_KING_BORDER1_COLOR_NORMAL;
+		ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
 		ctx.fillRect(myKing.x - KING_WIDTH/2, myKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
 		if (myKing.selected) {
-			ctx.fillStyle = MY_KING_BORDER2_COLOR_SELECTED;
+			ctx.fillStyle = KING_BORDER2_COLOR_SELECTED;
 			ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		} else {
-			ctx.fillStyle = MY_KING_BORDER2_COLOR_NORMAL;
+			ctx.fillStyle = KING_BORDER2_COLOR_NORMAL;
 			ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		}
 		ctx.fillStyle = kingCountToColor(myKing.count, myKing.color);
@@ -763,13 +766,13 @@ $(document).ready(function() {
 		}
 
 		// draw enemy king
-		ctx.fillStyle = ENEMY_KING_BORDER1_COLOR_NORMAL;
+		ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
 		ctx.fillRect(enemyKing.x - KING_WIDTH/2, enemyKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
 		if (enemyKing.selected) {
-			ctx.fillStyle = ENEMY_KING_BORDER2_COLOR_SELECTED;
+			ctx.fillStyle = KING_BORDER2_COLOR_SELECTED;
 			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		} else {
-			ctx.fillStyle = ENEMY_KING_BORDER2_COLOR_NORMAL;
+			ctx.fillStyle = KING_BORDER2_COLOR_NORMAL;
 			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		}
 		ctx.fillStyle = kingCountToColor(enemyKing.count, enemyKing.color);
