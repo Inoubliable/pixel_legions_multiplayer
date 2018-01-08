@@ -155,10 +155,12 @@ $(document).ready(function() {
 
 	function win() {
 		//window.location.href = '/win';
+		console.log('win');
 	}
 
 	function lose() {
 		//window.location.href = '/lose';
+		console.log('lose');
 	}
 
 	function legionCountToWidth(count) {
