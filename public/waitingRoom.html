@@ -3,13 +3,13 @@
 	<head>
 		<title>Pixel Legions</title>
 		<link rel="stylesheet" href="css/login.css">
+		<script src="/socket.io/socket.io.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-		<script src="js/login.js"></script>
+		<script src="js/waitingRoom.js"></script>
 	</head>
 	<body>
-		<form id="login-form" action="/login" method="POST">
-			<input type="text" id="name" placeholder="Name"  maxlength="10" required>
-			<input type="submit" value="Play">
-		</form>
+		<h3>Wait for players to join...</h3>
+
+		<ul id="players-list"></ul>
 	</body>
 </html>

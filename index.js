@@ -10,14 +10,16 @@ var public = __dirname + '/public/';
 app.use(express.static(public));
 
 app.get('/', (req, res) => {
-	//res.sendFile(path.join(public + 'login.html'));
-	res.sendFile(path.join(public + 'game.html'));
-});
-app.post('/', (req, res) => {
-	res.sendFile(path.join(public + 'game.html'));
+	res.sendFile(path.join(public + 'login.html'));
 });
 app.get('/login', (req, res) => {
 	res.sendFile(path.join(public + 'login.html'));
+});
+app.post('/login', (req, res) => {
+	res.sendFile(path.join(public + 'waitingRoom.html'));
+});
+app.get('/game', (req, res) => {
+	res.sendFile(path.join(public + 'game.html'));
 });
 app.get('/win', (req, res) => {
 	res.sendFile(path.join(public + 'win.html'));
@@ -25,8 +27,6 @@ app.get('/win', (req, res) => {
 app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
-
-const LAG_SIMULATION = 0;
 
 const KING_COUNT = 50;
 
@@ -62,11 +62,35 @@ const COLORS = {
 var allKings = [];
 var allLegions = [];
 
-io.on('connection', onConnection);
+var allPlayers = [];
 
-function onConnection(socket) {
+var waitingRoom = io.of('/waitingRoom');
+waitingRoom.on('connection', waitingConnection);
+
+var gameRoom = io.of('/game');
+gameRoom.on('connection', gameConnection);
+
+function waitingConnection(socket) {
+	var name = socket.handshake.query.name;
+	allPlayers.push(name);
+	waitingRoom.emit('player joined', allPlayers);
+
+	if (allPlayers.length > 1) {
+		setTimeout(function() {
+			waitingRoom.emit('start game', allPlayers);
+		}, 2000);
+	}
+
+  	socket.on('disconnect', function() {
+  		var index = allPlayers.indexOf(name);
+  		allPlayers.splice(index, 1);
+  		console.log('User disconnected');
+  	});
+};
+
+function gameConnection(socket) {
 	var playerId = uuidv1();
-	io.to(socket.id).emit('myId', playerId);
+	gameRoom.to(socket.id).emit('myId', playerId);
 
 	if (allLegions.length == 0) {
 		initiatePlayer(playerId, 350, 500, 'blue', 2);
@@ -74,31 +98,29 @@ function onConnection(socket) {
 		initiatePlayer(playerId, 300, 120, 'red', 2);
 	}
 
-	socket.on('move', function(data){
-		setTimeout(function() {
-			var playerId = data.playerId;
-			var king = data.king;
-			var legions = data.legions;
+	socket.on('move', function(data) {
+		var playerId = data.playerId;
+		var king = data.king;
+		var legions = data.legions;
 
-			if (legions.length > 0) {
-				for (var i = 0; i < legions.length; i++){
-					var foundLegion = allLegions.find(legion => legion.id == legions[i].id);
-					if (foundLegion) {
-						foundLegion.x = legions[i].x;
-						foundLegion.y = legions[i].y;
-						foundLegion.path = legions[i].path;
-						foundLegion.spawning = legions[i].spawning;
-					}
+		if (legions.length > 0) {
+			for (var i = 0; i < legions.length; i++) {
+				var foundLegion = allLegions.find(legion => legion.id == legions[i].id);
+				if (foundLegion) {
+					foundLegion.x = legions[i].x;
+					foundLegion.y = legions[i].y;
+					foundLegion.path = legions[i].path;
+					foundLegion.spawning = legions[i].spawning;
 				}
 			}
-		}, LAG_SIMULATION/2);
+		}
 	});
 
-	socket.on('myPing', function(){
-		io.to(socket.id).emit('myPong', 'Pong');
+	socket.on('myPing', function() {
+		gameRoom.to(socket.id).emit('myPong', 'Pong');
 	});
 
-  	socket.on('disconnect', function(){
+  	socket.on('disconnect', function() {
   		console.log('User disconnected');
 		allKings = [];
 		allLegions = [];
@@ -115,9 +137,7 @@ setInterval(function() {
 // send game state loop
 setInterval(function() {
 	var gameUpdate = {allKings: allKings, allLegions: allLegions};
-	setTimeout(function() {
-		io.emit('game update', gameUpdate);
-	}, LAG_SIMULATION/2);
+	gameRoom.emit('game update', gameUpdate);
 }, 1000/10);
 
 function initiatePlayer(name, x, y, color, numOfLegions) {
@@ -198,7 +218,7 @@ function calculateHull(points, x, y) {
     // Find the leftmost point
     var l = 0;
     var newArray = [];
-    for (var i = 0; i < n; i++){
+    for (var i = 0; i < n; i++) {
     	newArray.push([points[i][0], points[i][1]]);
 		if (points[i][0] < points[l][0]) {
 			l = i;
@@ -260,7 +280,7 @@ function orientation(p, q, r) {
 }
 
 // spawning new legions
-setInterval(function(){
+setInterval(function() {
 	for (var i = 0; i < allKings.length; i++) {
 		var king = allKings[i];
 
@@ -492,7 +512,7 @@ function AIClearDefending() {
 }
 
 // AI loop
-setInterval(function(){
+setInterval(function() {
 	AIAttackCheck();
 	AIClearDefending();
 }, AI_LOOP_INTERVAL);

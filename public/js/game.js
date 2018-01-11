@@ -4,10 +4,11 @@ $(document).ready(function() {
 		var myName = localStorage.getItem('pixelLegionsName');
 		localStorage.removeItem('pixelLegionsName');
 	} else {
-		//$.post('/game', function(data) {});
+		// send user to login
+		$.get('/login', function(data) {});
 	}
 
-	var socket = io({ query: "&name=" + myName});
+	var socket = io('/game', { query: "&name=" + myName});
 
 	var myId = 'bla';
 	socket.on('myId', function(id){
