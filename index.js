@@ -153,6 +153,7 @@ function gameConnection(socket) {
   		console.log('User disconnected');
 		allKings = [];
 		allLegions = [];
+  		colors.push(color);
   	});
 };
 

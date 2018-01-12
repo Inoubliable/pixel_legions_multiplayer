@@ -22,7 +22,7 @@ $(document).ready(function() {
 	setInterval(function() {
 		sentTime = Date.now();
 		socket.emit('myPing', 'Ping');
-	}, 1000);
+	}, 2000);
 	socket.on('myPong', function(data) {
 		lag = Date.now() - sentTime;
 		// show lag
