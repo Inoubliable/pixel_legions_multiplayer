@@ -162,13 +162,13 @@ setInterval(function() {
 	if (allLegions.length > 0) {
 		battle();
 	}
-}, 1000/20);
+}, 1000/60);
 
 // send game state loop
 setInterval(function() {
 	let gameUpdate = {allKings: allKings, allLegions: allLegions};
 	gameRoom.emit('game update', gameUpdate);
-}, 1000/10);
+}, 1000/60);
 
 function initiatePlayer(name, x, y, color, numOfLegions) {
 	// TODO: is it AI or human?
