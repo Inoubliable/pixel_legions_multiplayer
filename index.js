@@ -32,7 +32,7 @@ app.get('/lose', (req, res) => {
 const PLAYFIELD_WIDTH = 600;
 const PLAYFIELD_HEIGHT = 500;
 
-const KING_COUNT = 50;
+const KING_COUNT = 40;
 
 const LEGION_COUNT = 25;
 const LEGION_COUNT_TO_WIDTH = 1.6;
@@ -111,8 +111,8 @@ function gameConnection(socket) {
 	let initialX, initialY, initialDx, initialDy, initialDistance;
 	let isTooClose = true;
 	while (isTooClose) {
-		initialX = Math.floor(Math.random() * PLAYFIELD_WIDTH);
-		initialY = Math.floor(Math.random() * PLAYFIELD_HEIGHT);
+		initialX = Math.floor(Math.random() * PLAYFIELD_WIDTH) + 50;
+		initialY = Math.floor(Math.random() * PLAYFIELD_HEIGHT) + 50;
 		isTooClose = false;
 		for (let i = 0; i < allKings.length; i++) {
 			initialDx = allKings[i].x - initialX;

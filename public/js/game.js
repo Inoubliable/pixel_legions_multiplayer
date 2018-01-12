@@ -1,7 +1,9 @@
 $(document).ready(function() {
 
+	let myName = 'Default name';
+
 	if (localStorage.getItem('gameName')) {
-		let myName = localStorage.getItem('pixelLegionsName');
+		myName = localStorage.getItem('pixelLegionsName');
 		localStorage.removeItem('pixelLegionsName');
 	} else {
 		// send user to login
@@ -51,21 +53,26 @@ $(document).ready(function() {
 	let allKings = [];
 	let allLegions = [];
 
+	let timeElapsed = 0;
+	let timeGameStart = Date.now();
+
 	socket.on('game update', function(data) {
+		let timeGameUpdate = Date.now();
+		timeElapsed = timeGameUpdate - timeGameStart;
 		allKings = data.allKings;
 		allLegions = data.allLegions;
 		// get my and enemy's king and legions
 		myKing = allKings.find(function(king) {
 			return king.playerId == myId;
 		});
-		if (!myKing) {
+		if (!myKing && (timeElapsed > 2000)) {
 			lose();
 		}
 
 		enemyKing = allKings.find(function(king) {
 			return king.playerId != myId;
 		});
-		if (!enemyKing) {
+		if (!enemyKing && (timeElapsed > 2000)) {
 			win();
 		}
 
@@ -155,13 +162,11 @@ $(document).ready(function() {
 	let deadPixelsAnimations = [];
 
 	function win() {
-		//window.location.href = '/win';
-		console.log('win');
+		window.location.href = '/win';
 	}
 
 	function lose() {
-		//window.location.href = '/lose';
-		console.log('lose');
+		window.location.href = '/lose';
 	}
 
 	function legionCountToWidth(count) {
