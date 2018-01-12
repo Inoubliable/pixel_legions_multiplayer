@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-	var myName = 'Default name';
+	let myName = 'Default name';
 
 	if (localStorage.getItem('pixelLegionsName')) {
 		myName = localStorage.getItem('pixelLegionsName');
@@ -10,7 +10,7 @@ $(document).ready(function() {
 		$.get('/login', function(data) {});
 	}
 
-	var socket = io('/waitingRoom', { query: "&name=" + myName});
+	let socket = io('/waitingRoom', { query: "&name=" + myName});
 
 	socket.on('player joined', function(allPlayers){
 		$('#players-list').html('');

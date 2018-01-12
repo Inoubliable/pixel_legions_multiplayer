@@ -1,11 +1,11 @@
-var express = require('express');
-var app = express();
-var path = require('path');
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var uuidv1 = require('uuid/v1');
+let express = require('express');
+let app = express();
+let path = require('path');
+let http = require('http').Server(app);
+let io = require('socket.io')(http);
+let uuidv1 = require('uuid/v1');
 
-var public = __dirname + '/public/';
+let public = __dirname + '/public/';
 
 app.use(express.static(public));
 
@@ -66,24 +66,24 @@ const COLORS = {
 		selected: 'rgba(87, 217, 82, 1)'
 	}
 };
-var colors = [];
-for (var color in COLORS) {
+let colors = [];
+for (let color in COLORS) {
 	colors.push(color);
 }
 
-var allKings = [];
-var allLegions = [];
+let allKings = [];
+let allLegions = [];
 
-var allPlayers = [];
+let allPlayers = [];
 
-var waitingRoom = io.of('/waitingRoom');
+let waitingRoom = io.of('/waitingRoom');
 waitingRoom.on('connection', waitingConnection);
 
-var gameRoom = io.of('/game');
+let gameRoom = io.of('/game');
 gameRoom.on('connection', gameConnection);
 
 function waitingConnection(socket) {
-	var name = socket.handshake.query.name;
+	let name = socket.handshake.query.name;
 	allPlayers.push(name);
 	waitingRoom.emit('player joined', allPlayers);
 
@@ -94,27 +94,27 @@ function waitingConnection(socket) {
 	}
 
   	socket.on('disconnect', function() {
-  		var index = allPlayers.indexOf(name);
+  		let index = allPlayers.indexOf(name);
   		allPlayers.splice(index, 1);
   		console.log('User disconnected');
   	});
 };
 
 function gameConnection(socket) {
-	var playerId = uuidv1();
+	let playerId = uuidv1();
 	gameRoom.to(socket.id).emit('myId', playerId);
 
-	var colorIndex = Math.floor(Math.random() * colors.length);
-	var color = colors[colorIndex];
+	let colorIndex = Math.floor(Math.random() * colors.length);
+	let color = colors[colorIndex];
 	colors.splice(colorIndex, 1);
 
-	var initialX, initialY, initialDx, initialDy, initialDistance;
-	var isTooClose = true;
+	let initialX, initialY, initialDx, initialDy, initialDistance;
+	let isTooClose = true;
 	while (isTooClose) {
 		initialX = Math.floor(Math.random() * PLAYFIELD_WIDTH);
 		initialY = Math.floor(Math.random() * PLAYFIELD_HEIGHT);
 		isTooClose = false;
-		for (var i = 0; i < allKings.length; i++) {
+		for (let i = 0; i < allKings.length; i++) {
 			initialDx = allKings[i].x - initialX;
 			initialDy = allKings[i].y - initialY;
 			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
@@ -124,17 +124,17 @@ function gameConnection(socket) {
 			}
 		}
 	}
-	
+
 	initiatePlayer(playerId, initialX, initialY, color, 2);
 
 	socket.on('move', function(data) {
-		var playerId = data.playerId;
-		var king = data.king;
-		var legions = data.legions;
+		let playerId = data.playerId;
+		let king = data.king;
+		let legions = data.legions;
 
 		if (legions.length > 0) {
-			for (var i = 0; i < legions.length; i++) {
-				var foundLegion = allLegions.find(legion => legion.id == legions[i].id);
+			for (let i = 0; i < legions.length; i++) {
+				let foundLegion = allLegions.find(legion => legion.id == legions[i].id);
 				if (foundLegion) {
 					foundLegion.x = legions[i].x;
 					foundLegion.y = legions[i].y;
@@ -165,7 +165,7 @@ setInterval(function() {
 
 // send game state loop
 setInterval(function() {
-	var gameUpdate = {allKings: allKings, allLegions: allLegions};
+	let gameUpdate = {allKings: allKings, allLegions: allLegions};
 	gameRoom.emit('game update', gameUpdate);
 }, 1000/10);
 
@@ -175,9 +175,9 @@ function initiatePlayer(name, x, y, color, numOfLegions) {
 	allKings.push(new King(name, x, y, KING_COUNT, color));
 
 	// initiate legions
-	for (var i = 0; i < numOfLegions; i++) {
-		var legionX = Math.random() * SPAWN_AREA_WIDTH + x - SPAWN_AREA_WIDTH/2;
-		var legionY = Math.random() * SPAWN_AREA_WIDTH + y - SPAWN_AREA_WIDTH/2;
+	for (let i = 0; i < numOfLegions; i++) {
+		let legionX = Math.random() * SPAWN_AREA_WIDTH + x - SPAWN_AREA_WIDTH/2;
+		let legionY = Math.random() * SPAWN_AREA_WIDTH + y - SPAWN_AREA_WIDTH/2;
 		allLegions.push(new Legion(name, legionX, legionY, LEGION_COUNT, color, false, 0, 0));
 	}
 }
@@ -222,14 +222,14 @@ function legionCountToWidth(count) {
 
 function createPixels(x, y, w, h, count) {
 
-	var pixels = [];
-	var num = count + PIXELS_NUM_MIN;
+	let pixels = [];
+	let num = count + PIXELS_NUM_MIN;
 
-	for (var i = 0; i < num; i++) {
-		var pixelX = Math.random() * (w - 2 * HULL_SPACE_PX) + x - w/2 + HULL_SPACE_PX;
-		var pixelY = Math.random() * h + y - h/2;
-		var pixelMoveDirectionX = Math.floor(Math.random() * 2);
-		var pixelMoveDirectionY = Math.floor(Math.random() * 2);
+	for (let i = 0; i < num; i++) {
+		let pixelX = Math.random() * (w - 2 * HULL_SPACE_PX) + x - w/2 + HULL_SPACE_PX;
+		let pixelY = Math.random() * h + y - h/2;
+		let pixelMoveDirectionX = Math.floor(Math.random() * 2);
+		let pixelMoveDirectionY = Math.floor(Math.random() * 2);
 		pixels.push([pixelX, pixelY, pixelMoveDirectionX, pixelMoveDirectionY]);
 	}
 
@@ -237,17 +237,17 @@ function createPixels(x, y, w, h, count) {
 }
 
 function calculateHull(points, x, y) {
-	var n = points.length;
+	let n = points.length;
     // There must be at least 3 points
     if (n < 3) return;
   
     // Initialize Result
-    var hull = [];
+    let hull = [];
   
     // Find the leftmost point
-    var l = 0;
-    var newArray = [];
-    for (var i = 0; i < n; i++) {
+    let l = 0;
+    let newArray = [];
+    for (let i = 0; i < n; i++) {
     	newArray.push([points[i][0], points[i][1]]);
 		if (points[i][0] < points[l][0]) {
 			l = i;
@@ -258,7 +258,7 @@ function calculateHull(points, x, y) {
     // counterclockwise until reach the start point
     // again. This loop runs O(h) times where h is
     // number of points in result or output.
-    var p = l, q;
+    let p = l, q;
     do {
     	// Move point outwards
         if (newArray[p][0] > x) {
@@ -282,7 +282,7 @@ function calculateHull(points, x, y) {
         // counterclock-wise than q, then update q.
         q = (p + 1) % n;
          
-        for (var i = 0; i < n; i++) {
+        for (let i = 0; i < n; i++) {
 			// If i is more counterclockwise than 
 			// current q, then update q
 			if (orientation(points[p], points[i], points[q]) == 2) {
@@ -302,7 +302,7 @@ function calculateHull(points, x, y) {
 }
 
 function orientation(p, q, r) {
-    var val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
+    let val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
   
     if (val == 0) return 0;	// collinear
     return (val > 0) ? 1 : 2;	// clock or counterclock wise
@@ -310,36 +310,36 @@ function orientation(p, q, r) {
 
 // spawning new legions
 setInterval(function() {
-	for (var i = 0; i < allKings.length; i++) {
-		var king = allKings[i];
+	for (let i = 0; i < allKings.length; i++) {
+		let king = allKings[i];
 
-		var playerId = king.playerId;
-		var startX = king.x;
-		var startY = king.y;
-		var color = king.spawnedColor;
-		var spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
-		var spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
+		let playerId = king.playerId;
+		let startX = king.x;
+		let startY = king.y;
+		let color = king.spawnedColor;
+		let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
+		let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
 		allLegions.push(new Legion(playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY));
 	}
 }, SPAWN_INTERVAL);
 
 function battle() {
-	for (var i = 0; i < allLegions.length; i++) {
-		var legion1 = allLegions[i];
-		for (var j = i+1; j < allLegions.length; j++) {
-			var legion2 = allLegions[j];
+	for (let i = 0; i < allLegions.length; i++) {
+		let legion1 = allLegions[i];
+		for (let j = i+1; j < allLegions.length; j++) {
+			let legion2 = allLegions[j];
 			if (legion1.playerId != legion2.playerId) {
 
 				// distance to legion
-				var legionsDistanceX = Math.abs(legion2.x - legion1.x);
-				var legionsDistanceY = Math.abs(legion2.y - legion1.y);
+				let legionsDistanceX = Math.abs(legion2.x - legion1.x);
+				let legionsDistanceY = Math.abs(legion2.y - legion1.y);
 
 				if (legionsDistanceX < BATTLE_DISTANCE && legionsDistanceY < BATTLE_DISTANCE) {
 					legion2.count -= BATTLE_COUNT_LOSE;
 					legion1.count -= BATTLE_COUNT_LOSE;
 
 					// find nearby enemies position
-					var enemyHalfWidth = legionCountToWidth(legion1.count) / 2;
+					let enemyHalfWidth = legionCountToWidth(legion1.count) / 2;
 					if (legionsDistanceX > enemyHalfWidth) {
 						// is legion on the left or right of enemy
 						if ((legion2.x - legion1.x) > 0) {
@@ -387,10 +387,10 @@ function battle() {
 		}
 
 		// battle with king
-		for (var k = 0; k < allKings.length; k++) {
+		for (let k = 0; k < allKings.length; k++) {
 			if (allKings[k].playerId != legion1.playerId) {
-				var kingDistanceX = Math.abs(allKings[k].x - legion1.x);
-				var kingDistanceY = Math.abs(allKings[k].y - legion1.y);
+				let kingDistanceX = Math.abs(allKings[k].x - legion1.x);
+				let kingDistanceY = Math.abs(allKings[k].y - legion1.y);
 	
 				if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {				
 					allKings[k].count -= BATTLE_COUNT_LOSE;
@@ -409,7 +409,7 @@ function battle() {
 	}
 
 	// remove dead legions
-	for (var i = 0; i < allLegions.length; i++) {
+	for (let i = 0; i < allLegions.length; i++) {
 		if (allLegions[i].count <= 0) {
 			allLegions.splice(i, 1);
 		}
@@ -420,29 +420,29 @@ function battle() {
 /*
 function AIDefenceAfterSpawnPath(legion) {
 
-	var dxKings = myKing.x - enemyKing.x;
-	var dyKings = myKing.y - enemyKing.y;
-	var goToX = 0;
-	var goToY = 0;
+	let dxKings = myKing.x - enemyKing.x;
+	let dyKings = myKing.y - enemyKing.y;
+	let goToX = 0;
+	let goToY = 0;
 	if (dyKings > dxKings) {
-		var kx = Math.floor(Math.random() * 300 - 150);
-		var ky = Math.floor(Math.random() * 40 - 20);
+		let kx = Math.floor(Math.random() * 300 - 150);
+		let ky = Math.floor(Math.random() * 40 - 20);
 		goToX = enemyKing.x + dxKings*0.2 + kx;
 		goToY = enemyKing.y + dyKings*0.2 + ky;
 	} else {
-		var kx = Math.floor(Math.random() * 40 - 20);
-		var ky = Math.floor(Math.random() * 300 - 150);
+		let kx = Math.floor(Math.random() * 40 - 20);
+		let ky = Math.floor(Math.random() * 300 - 150);
 		goToX = enemyKing.x + dxKings*0.2 + kx;
 		goToY = enemyKing.y + dyKings*0.2 + ky;
 	}
 
-	var dx = goToX - legion.x;
-	var dy = goToY - legion.y;
-	var distance = Math.sqrt(dx * dx + dy * dy);
-	var repeat = Math.floor(distance / Math.sqrt(10));
+	let dx = goToX - legion.x;
+	let dy = goToY - legion.y;
+	let distance = Math.sqrt(dx * dx + dy * dy);
+	let repeat = Math.floor(distance / Math.sqrt(10));
 	legion.AIPath = [[goToX, goToY]];
-	for (var i = 0; i < repeat; i++) {
-		var goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
+	for (let i = 0; i < repeat; i++) {
+		let goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
 		legion.AIPath.unshift(goTo);
 	}
 
@@ -450,23 +450,23 @@ function AIDefenceAfterSpawnPath(legion) {
 
 function AIDefend(x, y) {
 	if (enemyLegions.length > 0) {
-		var defendersIndexes = [];
-		var defendingNum = Math.ceil(enemyLegions.length/2);
+		let defendersIndexes = [];
+		let defendingNum = Math.ceil(enemyLegions.length/2);
 
-		var defendingLegionsIndexes = [];
-		for (var i = 0; i < enemyLegions.length; i++) {
-			var dx = x - enemyLegions[i].x;
-			var dy = y - enemyLegions[i].y;
-			var distance = Math.sqrt(dx*dx + dy*dy);
+		let defendingLegionsIndexes = [];
+		for (let i = 0; i < enemyLegions.length; i++) {
+			let dx = x - enemyLegions[i].x;
+			let dy = y - enemyLegions[i].y;
+			let distance = Math.sqrt(dx*dx + dy*dy);
 			if (enemyLegions[i].defending || distance < BATTLE_DISTANCE) {
 				defendingLegionsIndexes.push(i);
 			}
 		}
 
-		var reinforcementsNum = defendingNum - defendingLegionsIndexes.length;
+		let reinforcementsNum = defendingNum - defendingLegionsIndexes.length;
 		if (reinforcementsNum > 0) {
-			var index = 0;
-			for (var i = 0; i < defendingNum; i++) {
+			let index = 0;
+			for (let i = 0; i < defendingNum; i++) {
 				while (defendingLegionsIndexes.indexOf(index) != -1 && defendersIndexes.indexOf(index) != -1) {
 					index = Math.floor(Math.random() * enemyLegions.length);
 				}
@@ -481,18 +481,18 @@ function AIDefend(x, y) {
 
 function AIDefendPath(legion, x, y) {
 
-	var ax = Math.random()*BATTLE_DISTANCE - BATTLE_DISTANCE/2;
-	var ay = Math.random()*BATTLE_DISTANCE - BATTLE_DISTANCE/2;
-	var goToX = x + ax;
-	var goToY = y + ay;
+	let ax = Math.random()*BATTLE_DISTANCE - BATTLE_DISTANCE/2;
+	let ay = Math.random()*BATTLE_DISTANCE - BATTLE_DISTANCE/2;
+	let goToX = x + ax;
+	let goToY = y + ay;
 
-	var dx = goToX - legion.x;
-	var dy = goToY - legion.y;
-	var distance = Math.sqrt(dx * dx + dy * dy);
-	var repeat = Math.floor(distance / Math.sqrt(10));
+	let dx = goToX - legion.x;
+	let dy = goToY - legion.y;
+	let distance = Math.sqrt(dx * dx + dy * dy);
+	let repeat = Math.floor(distance / Math.sqrt(10));
 	legion.AIPath = [[goToX, goToY]];
-	for (var i = 0; i < repeat; i++) {
-		var goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
+	for (let i = 0; i < repeat; i++) {
+		let goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
 		legion.AIPath.unshift(goTo);
 	}
 
@@ -500,8 +500,8 @@ function AIDefendPath(legion, x, y) {
 
 function AIAttackCheck() {
 	if (enemyLegions.length > 1 && enemyLegions.length > myLegions.length) {
-		var index1 = Math.floor(Math.random() * enemyLegions.length);
-		var index2 = Math.floor(Math.random() * enemyLegions.length);
+		let index1 = Math.floor(Math.random() * enemyLegions.length);
+		let index2 = Math.floor(Math.random() * enemyLegions.length);
 
 		do {
 			index2 = Math.floor(Math.random() * enemyLegions.length);
@@ -518,24 +518,24 @@ function AIAttackCheck() {
 
 function AIAttackPath(legion) {
 
-	var a = Math.random()*BATTLE_DISTANCE;
-	var goToX = myKing.x + a - BATTLE_DISTANCE/2;
-	var goToY = myKing.y + a - BATTLE_DISTANCE/2;
+	let a = Math.random()*BATTLE_DISTANCE;
+	let goToX = myKing.x + a - BATTLE_DISTANCE/2;
+	let goToY = myKing.y + a - BATTLE_DISTANCE/2;
 
-	var dx = goToX - legion.x;
-	var dy = goToY - legion.y;
-	var distance = Math.sqrt(dx * dx + dy * dy);
-	var repeat = Math.floor(distance / Math.sqrt(10));
+	let dx = goToX - legion.x;
+	let dy = goToY - legion.y;
+	let distance = Math.sqrt(dx * dx + dy * dy);
+	let repeat = Math.floor(distance / Math.sqrt(10));
 	legion.AIPath = [[goToX, goToY]];
-	for (var i = 0; i < repeat; i++) {
-		var goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
+	for (let i = 0; i < repeat; i++) {
+		let goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
 		legion.AIPath.unshift(goTo);
 	}
 
 }
 
 function AIClearDefending() {
-	for (var i = 0; i < enemyLegions.length; i++) {
+	for (let i = 0; i < enemyLegions.length; i++) {
 		enemyLegions[i].defending = false;
 	}
 }
