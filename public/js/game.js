@@ -11,7 +11,7 @@ $(document).ready(function() {
 	var socket = io('/game', { query: "&name=" + myName});
 
 	var myId = 'bla';
-	socket.on('myId', function(id){
+	socket.on('myId', function(id) {
 		myId = id;
 	});
 
@@ -21,7 +21,7 @@ $(document).ready(function() {
 		sentTime = Date.now();
 		socket.emit('myPing', 'Ping');
 	}, 1000);
-	socket.on('myPong', function(data){
+	socket.on('myPong', function(data) {
 		lag = Date.now() - sentTime;
 		// show lag
 		$('#lag').text(lag + 'ms');
@@ -51,7 +51,7 @@ $(document).ready(function() {
 	var allKings = [];
 	var allLegions = [];
 
-	socket.on('game update', function(data){
+	socket.on('game update', function(data) {
 		allKings = data.allKings;
 		allLegions = data.allLegions;
 		// get my and enemy's king and legions
@@ -190,7 +190,7 @@ $(document).ready(function() {
         // Find the leftmost point
         var l = 0;
         var newArray = [];
-        for (var i = 0; i < n; i++){
+        for (var i = 0; i < n; i++) {
         	newArray.push([points[i][0], points[i][1]]);
 			if (points[i][0] < points[l][0]) {
 				l = i;

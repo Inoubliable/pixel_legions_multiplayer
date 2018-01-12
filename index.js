@@ -28,6 +28,10 @@ app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
 
+
+const PLAYFIELD_WIDTH = 600;
+const PLAYFIELD_HEIGHT = 500;
+
 const KING_COUNT = 50;
 
 const LEGION_COUNT = 25;
@@ -56,8 +60,16 @@ const COLORS = {
 	red: {
 		normal: 'rgba(248, 6, 42, 1)',
 		selected: 'rgba(254, 76, 112, 1)'
+	},
+	green: {
+		normal: 'rgba(37, 177, 42, 1)',
+		selected: 'rgba(87, 217, 82, 1)'
 	}
 };
+var colors = [];
+for (var color in COLORS) {
+	colors.push(color);
+}
 
 var allKings = [];
 var allLegions = [];
@@ -92,11 +104,28 @@ function gameConnection(socket) {
 	var playerId = uuidv1();
 	gameRoom.to(socket.id).emit('myId', playerId);
 
-	if (allLegions.length == 0) {
-		initiatePlayer(playerId, 350, 500, 'blue', 2);
-	} else {
-		initiatePlayer(playerId, 300, 120, 'red', 2);
+	var colorIndex = Math.floor(Math.random() * colors.length);
+	var color = colors[colorIndex];
+	colors.splice(colorIndex, 1);
+
+	var initialX, initialY, initialDx, initialDy, initialDistance;
+	var isTooClose = true;
+	while (isTooClose) {
+		initialX = Math.floor(Math.random() * PLAYFIELD_WIDTH);
+		initialY = Math.floor(Math.random() * PLAYFIELD_HEIGHT);
+		isTooClose = false;
+		for (var i = 0; i < allKings.length; i++) {
+			initialDx = allKings[i].x - initialX;
+			initialDy = allKings[i].y - initialY;
+			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
+			if (initialDistance < (BATTLE_DISTANCE + 50)) {
+				isTooClose = true;
+				break;
+			}
+		}
 	}
+	
+	initiatePlayer(playerId, initialX, initialY, color, 2);
 
 	socket.on('move', function(data) {
 		var playerId = data.playerId;
