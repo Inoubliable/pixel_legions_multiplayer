@@ -39,15 +39,7 @@ $(document).ready(function() {
 		color: "#000"
 	};
 	let myLegions = [];
-	let enemyKing = {
-		x: 0,
-		y: 0,
-		count: 0,
-		path: [],
-		selected: false,
-		move: false,
-		color: "#000"
-	};
+	let enemyKings = [];
 	let enemyLegions = [];
 
 	let allKings = [];
@@ -62,19 +54,42 @@ $(document).ready(function() {
 		allKings = data.allKings;
 		allLegions = data.allLegions;
 		// get my and enemy's king and legions
-		myKing = allKings.find(function(king) {
-			return king.playerId == myId;
-		});
-		if (!myKing && (timeElapsed > 2000)) {
+		let myKingFound = allKings.find(king => king.playerId == myId);
+		if (myKingFound) {
+			if (myKing.x > 0) {
+				// don't update my coordinates
+				myKing.count = myKingFound.count;
+			} else {
+				// at the start, when myKing is not yet set
+				myKing = myKingFound;
+			}
+		} else if (timeElapsed > 2000) {
 			lose();
 		}
 
-		enemyKing = allKings.find(function(king) {
-			return king.playerId != myId;
-		});
-		if (!enemyKing && (timeElapsed > 2000)) {
-			win();
+		for (let i = 0; i < allKings.length; i++) {
+			if (allKings[i].playerId != myId) {
+				let enemyKingFound = enemyKings.find(king => king.id != myId);
+				if (enemyKingFound) {
+					enemyKingFound.x = allKings[i].x;
+					enemyKingFound.y = allKings[i].y;
+					enemyKingFound.count = allKings[i].count;
+					allKings[i] = enemyKingFound;
+				} else {
+					enemyKings.push(allKings[i]);
+				}
+			}
 		}
+		for (let i = 0; i < enemyKings.length; i++) {
+			let kin = allKings.find(king => king.id == enemyKings[i].id);
+			if (!kin) {
+				enemyKings.splice(i, 1);
+				if (enemyKings.length == 0) {
+					win();
+				}
+			}
+		}
+		console.log(enemyKings);
 
 		for (let i = 0; i < allLegions.length; i++) {
 			if (allLegions[i].playerId == myId) {
@@ -135,6 +150,7 @@ $(document).ready(function() {
 	const KING_BORDER1_WIDTH = 4;
 	const KING_BORDER2_WIDTH = 8;
 	const KING_BORDER1_COLOR_NORMAL = "#fff";
+	const KING_BORDER1_COLOR_SELECTED = "#aaa";
 	const KING_BORDER2_COLOR_NORMAL = "#000";
 	const KING_BORDER2_COLOR_SELECTED = "#333";
 
@@ -675,12 +691,14 @@ $(document).ready(function() {
 			}
 		}
 
-		ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
-		ctx.fillRect(myKing.x - KING_WIDTH/2, myKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
 		if (myKing.selected) {
+			ctx.fillStyle = KING_BORDER1_COLOR_SELECTED;
+			ctx.fillRect(myKing.x - KING_WIDTH/2, myKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
 			ctx.fillStyle = KING_BORDER2_COLOR_SELECTED;
 			ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		} else {
+			ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
+			ctx.fillRect(myKing.x - KING_WIDTH/2, myKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
 			ctx.fillStyle = KING_BORDER2_COLOR_NORMAL;
 			ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 		}
@@ -773,14 +791,17 @@ $(document).ready(function() {
 			}
 		}
 
-		// draw enemy king
-		if (enemyKing) {
-			ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
-			ctx.fillRect(enemyKing.x - KING_WIDTH/2, enemyKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
+		// draw enemy kings
+		for (let i = 0; i < enemyKings.length; i++) {
+			let enemyKing = enemyKings[i];
 			if (enemyKing.selected) {
+				ctx.fillStyle = KING_BORDER1_COLOR_SELECTED;
+				ctx.fillRect(enemyKing.x - KING_WIDTH/2, enemyKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
 				ctx.fillStyle = KING_BORDER2_COLOR_SELECTED;
 				ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 			} else {
+				ctx.fillStyle = KING_BORDER1_COLOR_NORMAL;
+				ctx.fillRect(enemyKing.x - KING_WIDTH/2, enemyKing.y - KING_WIDTH/2, KING_WIDTH, KING_WIDTH);
 				ctx.fillStyle = KING_BORDER2_COLOR_NORMAL;
 				ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER1_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH, KING_WIDTH - 2*KING_BORDER1_WIDTH);
 			}

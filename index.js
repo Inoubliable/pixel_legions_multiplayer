@@ -129,17 +129,24 @@ function gameConnection(socket) {
 
 	socket.on('move', function(data) {
 		let playerId = data.playerId;
-		let king = data.king;
-		let legions = data.legions;
+		let dataKing = data.king;
+		let dataLegions = data.legions;
 
-		if (legions.length > 0) {
-			for (let i = 0; i < legions.length; i++) {
-				let foundLegion = allLegions.find(legion => legion.id == legions[i].id);
+		let foundKing = allKings.find(king => king.id == dataKing.id);
+		if (foundKing) {
+			foundKing.x = dataKing.x;
+			foundKing.y = dataKing.y;
+			foundKing.path = dataKing.path;
+		}
+
+		if (dataLegions.length > 0) {
+			for (let i = 0; i < dataLegions.length; i++) {
+				let foundLegion = allLegions.find(legion => legion.id == dataLegions[i].id);
 				if (foundLegion) {
-					foundLegion.x = legions[i].x;
-					foundLegion.y = legions[i].y;
-					foundLegion.path = legions[i].path;
-					foundLegion.spawning = legions[i].spawning;
+					foundLegion.x = dataLegions[i].x;
+					foundLegion.y = dataLegions[i].y;
+					foundLegion.path = dataLegions[i].path;
+					foundLegion.spawning = dataLegions[i].spawning;
 				}
 			}
 		}
