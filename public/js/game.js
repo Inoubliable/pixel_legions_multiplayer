@@ -55,6 +55,7 @@ $(document).ready(function() {
 		allLegions = data.allLegions;
 		// get my and enemy's king and legions
 		let myKingFound = allKings.find(king => king.playerId == myId);
+		console.log(allKings);
 		if (myKingFound) {
 			if (myKing.x > 0) {
 				// don't update my coordinates
@@ -69,7 +70,7 @@ $(document).ready(function() {
 
 		for (let i = 0; i < allKings.length; i++) {
 			if (allKings[i].playerId != myId) {
-				let enemyKingFound = enemyKings.find(king => king.id != myId);
+				let enemyKingFound = enemyKings.find(king => king.id == allKings[i].id);
 				if (enemyKingFound) {
 					enemyKingFound.x = allKings[i].x;
 					enemyKingFound.y = allKings[i].y;
@@ -80,7 +81,7 @@ $(document).ready(function() {
 				}
 			}
 		}
-		for (let i = 0; i < enemyKings.length; i++) {
+		for (let i = enemyKings.length-1; i >= 0; i--) {
 			let kin = allKings.find(king => king.id == enemyKings[i].id);
 			if (!kin) {
 				enemyKings.splice(i, 1);
@@ -89,7 +90,6 @@ $(document).ready(function() {
 				}
 			}
 		}
-		console.log(enemyKings);
 
 		for (let i = 0; i < allLegions.length; i++) {
 			if (allLegions[i].playerId == myId) {
@@ -117,13 +117,13 @@ $(document).ready(function() {
 			}
 		}
 		// remove legions that are not in allLegions --> are dead
-		for (let i = 0; i < myLegions.length; i++) {
+		for (let i = myLegions.length-1; i >= 0; i--) {
 			let leg = allLegions.find(legion => legion.id == myLegions[i].id);
 			if (!leg) {
 				myLegions.splice(i, 1);
 			}
 		}
-		for (let i = 0; i < enemyLegions.length; i++) {
+		for (let i = enemyLegions.length-1; i >= 0; i--) {
 			let leg = allLegions.find(legion => legion.id == enemyLegions[i].id);
 			if (!leg) {
 				enemyLegions.splice(i, 1);
@@ -536,7 +536,7 @@ $(document).ready(function() {
 
 	function updateDeadPixelsAnimations() {
 		let moveBy = 1;
-		for (let i = 0; i < deadPixelsAnimations.length; i++) {
+		for (let i = deadPixelsAnimations.length-1; i >= 0; i--) {
 			
 			deadPixelsAnimations[i][0][1] -= moveBy;
 			deadPixelsAnimations[i][1][0] += moveBy;
@@ -634,7 +634,7 @@ $(document).ready(function() {
 		}
 
 		// remove dead legions and pixels
-		for (let i = 0; i < allLegions.length; i++) {
+		for (let i = allLegions.length-1; i >= 0; i--) {
 			let deadPixelsCount = Math.floor(allLegions[i].pixels.length - PIXELS_NUM_MIN - allLegions[i].count);
 
 			if (allLegions[i].count <= 0) {

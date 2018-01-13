@@ -90,7 +90,7 @@ function waitingConnection(socket) {
 	allPlayers.push(name);
 	waitingRoom.emit('player joined', allPlayers);
 
-	if (allPlayers.length > 1) {
+	if (allPlayers.length > 2) {
 		setTimeout(function() {
 			waitingRoom.emit('start game', allPlayers);
 		}, 2000);
@@ -114,14 +114,14 @@ function gameConnection(socket) {
 	let initialX, initialY, initialDx, initialDy, initialDistance;
 	let isTooClose = true;
 	while (isTooClose) {
-		initialX = Math.floor(Math.random() * PLAYFIELD_WIDTH) + 50;
-		initialY = Math.floor(Math.random() * PLAYFIELD_HEIGHT) + 50;
+		initialX = Math.floor(Math.random() * PLAYFIELD_WIDTH) + 60;
+		initialY = Math.floor(Math.random() * PLAYFIELD_HEIGHT) + 60;
 		isTooClose = false;
 		for (let i = 0; i < allKings.length; i++) {
 			initialDx = allKings[i].x - initialX;
 			initialDy = allKings[i].y - initialY;
 			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
-			if (initialDistance < (BATTLE_DISTANCE + 50)) {
+			if (initialDistance < (BATTLE_DISTANCE + 70)) {
 				isTooClose = true;
 				break;
 			}
@@ -161,8 +161,6 @@ function gameConnection(socket) {
 
   	socket.on('disconnect', function() {
   		console.log('User disconnected');
-		allKings = [];
-		allLegions = [];
   		colors.push(color);
   	});
 };
@@ -335,6 +333,7 @@ setInterval(function() {
 }, SPAWN_INTERVAL);
 
 function battle() {
+	let deadPlayersIds = [];
 	for (let i = 0; i < allLegions.length; i++) {
 		let legion1 = allLegions[i];
 		for (let j = i+1; j < allLegions.length; j++) {
@@ -398,7 +397,7 @@ function battle() {
 		}
 
 		// battle with king
-		for (let k = 0; k < allKings.length; k++) {
+		for (let k = allKings.length-1; k >= 0; k--) {
 			if (allKings[k].playerId != legion1.playerId) {
 				let kingDistanceX = Math.abs(allKings[k].x - legion1.x);
 				let kingDistanceY = Math.abs(allKings[k].y - legion1.y);
@@ -409,6 +408,7 @@ function battle() {
 				}
 
 				if (allKings[k].count <= 0) {
+					deadPlayersIds.push(allKings[k].playerId);
 					allKings.splice(k, 1);
 				}
 			}
@@ -420,8 +420,8 @@ function battle() {
 	}
 
 	// remove dead legions
-	for (let i = 0; i < allLegions.length; i++) {
-		if (allLegions[i].count <= 0) {
+	for (let i = allLegions.length-1; i >= 0; i--) {
+		if ((allLegions[i].count <= 0) || (deadPlayersIds.indexOf(allLegions[i].playerId) > -1)) {
 			allLegions.splice(i, 1);
 		}
 	}
