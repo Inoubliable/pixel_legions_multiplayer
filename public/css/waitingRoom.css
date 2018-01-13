@@ -1,0 +1,25 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial"; }
+
+body {
+  padding: 40px 30px;
+  background-color: #000; }
+
+.header {
+  font-size: 20px;
+  text-align: center;
+  color: #fff; }
+
+#players-list {
+  list-style-type: none;
+  margin-top: 50px;
+  padding-left: 50px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px; }
+
+/*# sourceMappingURL=waitingRoom.css.map */

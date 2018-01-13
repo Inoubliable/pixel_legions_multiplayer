@@ -18,6 +18,9 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
 	res.sendFile(path.join(public + 'waitingRoom.html'));
 });
+app.get('/waitingRoom', (req, res) => {
+	res.sendFile(path.join(public + 'waitingRoom.html'));
+});
 app.get('/game', (req, res) => {
 	res.sendFile(path.join(public + 'game.html'));
 });

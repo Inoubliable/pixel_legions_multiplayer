@@ -10,7 +10,25 @@ $bluish: #37c;
 }
 
 body {
-	padding: 20px 30px;
+    width: 100%;
+    height: 100%;
+}
+
+#bgVideo {
+	position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 100%; 
+    min-height: 100%;
+}
+
+.main-header {
+	position: absolute;
+	font-size: 60px;
+	text-align: center;
+	margin-top: 100px;
+	width: 100%;
+	color: white;
 }
 
 #login-form {
@@ -28,10 +46,10 @@ input[type='text'] {
 }
 
 input[type='submit'] {
-	padding: 6px 10px;
+	padding: 8px 12px;
 	border-radius: 4px;
 	background-color: $bluish;
 	color: white;
-	border: 1px solid $dark-gray;
+	border: none;
 	font-size: 16px;
 }
