@@ -55,7 +55,6 @@ $(document).ready(function() {
 		allLegions = data.allLegions;
 		// get my and enemy's king and legions
 		let myKingFound = allKings.find(king => king.playerId == myId);
-		console.log(allKings);
 		if (myKingFound) {
 			if (myKing.x > 0) {
 				// don't update my coordinates
@@ -143,7 +142,7 @@ $(document).ready(function() {
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 
-	const SHOW_BOUNDING_RECTANGLES = false;
+	const SHOW_BOUNDING_RECTANGLES = true;
 
 	const KING_COUNT = 50;
 	const KING_WIDTH = 30;
@@ -739,7 +738,7 @@ $(document).ready(function() {
 			// move spawning legions
 			if (myLegions[i].spawning) {
 				let pathPart = 0.06;
-				let minD = 0.05;
+				let minD = 0.07;
 				let dx = (myLegions[i].spawnX - myLegions[i].x) * pathPart;
 				let dy = (myLegions[i].spawnY - myLegions[i].y) * pathPart;
 

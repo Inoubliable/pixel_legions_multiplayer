@@ -31,12 +31,14 @@ app.get('/lose', (req, res) => {
 	res.sendFile(path.join(public + 'lose.html'));
 });
 
+const GAME_PLAYERS_NUM = 3;
 
 const PLAYFIELD_WIDTH = 600;
 const PLAYFIELD_HEIGHT = 500;
 
-const KING_COUNT = 40;
+const KING_COUNT = 50;
 
+const INITIAL_LEGIONS_NUM = 2;
 const LEGION_COUNT = 25;
 const LEGION_COUNT_TO_WIDTH = 1.6;
 const LEGION_MINIMAL_PX = 30;
@@ -78,6 +80,7 @@ let allKings = [];
 let allLegions = [];
 
 let allPlayers = [];
+let AInames = ['DeepBlue', 'AlphaZero', 'TARS'];
 
 let waitingRoom = io.of('/waitingRoom');
 waitingRoom.on('connection', waitingConnection);
@@ -88,47 +91,40 @@ gameRoom.on('connection', gameConnection);
 function waitingConnection(socket) {
 	let name = socket.handshake.query.name;
 	allPlayers.push(name);
+
+	// generate AIs to fill the room
+	if (allPlayers.length == 1) {
+		for (let i = 1; i < GAME_PLAYERS_NUM; i++) {
+			let AIindex = Math.floor((Math.random() * AInames.length));
+			allPlayers.push(AInames[AIindex]);
+			AInames.splice(AIindex, 1);
+		}
+	}
+
 	waitingRoom.emit('player joined', allPlayers);
 
-	if (allPlayers.length > 2) {
+	if (allPlayers.length == GAME_PLAYERS_NUM) {
 		setTimeout(function() {
 			waitingRoom.emit('start game', allPlayers);
+			for (let i = 1; i < 3; i++) {
+				let playerId = uuidv1();
+				initiatePlayer(playerId, true);
+			}
 		}, 2000);
 	}
 
-  	socket.on('disconnect', function() {
-  		let index = allPlayers.indexOf(name);
-  		allPlayers.splice(index, 1);
-  		console.log('User disconnected');
-  	});
+	socket.on('disconnect', function() {
+		let index = allPlayers.indexOf(name);
+		allPlayers.splice(index, 1);
+		console.log('User disconnected');
+	});
 };
 
 function gameConnection(socket) {
 	let playerId = uuidv1();
 	gameRoom.to(socket.id).emit('myId', playerId);
 
-	let colorIndex = Math.floor(Math.random() * colors.length);
-	let color = colors[colorIndex];
-	colors.splice(colorIndex, 1);
-
-	let initialX, initialY, initialDx, initialDy, initialDistance;
-	let isTooClose = true;
-	while (isTooClose) {
-		initialX = Math.floor(Math.random() * PLAYFIELD_WIDTH) + 60;
-		initialY = Math.floor(Math.random() * PLAYFIELD_HEIGHT) + 60;
-		isTooClose = false;
-		for (let i = 0; i < allKings.length; i++) {
-			initialDx = allKings[i].x - initialX;
-			initialDy = allKings[i].y - initialY;
-			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
-			if (initialDistance < (BATTLE_DISTANCE + 70)) {
-				isTooClose = true;
-				break;
-			}
-		}
-	}
-
-	initiatePlayer(playerId, initialX, initialY, color, 2);
+	initiatePlayer(playerId, false);
 
 	socket.on('move', function(data) {
 		let playerId = data.playerId;
@@ -159,16 +155,16 @@ function gameConnection(socket) {
 		gameRoom.to(socket.id).emit('myPong', 'Pong');
 	});
 
-  	socket.on('disconnect', function() {
-  		console.log('User disconnected');
-  		colors.push(color);
-  	});
+	socket.on('disconnect', function() {
+		console.log('User disconnected');
+	});
 };
 
 // game physics loop
 setInterval(function() {
 	if (allLegions.length > 0) {
 		battle();
+		moveAI();
 	}
 }, 1000/60);
 
@@ -178,20 +174,40 @@ setInterval(function() {
 	gameRoom.emit('game update', gameUpdate);
 }, 1000/60);
 
-function initiatePlayer(name, x, y, color, numOfLegions) {
-	// TODO: is it AI or human?
+function initiatePlayer(playerId, isAI) {
+	let colorIndex = Math.floor(Math.random() * colors.length);
+	let color = colors[colorIndex];
+	colors.splice(colorIndex, 1);
+
+	let x, y, initialDx, initialDy, initialDistance;
+	let isTooClose = true;
+	while (isTooClose) {
+		x = Math.floor(Math.random() * PLAYFIELD_WIDTH) + 60;
+		y = Math.floor(Math.random() * PLAYFIELD_HEIGHT) + 60;
+		isTooClose = false;
+		for (let i = 0; i < allKings.length; i++) {
+			initialDx = allKings[i].x - x;
+			initialDy = allKings[i].y - y;
+			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
+			if (initialDistance < (BATTLE_DISTANCE + 70)) {
+				isTooClose = true;
+				break;
+			}
+		}
+	}
+
 	// initiate king
-	allKings.push(new King(name, x, y, KING_COUNT, color));
+	allKings.push(new King(playerId, x, y, KING_COUNT, color, isAI));
 
 	// initiate legions
-	for (let i = 0; i < numOfLegions; i++) {
+	for (let i = 0; i < INITIAL_LEGIONS_NUM; i++) {
 		let legionX = Math.random() * SPAWN_AREA_WIDTH + x - SPAWN_AREA_WIDTH/2;
 		let legionY = Math.random() * SPAWN_AREA_WIDTH + y - SPAWN_AREA_WIDTH/2;
-		allLegions.push(new Legion(name, legionX, legionY, LEGION_COUNT, color, false, 0, 0));
+		allLegions.push(new Legion(playerId, legionX, legionY, LEGION_COUNT, color, false, 0, 0, isAI));
 	}
 }
 
-function Legion(playerId, x, y, count, color, spawning, spawnX, spawnY) {
+function Legion(playerId, x, y, count, color, spawning, spawnX, spawnY, isAI) {
 	this.id = uuidv1();
 	this.playerId = playerId;
 	this.x = x;
@@ -210,9 +226,10 @@ function Legion(playerId, x, y, count, color, spawning, spawnX, spawnY) {
 	this.spawning = spawning;
 	this.spawnX = spawnX;
 	this.spawnY = spawnY;
+	this.isAI = isAI;
 }
 
-function King(playerId, x, y, count, color) {
+function King(playerId, x, y, count, color, isAI) {
 	this.id = uuidv1();
 	this.playerId = playerId;
 	this.x = x;
@@ -223,6 +240,7 @@ function King(playerId, x, y, count, color) {
 	this.move = false;
 	this.color = COLORS[color].normal;
 	this.spawnedColor = color;
+	this.isAI = isAI;
 }
 
 function legionCountToWidth(count) {
@@ -328,7 +346,8 @@ setInterval(function() {
 		let color = king.spawnedColor;
 		let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
 		let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
-		allLegions.push(new Legion(playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY));
+		let isAI = king.isAI;
+		allLegions.push(new Legion(playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
 	}
 }, SPAWN_INTERVAL);
 
@@ -402,9 +421,14 @@ function battle() {
 				let kingDistanceX = Math.abs(allKings[k].x - legion1.x);
 				let kingDistanceY = Math.abs(allKings[k].y - legion1.y);
 	
-				if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {				
+				if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {
 					allKings[k].count -= BATTLE_COUNT_LOSE;
 					legion1.count -= BATTLE_COUNT_LOSE;
+
+					if (allKings[k].isAI) {
+						// get legions to defend
+						AIDefend(allKings[k].playerId, legion1.x, legion1.y);
+					}
 				}
 
 				if (allKings[k].count <= 0) {
@@ -426,6 +450,7 @@ function battle() {
 		}
 	}
 }
+
 
 /********************************* AI FUNCTIONS **********************************/
 /*
@@ -458,33 +483,97 @@ function AIDefenceAfterSpawnPath(legion) {
 	}
 
 }
+*/
 
-function AIDefend(x, y) {
-	if (enemyLegions.length > 0) {
+function AIAttackCheck() {
+	let checkedPlayers = [];
+	for (let i = 0; i < allLegions.length; i++) {
+		if (allLegions[i].isAI && (checkedPlayers.indexOf(allLegions[i].playerId) == -1)) {
+			checkedPlayers.push(allLegions[i].playerId);
+			let playersLegions = [];
+			for (let j = 0; j < allLegions.length; j++) {
+				if (allLegions[j].playerId == allLegions[i].playerId) {
+					playersLegions.push(j);
+				}
+			}
+
+			if (playersLegions.length > 4) {
+				let index1 = Math.floor(Math.random() * playersLegions.length);
+				let index2 = Math.floor(Math.random() * playersLegions.length);
+
+				while (index2 == index1) {
+					index2 = Math.floor(Math.random() * playersLegions.length);
+				}
+
+				if (!allLegions[index1].spawning) {
+					AIAttackPath(allLegions[index1]);
+				}
+				if (!allLegions[index2].spawning) {
+					AIAttackPath(allLegions[index2]);
+				}
+			}
+		}
+	}
+}
+
+function AIAttackPath(legion) {
+
+	// attack random king
+	let kingIndex = Math.floor(Math.random() * allKings.length);
+	while (allKings[kingIndex].playerId == legion.playerId) {
+		kingIndex = Math.floor(Math.random() * allKings.length);
+	}
+
+	let a = Math.random() * BATTLE_DISTANCE;
+	let goToX = allKings[kingIndex].x + a - BATTLE_DISTANCE/2;
+	let goToY = allKings[kingIndex].y + a - BATTLE_DISTANCE/2;
+
+	let dx = goToX - legion.x;
+	let dy = goToY - legion.y;
+	let distance = Math.sqrt(dx * dx + dy * dy);
+	let repeat = Math.floor(distance / Math.sqrt(10));
+	legion.AIPath = [[goToX, goToY]];
+	for (let i = 0; i < repeat; i++) {
+		let goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
+		legion.AIPath.unshift(goTo);
+	}
+
+}
+
+function AIDefend(playerId, x, y) {
+	let playersLegions = [];
+	for (let i = 0; i < allLegions.length; i++) {
+		if (allLegions[i].playerId == playerId) {
+			playersLegions.push(allLegions[i]);
+		}
+	}
+
+	if (playersLegions.length > 0) {
 		let defendersIndexes = [];
-		let defendingNum = Math.ceil(enemyLegions.length/2);
+		let defendingNum = Math.ceil(playersLegions.length/2);
 
 		let defendingLegionsIndexes = [];
-		for (let i = 0; i < enemyLegions.length; i++) {
-			let dx = x - enemyLegions[i].x;
-			let dy = y - enemyLegions[i].y;
+		for (let i = 0; i < playersLegions.length; i++) {
+			let dx = x - playersLegions[i].x;
+			let dy = y - playersLegions[i].y;
 			let distance = Math.sqrt(dx*dx + dy*dy);
-			if (enemyLegions[i].defending || distance < BATTLE_DISTANCE) {
+			if (playersLegions[i].defending || distance < BATTLE_DISTANCE) {
 				defendingLegionsIndexes.push(i);
 			}
 		}
 
 		let reinforcementsNum = defendingNum - defendingLegionsIndexes.length;
+		console.log(defendingLegionsIndexes.length);
 		if (reinforcementsNum > 0) {
 			let index = 0;
 			for (let i = 0; i < defendingNum; i++) {
 				while (defendingLegionsIndexes.indexOf(index) != -1 && defendersIndexes.indexOf(index) != -1) {
-					index = Math.floor(Math.random() * enemyLegions.length);
+					index = Math.floor(Math.random() * playersLegions.length);
 				}
 				defendersIndexes.push(index);
-				enemyLegions[index].defending = true;
+				playersLegions[index].defending = true;
 
-				AIDefendPath(enemyLegions[index], x, y);
+				AIDefendPath(playersLegions[index], x, y);
 			}
 		}
 	}
@@ -509,54 +598,42 @@ function AIDefendPath(legion, x, y) {
 
 }
 
-function AIAttackCheck() {
-	if (enemyLegions.length > 1 && enemyLegions.length > myLegions.length) {
-		let index1 = Math.floor(Math.random() * enemyLegions.length);
-		let index2 = Math.floor(Math.random() * enemyLegions.length);
-
-		do {
-			index2 = Math.floor(Math.random() * enemyLegions.length);
-		} while (index2 == index1)
-
-		if (!enemyLegions[index1].spawning) {
-			AIAttackPath(enemyLegions[index1]);
-		}
-		if (!enemyLegions[index2].spawning) {
-			AIAttackPath(enemyLegions[index2]);
-		}
-	}
-}
-
-function AIAttackPath(legion) {
-
-	let a = Math.random()*BATTLE_DISTANCE;
-	let goToX = myKing.x + a - BATTLE_DISTANCE/2;
-	let goToY = myKing.y + a - BATTLE_DISTANCE/2;
-
-	let dx = goToX - legion.x;
-	let dy = goToY - legion.y;
-	let distance = Math.sqrt(dx * dx + dy * dy);
-	let repeat = Math.floor(distance / Math.sqrt(10));
-	legion.AIPath = [[goToX, goToY]];
-	for (let i = 0; i < repeat; i++) {
-		let goTo = [legion.AIPath[0][0] - dx/repeat, legion.AIPath[0][1] - dy/repeat];
-		legion.AIPath.unshift(goTo);
-	}
-
-}
-
 function AIClearDefending() {
-	for (let i = 0; i < enemyLegions.length; i++) {
-		enemyLegions[i].defending = false;
+	for (let i = 0; i < allLegions.length; i++) {
+		allLegions[i].defending = false;
+	}
+}
+
+function moveAI() {
+	for (let i = 0; i < allLegions.length; i++) {
+		// move spawning legions
+		if (allLegions[i].isAI && allLegions[i].spawning) {
+			let pathPart = 0.06;
+			let minD = 0.07;
+			let dx = (allLegions[i].spawnX - allLegions[i].x) * pathPart;
+			let dy = (allLegions[i].spawnY - allLegions[i].y) * pathPart;
+
+			if (Math.abs(dx) > minD && Math.abs(dy) > minD) {
+				allLegions[i].x += dx;
+				allLegions[i].y += dy;
+			} else {
+				allLegions[i].spawning = false;
+			}
+		}
+
+		if (allLegions[i].AIPath && allLegions[i].AIPath.length > 0) {
+			let pos = allLegions[i].AIPath.shift();
+			allLegions[i].x = pos[0];
+			allLegions[i].y = pos[1];
+		}
 	}
 }
 
 // AI loop
 setInterval(function() {
-	AIAttackCheck();
 	AIClearDefending();
+	AIAttackCheck();
 }, AI_LOOP_INTERVAL);
-*/
 
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
