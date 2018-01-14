@@ -4,7 +4,6 @@ $(document).ready(function() {
 
 	if (localStorage.getItem('pixelLegionsName')) {
 		myName = localStorage.getItem('pixelLegionsName');
-		localStorage.removeItem('pixelLegionsName');
 	} else {
 		// send user to login
 		$.get('/login', function(data) {});
@@ -12,9 +11,14 @@ $(document).ready(function() {
 
 	let socket = io('/waitingRoom', { query: "&name=" + myName});
 
+	socket.on('myId', function(id) {
+		myId = id;
+		localStorage.setItem('pixelLegionsId', myId);
+	});
+
 	socket.on('player joined', function(allPlayers){
-		$('#players-list').html('');
-		allPlayers.forEach(player => $('#players-list').append('<li>' + player + '</li>'));
+		$('.players-list').html('');
+		allPlayers.forEach(player => $('.players-list').append('<li>' + player.name + '</li>'));
 	});
 
 	socket.on('start game', function(players){

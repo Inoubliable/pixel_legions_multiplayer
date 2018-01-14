@@ -1,21 +1,17 @@
 $(document).ready(function() {
 
+	let myId = 'bla';
 	let myName = 'Default name';
 
-	if (localStorage.getItem('gameName')) {
+	if (localStorage.getItem('pixelLegionsId') && localStorage.getItem('pixelLegionsName')) {
+		myId = localStorage.getItem('pixelLegionsId');
 		myName = localStorage.getItem('pixelLegionsName');
-		localStorage.removeItem('pixelLegionsName');
 	} else {
 		// send user to login
 		$.get('/login', function(data) {});
 	}
 
-	let socket = io('/game', { query: "&name=" + myName});
-
-	let myId = 'bla';
-	socket.on('myId', function(id) {
-		myId = id;
-	});
+	let socket = io('/game', { query: "&id=" + myId + "&name=" + myName});
 
 	let sentTime = Date.now();
 	let lag = 0;
@@ -142,7 +138,7 @@ $(document).ready(function() {
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 
-	const SHOW_BOUNDING_RECTANGLES = true;
+	const SHOW_BOUNDING_RECTANGLES = false;
 
 	const KING_COUNT = 50;
 	const KING_WIDTH = 30;
@@ -177,11 +173,11 @@ $(document).ready(function() {
 	let deadPixelsAnimations = [];
 
 	function win() {
-		window.location.href = '/win';
+		window.location.href = '/gameOver';
 	}
 
 	function lose() {
-		window.location.href = '/lose';
+		window.location.href = '/gameOver';
 	}
 
 	function legionCountToWidth(count) {

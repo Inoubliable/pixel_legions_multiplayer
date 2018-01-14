@@ -24,12 +24,15 @@ app.get('/waitingRoom', (req, res) => {
 app.get('/game', (req, res) => {
 	res.sendFile(path.join(public + 'game.html'));
 });
-app.get('/win', (req, res) => {
-	res.sendFile(path.join(public + 'win.html'));
+app.get('/gameOver', (req, res) => {
+	res.sendFile(path.join(public + 'gameOver.html'));
 });
-app.get('/lose', (req, res) => {
-	res.sendFile(path.join(public + 'lose.html'));
+app.get('/ranking', (req, res) => {
+	res.json({ranking: ranking, oldRating: STARTING_RATING, newRating: NEW_RATING});
 });
+
+const STARTING_RATING = 1500;
+const NEW_RATING = 1582;
 
 const GAME_PLAYERS_NUM = 3;
 
@@ -80,6 +83,10 @@ let allKings = [];
 let allLegions = [];
 
 let allPlayers = [];
+let ranking = [];
+for (let i = 0; i < GAME_PLAYERS_NUM; i++) {
+	ranking.push({id: '', name: ''});
+}
 let AInames = ['DeepBlue', 'AlphaZero', 'TARS'];
 
 let waitingRoom = io.of('/waitingRoom');
@@ -89,14 +96,17 @@ let gameRoom = io.of('/game');
 gameRoom.on('connection', gameConnection);
 
 function waitingConnection(socket) {
-	let name = socket.handshake.query.name;
-	allPlayers.push(name);
+	let playerName = socket.handshake.query.name;
+	let playerId = uuidv1();
+	waitingRoom.to(socket.id).emit('myId', playerId);
+	allPlayers.push({id: playerId, name: playerName});
 
 	// generate AIs to fill the room
 	if (allPlayers.length == 1) {
 		for (let i = 1; i < GAME_PLAYERS_NUM; i++) {
 			let AIindex = Math.floor((Math.random() * AInames.length));
-			allPlayers.push(AInames[AIindex]);
+			let AIid = uuidv1();
+			allPlayers.push({id: AIid, name: AInames[AIindex]});
 			AInames.splice(AIindex, 1);
 		}
 	}
@@ -106,23 +116,25 @@ function waitingConnection(socket) {
 	if (allPlayers.length == GAME_PLAYERS_NUM) {
 		setTimeout(function() {
 			waitingRoom.emit('start game', allPlayers);
-			for (let i = 1; i < 3; i++) {
-				let playerId = uuidv1();
-				initiatePlayer(playerId, true);
+			for (let i = 1; i < allPlayers.length; i++) {
+				initiatePlayer(allPlayers[i].id, true);
 			}
 		}, 2000);
 	}
 
 	socket.on('disconnect', function() {
-		let index = allPlayers.indexOf(name);
+		let index = allPlayers.findIndex(function(player) {
+			return player.id = playerId;
+		});
 		allPlayers.splice(index, 1);
 		console.log('User disconnected');
 	});
 };
 
 function gameConnection(socket) {
-	let playerId = uuidv1();
-	gameRoom.to(socket.id).emit('myId', playerId);
+	let playerId = socket.handshake.query.id;
+	let playerName = socket.handshake.query.name;
+	allPlayers.push({id: playerId, name: playerName});
 
 	initiatePlayer(playerId, false);
 
@@ -432,8 +444,23 @@ function battle() {
 				}
 
 				if (allKings[k].count <= 0) {
-					deadPlayersIds.push(allKings[k].playerId);
+					let deadPlayerId = allKings[k].playerId;
+					deadPlayersIds.push(deadPlayerId);
 					allKings.splice(k, 1);
+
+					// rank the player
+					for (let i = ranking.length-1; i >= 0; i--) {
+						if (ranking[i].id == '') {
+							ranking[i] = allPlayers.find(p => p.id == deadPlayerId);
+
+							// check if only one player is still alive
+							if (ranking[1].id != '') {
+								let winnerKing = allKings.find(k => k.count > 0);
+								ranking[0] = allPlayers.find(p => p.id == winnerKing.playerId);
+							}
+							break;
+						}
+					}
 				}
 			}
 		}
@@ -563,7 +590,6 @@ function AIDefend(playerId, x, y) {
 		}
 
 		let reinforcementsNum = defendingNum - defendingLegionsIndexes.length;
-		console.log(defendingLegionsIndexes.length);
 		if (reinforcementsNum > 0) {
 			let index = 0;
 			for (let i = 0; i < defendingNum; i++) {
