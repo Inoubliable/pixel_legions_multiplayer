@@ -149,6 +149,9 @@ $(document).ready(function() {
 	const KING_BORDER2_COLOR_NORMAL = "#000";
 	const KING_BORDER2_COLOR_SELECTED = "#333";
 
+	const KING_PX_PER_FRAME = 0.7;
+	const LEGION_PX_PER_FRAME = 3;
+
 	const LEGION_COUNT = 25;
 	const LEGION_COUNT_TO_WIDTH = 1.6;
 	const LEGION_MINIMAL_PX = 30;
@@ -341,7 +344,7 @@ $(document).ready(function() {
 				let dx = myKing.path[0][0] - myKing.x;
 				let dy = myKing.path[0][1] - myKing.y;
 				let distance = Math.sqrt(dx * dx + dy * dy);
-				let repeat = Math.floor(distance / Math.sqrt(3));
+				let repeat = Math.floor(distance / KING_PX_PER_FRAME);
 				for (let j = 0; j < repeat; j++) {
 					let goTo = [myKing.path[0][0] - dx/repeat, myKing.path[0][1] - dy/repeat];
 					myKing.path.unshift(goTo);
@@ -356,7 +359,7 @@ $(document).ready(function() {
 					let dx = path[0][0] - myLegions[i].x;
 					let dy = path[0][1] - myLegions[i].y;
 					let distance = Math.sqrt(dx * dx + dy * dy);
-					let repeat = Math.floor(distance / Math.sqrt(10));
+					let repeat = Math.floor(distance / LEGION_PX_PER_FRAME);
 					for (let j = 0; j < repeat; j++) {
 						let goTo = [path[0][0] - dx/repeat, path[0][1] - dy/repeat];
 						path.unshift(goTo);
@@ -377,16 +380,15 @@ $(document).ready(function() {
 		if (myKing.selected) {
 			let path = myKing.path;
 			
-			// if legion is selected AND mouse is inside certain distance
+			// if king is selected AND mouse is inside certain distance
 			if (path.length > 0) {
+				// stabilize speed
 				let lastPoint = path[path.length-1];
 				let dx = lastPoint[0] - e.clientX;
 				let dy = lastPoint[1] - e.clientY;
 				let distance = Math.sqrt(dx * dx + dy * dy);
-				if (distance > 0.6 && distance < 0.8) {	// stabilizing speed
-					path.push([e.clientX, e.clientY]);
-				} else if (distance >= 1) {
-					let repeat = Math.floor(distance / Math.sqrt(3));
+				if (distance >= KING_PX_PER_FRAME) {
+					let repeat = Math.floor(distance / KING_PX_PER_FRAME);
 					for (let j = 0; j < repeat; j++) {
 						let goTo = [path[path.length-1][0] - dx/repeat, path[path.length-1][1] - dy/repeat];
 						path.push(goTo);
@@ -404,15 +406,13 @@ $(document).ready(function() {
 
 				// if legion is selected AND mouse is inside certain distance
 				if (path.length > 0) {
+					// stabilize speed
 					let lastPoint = path[path.length-1];
 					let dx = lastPoint[0] - e.clientX;
 					let dy = lastPoint[1] - e.clientY;
 					let distance = Math.sqrt(dx * dx + dy * dy);
-					if (distance > 3 && distance < 5) {	// stabilizing speed
-						path.push([e.clientX, e.clientY]);
-						continue;
-					} else if (distance >= 5) {
-						let repeat = Math.floor(distance / Math.sqrt(10));
+					if (distance >= LEGION_PX_PER_FRAME) {
+						let repeat = Math.floor(distance / LEGION_PX_PER_FRAME);
 						for (let j = 0; j < repeat; j++) {
 							let goTo = [path[path.length-1][0] - dx/repeat, path[path.length-1][1] - dy/repeat];
 							path.push(goTo);
