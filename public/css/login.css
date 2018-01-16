@@ -28,19 +28,31 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%); }
+  #login-form input[type='text'] {
+    padding: 7px;
+    border-radius: 2px;
+    border: 1px solid #888;
+    font-size: 16px; }
+  #login-form input[type='submit'] {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: #37c;
+    color: white;
+    border: none;
+    font-size: 16px; }
 
-input[type='text'] {
-  padding: 7px;
-  border-radius: 2px;
-  border: 1px solid #888;
-  font-size: 16px; }
-
-input[type='submit'] {
-  padding: 8px 12px;
-  border-radius: 4px;
-  background-color: #37c;
-  color: white;
-  border: none;
-  font-size: 16px; }
+#login-as-form {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none; }
+  #login-as-form input[type='submit'] {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: #37c;
+    color: white;
+    border: none;
+    font-size: 16px; }
 
 /*# sourceMappingURL=login.css.map */

@@ -28,11 +28,10 @@ app.get('/gameOver', (req, res) => {
 	res.sendFile(path.join(public + 'gameOver.html'));
 });
 app.get('/ranking', (req, res) => {
-	res.json({ranking: ranking, oldRating: STARTING_RATING, newRating: NEW_RATING});
+	res.json({ranking: ranking, oldRating: STARTING_RATING});
 });
 
 const STARTING_RATING = 1500;
-const NEW_RATING = 1582;
 
 const GAME_PLAYERS_NUM = 3;
 
@@ -62,6 +61,8 @@ const SPAWN_AREA_WIDTH = 200;
 const BATTLE_COUNT_LOSE = 0.04;
 const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 const BATTLE_DISTANCE = 100;
+
+const RATING_K = 32;	// rating change per place
 
 const COLORS = {
 	blue: {
@@ -101,15 +102,16 @@ gameRoom.on('connection', gameConnection);
 function waitingConnection(socket) {
 	let playerName = socket.handshake.query.name;
 	let playerId = uuidv1();
+	let playerRating = STARTING_RATING;
 	waitingRoom.to(socket.id).emit('myId', playerId);
-	allPlayers.push({id: playerId, name: playerName});
+	allPlayers.push({id: playerId, name: playerName, rating: STARTING_RATING});
 
 	// generate AIs to fill the room
 	if (allPlayers.length == 1) {
 		for (let i = 1; i < GAME_PLAYERS_NUM; i++) {
 			let AIindex = Math.floor((Math.random() * AInames.length));
 			let AIid = uuidv1();
-			allPlayers.push({id: AIid, name: AInames[AIindex]});
+			allPlayers.push({id: AIid, name: AInames[AIindex], rating: STARTING_RATING});
 			AInames.splice(AIindex, 1);
 		}
 	}
@@ -137,7 +139,7 @@ function waitingConnection(socket) {
 function gameConnection(socket) {
 	let playerId = socket.handshake.query.id;
 	let playerName = socket.handshake.query.name;
-	allPlayers.push({id: playerId, name: playerName});
+	allPlayers.push({id: playerId, name: playerName, rating: STARTING_RATING});
 
 	initiatePlayer(playerId, false);
 
@@ -465,11 +467,13 @@ function battle() {
 					for (let i = ranking.length-1; i >= 0; i--) {
 						if (ranking[i].id == '') {
 							ranking[i] = allPlayers.find(p => p.id == deadPlayerId);
+							ranking[i].newRating = calculateRating(STARTING_RATING, i+1);
 
 							// check if only one player is still alive
 							if (ranking[1].id != '') {
 								let winnerKing = allKings.find(k => k.count > 0);
 								ranking[0] = allPlayers.find(p => p.id == winnerKing.playerId);
+								ranking[0].newRating = calculateRating(STARTING_RATING, 1);
 							}
 							break;
 						}
@@ -690,6 +694,13 @@ setInterval(function() {
 	AIClearDefending();
 	AIAttackCheck();
 }, AI_LOOP_INTERVAL);
+
+function calculateRating(rating, place) {
+	let avgPlace = (GAME_PLAYERS_NUM + 1) / 2;
+	let placeDifference = avgPlace - place;
+
+	return rating + placeDifference*RATING_K;
+}
 
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {

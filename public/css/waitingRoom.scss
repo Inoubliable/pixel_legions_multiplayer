@@ -28,4 +28,12 @@ body {
     font-size: 18px;
     font-weight: 700;
     letter-spacing: 1px;
+
+    li {
+    	width: 200px;
+    }
+
+	.player-rating {
+		float: right;
+	}
 }

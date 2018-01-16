@@ -12,27 +12,28 @@ $(document).ready(function() {
 	$.get('/ranking', function(data) {
 		let ranking = data.ranking;
 		let oldRating = data.oldRating;
-		let newRating = data.newRating;
+		let newRating = 1500;
 
 		for (let i = 0; i < ranking.length; i++) {
 			if (ranking[i].id == myId) {
+				newRating = ranking[i].newRating;
 				$('.place').html(i+1);
 			}
-			$('.ranking').append('<li>' + (i+1) + '. ' + ranking[i].name + '</li>')
+			$('.ranking').append('<li>' + (i+1) + '. ' + ranking[i].name + '</li>');
 		}
 
-		let ratingChange = '0';
+		let ratingPlus = (newRating - oldRating) > 0;
 		let rating = oldRating;
 		let ratingInterval = setInterval(function() {
 			ratingChange = rating - oldRating;
-			if (ratingChange > 0) {
+			if (ratingPlus) {
 				ratingChange = '+' + ratingChange;
 			}
 			$('.rating-change').html('New rating: ' + rating + ' (' + ratingChange + ')');
 			if (rating == newRating) {
 				clearInterval(ratingInterval);
 			}
-			rating++;
+			ratingPlus ? rating++ : rating--;
 		}, 20);
 	});
 

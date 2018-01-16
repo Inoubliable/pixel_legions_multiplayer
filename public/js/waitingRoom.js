@@ -18,7 +18,7 @@ $(document).ready(function() {
 
 	socket.on('player joined', function(allPlayers){
 		$('.players-list').html('');
-		allPlayers.forEach(player => $('.players-list').append('<li>' + player.name + '</li>'));
+		allPlayers.forEach(player => $('.players-list').append('<li>' + player.name + ' <span class="player-rating">' + player.rating + '</span></li>'));
 	});
 
 	socket.on('start game', function(players){

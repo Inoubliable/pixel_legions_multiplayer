@@ -21,5 +21,9 @@ body {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 1px; }
+  .players-list li {
+    width: 200px; }
+  .players-list .player-rating {
+    float: right; }
 
 /*# sourceMappingURL=waitingRoom.css.map */
