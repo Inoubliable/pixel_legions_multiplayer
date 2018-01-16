@@ -1,19 +1,30 @@
 $(document).ready(function() {
 
 	let myName = 'Default name';
+	let myPlayer, myId, myRating;
 
-	if (localStorage.getItem('pixelLegionsName')) {
-		myName = localStorage.getItem('pixelLegionsName');
+	let query = '';
+	if (localStorage.getItem('pixelLegionsPlayer')) {
+		myPlayer = JSON.parse(localStorage.getItem('pixelLegionsPlayer'));
+		myName = myPlayer.name;
+		query += '&name=' + myName;
+		if (myPlayer.id) {
+			myId = myPlayer.id;
+			query += '&id=' + myId;
+		}
+		if (myPlayer.rating) {
+			myRating = myPlayer.rating;
+			query += '&rating=' + myRating;
+		}
 	} else {
 		// send user to login
 		$.get('/login', function(data) {});
 	}
 
-	let socket = io('/waitingRoom', { query: "&name=" + myName});
+	let socket = io('/waitingRoom', {query: query});
 
-	socket.on('myId', function(id) {
-		myId = id;
-		localStorage.setItem('pixelLegionsId', myId);
+	socket.on('myPlayer', function(player) {
+		localStorage.setItem('pixelLegionsPlayer', JSON.stringify(player));
 	});
 
 	socket.on('player joined', function(allPlayers){

@@ -28,7 +28,7 @@ app.get('/gameOver', (req, res) => {
 	res.sendFile(path.join(public + 'gameOver.html'));
 });
 app.get('/ranking', (req, res) => {
-	res.json({ranking: ranking, oldRating: STARTING_RATING});
+	res.json({ranking: ranking});
 });
 
 const STARTING_RATING = 1500;
@@ -36,7 +36,7 @@ const STARTING_RATING = 1500;
 const GAME_PLAYERS_NUM = 3;
 
 const PLAYFIELD_WIDTH = 1000;
-const PLAYFIELD_HEIGHT = 700;
+const PLAYFIELD_HEIGHT = 600;
 
 const LEGION_OVER_BORDER = 0.2;
 
@@ -101,10 +101,10 @@ gameRoom.on('connection', gameConnection);
 
 function waitingConnection(socket) {
 	let playerName = socket.handshake.query.name;
-	let playerId = uuidv1();
-	let playerRating = STARTING_RATING;
-	waitingRoom.to(socket.id).emit('myId', playerId);
-	allPlayers.push({id: playerId, name: playerName, rating: STARTING_RATING});
+	let playerId = socket.handshake.query.id || uuidv1();
+	let playerRating = +socket.handshake.query.rating || STARTING_RATING;
+	waitingRoom.to(socket.id).emit('myPlayer', {id: playerId, name: playerName, rating: playerRating});
+	allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
 	// generate AIs to fill the room
 	if (allPlayers.length == 1) {
@@ -129,7 +129,7 @@ function waitingConnection(socket) {
 
 	socket.on('disconnect', function() {
 		let index = allPlayers.findIndex(function(player) {
-			return player.id = playerId;
+			return player.id == playerId;
 		});
 		allPlayers.splice(index, 1);
 		console.log('User disconnected');
@@ -139,7 +139,8 @@ function waitingConnection(socket) {
 function gameConnection(socket) {
 	let playerId = socket.handshake.query.id;
 	let playerName = socket.handshake.query.name;
-	allPlayers.push({id: playerId, name: playerName, rating: STARTING_RATING});
+	let playerRating = +socket.handshake.query.rating || STARTING_RATING;
+	allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
 	initiatePlayer(playerId, false);
 
@@ -467,13 +468,13 @@ function battle() {
 					for (let i = ranking.length-1; i >= 0; i--) {
 						if (ranking[i].id == '') {
 							ranking[i] = allPlayers.find(p => p.id == deadPlayerId);
-							ranking[i].newRating = calculateRating(STARTING_RATING, i+1);
+							ranking[i].newRating = calculateRating(ranking[i].rating, i+1);
 
 							// check if only one player is still alive
 							if (ranking[1].id != '') {
 								let winnerKing = allKings.find(k => k.count > 0);
 								ranking[0] = allPlayers.find(p => p.id == winnerKing.playerId);
-								ranking[0].newRating = calculateRating(STARTING_RATING, 1);
+								ranking[0].newRating = calculateRating(ranking[0].rating, 1);
 							}
 							break;
 						}

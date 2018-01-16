@@ -1,9 +1,11 @@
 $(document).ready(function() {
 
+	let myPlayer = {};
 	let myId = 'DefaultId';
 
-	if (localStorage.getItem('pixelLegionsId') && localStorage.getItem('pixelLegionsName')) {
-		myId = localStorage.getItem('pixelLegionsId');
+	if (localStorage.getItem('pixelLegionsPlayer')) {
+		myPlayer = JSON.parse(localStorage.getItem('pixelLegionsPlayer'));
+		myId = myPlayer.id;
 	} else {
 		// send user to login
 		$.get('/login', function(data) {});
@@ -11,13 +13,19 @@ $(document).ready(function() {
 
 	$.get('/ranking', function(data) {
 		let ranking = data.ranking;
-		let oldRating = data.oldRating;
+		let oldRating = 1500;
 		let newRating = 1500;
+		console.log(ranking);
 
 		for (let i = 0; i < ranking.length; i++) {
 			if (ranking[i].id == myId) {
+				oldRating = ranking[i].rating;
 				newRating = ranking[i].newRating;
 				$('.place').html(i+1);
+
+				// save users new rating
+				myPlayer.rating = newRating;
+				localStorage.setItem('pixelLegionsPlayer', JSON.stringify(myPlayer));
 			}
 			$('.ranking').append('<li>' + (i+1) + '. ' + ranking[i].name + '</li>');
 		}

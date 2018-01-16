@@ -22,6 +22,7 @@ body {
 }
 
 .rating-change {
+	display: inline-block;
 	font-size: 30px;
 	margin-left: 50%;
 	transform: translateX(-50%);

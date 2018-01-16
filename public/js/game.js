@@ -1,17 +1,21 @@
 $(document).ready(function() {
 
+	let myPlayer = {};
 	let myId = 'DefaultId';
 	let myName = 'Default name';
+	let myRating = 1500;
 
-	if (localStorage.getItem('pixelLegionsId') && localStorage.getItem('pixelLegionsName')) {
-		myId = localStorage.getItem('pixelLegionsId');
-		myName = localStorage.getItem('pixelLegionsName');
+	if (localStorage.getItem('pixelLegionsPlayer')) {
+		myPlayer = JSON.parse(localStorage.getItem('pixelLegionsPlayer'));
+		myId = myPlayer.id;
+		myName = myPlayer.name;
+		myRating = myPlayer.rating;
 	} else {
 		// send user to login
 		$.get('/login', function(data) {});
 	}
 
-	let socket = io('/game', { query: "&id=" + myId + "&name=" + myName});
+	let socket = io('/game', { query: "&id=" + myId + "&name=" + myName + "&rating=" + myRating});
 
 	let sentTime = Date.now();
 	let lag = 0;
@@ -141,7 +145,7 @@ $(document).ready(function() {
 	const SHOW_BOUNDING_RECTANGLES = true;
 
 	const PLAYFIELD_WIDTH = 1000;
-	const PLAYFIELD_HEIGHT = 700;
+	const PLAYFIELD_HEIGHT = 600;
 
 	const LEGION_OVER_BORDER = 0.2;
 
