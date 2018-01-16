@@ -36,10 +36,13 @@ const NEW_RATING = 1582;
 
 const GAME_PLAYERS_NUM = 3;
 
-const PLAYFIELD_WIDTH = 600;
-const PLAYFIELD_HEIGHT = 500;
+const PLAYFIELD_WIDTH = 1000;
+const PLAYFIELD_HEIGHT = 700;
+
+const LEGION_OVER_BORDER = 0.2;
 
 const KING_COUNT = 50;
+const KING_WIDTH = 30;
 
 const INITIAL_LEGIONS_NUM = 2;
 const LEGION_COUNT = 25;
@@ -194,8 +197,8 @@ function initiatePlayer(playerId, isAI) {
 	let x, y, initialDx, initialDy, initialDistance;
 	let isTooClose = true;
 	while (isTooClose) {
-		x = Math.floor(Math.random() * PLAYFIELD_WIDTH) + 60;
-		y = Math.floor(Math.random() * PLAYFIELD_HEIGHT) + 60;
+		x = Math.floor(Math.random() * PLAYFIELD_WIDTH);
+		y = Math.floor(Math.random() * PLAYFIELD_HEIGHT);
 		isTooClose = false;
 		for (let i = 0; i < allKings.length; i++) {
 			initialDx = allKings[i].x - x;
@@ -215,6 +218,16 @@ function initiatePlayer(playerId, isAI) {
 	for (let i = 0; i < INITIAL_LEGIONS_NUM; i++) {
 		let legionX = Math.random() * SPAWN_AREA_WIDTH + x - SPAWN_AREA_WIDTH/2;
 		let legionY = Math.random() * SPAWN_AREA_WIDTH + y - SPAWN_AREA_WIDTH/2;
+		let legW = legionCountToWidth(LEGION_COUNT);
+
+		// check if it spawns over playfield border
+		while (!(legionX > (legW*LEGION_OVER_BORDER) && legionX < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER))) {
+			legionX = Math.random() * SPAWN_AREA_WIDTH + x - SPAWN_AREA_WIDTH/2;
+		}
+		while (!(legionY > (legW*LEGION_OVER_BORDER) && legionY < (PLAYFIELD_HEIGHT - legW*LEGION_OVER_BORDER))) {
+			legionY = Math.random() * SPAWN_AREA_WIDTH + y - SPAWN_AREA_WIDTH/2;
+		}
+
 		allLegions.push(new Legion(playerId, legionX, legionY, LEGION_COUNT, color, false, 0, 0, isAI));
 	}
 }
@@ -633,6 +646,9 @@ function AIClearDefending() {
 function moveAI() {
 	for (let i = 0; i < allLegions.length; i++) {
 		// move spawning legions
+		let legW = legionCountToWidth(allLegions[i].count);
+		let legH = legionCountToWidth(allLegions[i].count);
+
 		if (allLegions[i].isAI && allLegions[i].spawning) {
 			let pathPart = 0.06;
 			let minD = 0.07;
@@ -640,8 +656,16 @@ function moveAI() {
 			let dy = (allLegions[i].spawnY - allLegions[i].y) * pathPart;
 
 			if (Math.abs(dx) > minD && Math.abs(dy) > minD) {
-				allLegions[i].x += dx;
-				allLegions[i].y += dy;
+				let newX = allLegions[i].x + dx;
+				let newY = allLegions[i].y + dy;
+
+				// check if it gets over playfield border
+				if (newX > (legW*LEGION_OVER_BORDER) && newX < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER)) {
+					allLegions[i].x = newX;
+				}
+				if (newY > (legH*LEGION_OVER_BORDER) && newY < (PLAYFIELD_HEIGHT - legH*LEGION_OVER_BORDER)) {
+					allLegions[i].y = newY;
+				}
 			} else {
 				allLegions[i].spawning = false;
 			}
@@ -649,8 +673,14 @@ function moveAI() {
 
 		if (allLegions[i].AIPath && allLegions[i].AIPath.length > 0) {
 			let pos = allLegions[i].AIPath.shift();
-			allLegions[i].x = pos[0];
-			allLegions[i].y = pos[1];
+
+			// check if it gets over playfield border
+			if (pos[0] > (legW*LEGION_OVER_BORDER) && pos[0] < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER)) {
+				allLegions[i].x = pos[0];
+			}
+			if (pos[1] > (legH*LEGION_OVER_BORDER) && pos[1] < (PLAYFIELD_HEIGHT - legH*LEGION_OVER_BORDER)) {
+				allLegions[i].y = pos[1];
+			}
 		}
 	}
 }

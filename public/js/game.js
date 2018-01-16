@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-	let myId = 'bla';
+	let myId = 'DefaultId';
 	let myName = 'Default name';
 
 	if (localStorage.getItem('pixelLegionsId') && localStorage.getItem('pixelLegionsName')) {
@@ -138,7 +138,12 @@ $(document).ready(function() {
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 
-	const SHOW_BOUNDING_RECTANGLES = false;
+	const SHOW_BOUNDING_RECTANGLES = true;
+
+	const PLAYFIELD_WIDTH = 1000;
+	const PLAYFIELD_HEIGHT = 700;
+
+	const LEGION_OVER_BORDER = 0.2;
 
 	const KING_COUNT = 50;
 	const KING_WIDTH = 30;
@@ -702,6 +707,8 @@ $(document).ready(function() {
 
 		// draw my legions
 		for (let i = 0; i < myLegions.length; i++) {
+			let legW = legionCountToWidth(myLegions[i].count);
+			let legH = legionCountToWidth(myLegions[i].count);
 
 			// draw path
 			let path = myLegions[i].path;
@@ -720,11 +727,19 @@ $(document).ready(function() {
 
 				if (myLegions[i].move) {
 					let pos = path.shift();
-					let dx = pos[0] - myLegions[i].x;
-					let dy = pos[1] - myLegions[i].y;
+					let dx = 0;
+					let dy = 0;
+
+					// check if it gets over playfield border
+					if (pos[0] > (legW*LEGION_OVER_BORDER) && pos[0] < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER)) {
+						dx = pos[0] - myLegions[i].x;
+						myLegions[i].x = pos[0];
+					}
+					if (pos[1] > (legH*LEGION_OVER_BORDER) && pos[1] < (PLAYFIELD_HEIGHT - legH*LEGION_OVER_BORDER)) {
+						dy = pos[1] - myLegions[i].y;
+						myLegions[i].y = pos[1];
+					}
 					updatePixelsPosition(myLegions[i].pixels, dx, dy);
-					myLegions[i].x = pos[0];
-					myLegions[i].y = pos[1];
 					if (path.length == 0) {
 						myLegions[i].move = false;
 					}
@@ -739,12 +754,21 @@ $(document).ready(function() {
 				let dy = (myLegions[i].spawnY - myLegions[i].y) * pathPart;
 
 				if (Math.abs(dx) > minD && Math.abs(dy) > minD) {
-					myLegions[i].x += dx;
-					myLegions[i].y += dy;
+					let newX = myLegions[i].x + dx;
+					let newY = myLegions[i].y + dy;
+					
+					// check if it gets over playfield border
+					if (newX > (legW*LEGION_OVER_BORDER) && newX < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER)) {
+						myLegions[i].x = newX;
+						updatePixelsPosition(myLegions[i].pixels, dx, 0);
+					}
+					if (newY > (legH*LEGION_OVER_BORDER) && newY < (PLAYFIELD_HEIGHT - legH*LEGION_OVER_BORDER)) {
+						myLegions[i].y = newY;
+						updatePixelsPosition(myLegions[i].pixels, 0, dy);
+					}
 				} else {
 					myLegions[i].spawning = false;
 				}
-				updatePixelsPosition(myLegions[i].pixels, dx, dy);
 			}
 
 			// deselect legions if king is selected (do it here because im already looping)
@@ -752,7 +776,6 @@ $(document).ready(function() {
 				myLegions[i].selected = false;
 			}
 			
-			let myLegionWidth = legionCountToWidth(myLegions[i].count);
 			if (myLegions[i].selected) {
 				ctx.strokeStyle = myLegions[i].borderSelected;
 				ctx.fillStyle = myLegions[i].colorSelected;
@@ -766,9 +789,8 @@ $(document).ready(function() {
 			// for testing
 			if (SHOW_BOUNDING_RECTANGLES) {
 				// drawing bounding rectangles
-				let myLegionWidth = legionCountToWidth(myLegions[i].count);
-				ctx.strokeRect(myLegions[i].x - myLegionWidth/2, myLegions[i].y - myLegionWidth/2, myLegionWidth, myLegionWidth);
-				ctx.fillRect(myLegions[i].x - myLegionWidth/2, myLegions[i].y - myLegionWidth/2, myLegionWidth, myLegionWidth);
+				ctx.strokeRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
+				ctx.fillRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
 			}
 			
 			if (myLegions[i].hull) {
@@ -841,6 +863,13 @@ $(document).ready(function() {
 				ctx.fillStyle = "#fff";
 				ctx.fillRect(deadPixelsAnimations[i][j][0] - PIXEL_SIZE_PX/2, deadPixelsAnimations[i][j][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
+		}
+
+		// drawing playfield border
+		if (SHOW_BOUNDING_RECTANGLES) {
+			ctx.strokeStyle = "#fff";
+			ctx.lineWidth = 3;
+			ctx.strokeRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
 		}
 	}
 

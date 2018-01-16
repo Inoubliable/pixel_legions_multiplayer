@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-	let myId = 'bla';
+	let myId = 'DefaultId';
 
 	if (localStorage.getItem('pixelLegionsId') && localStorage.getItem('pixelLegionsName')) {
 		myId = localStorage.getItem('pixelLegionsId');
