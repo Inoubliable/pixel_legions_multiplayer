@@ -76,6 +76,18 @@ const COLORS = {
 	green: {
 		normal: 'rgba(37, 177, 42, 1)',
 		selected: 'rgba(87, 217, 82, 1)'
+	},
+	orange: {
+		normal: 'rgba(240, 100, 23, 1)',
+		selected: 'rgba(254, 140, 63, 1)'
+	},
+	purple: {
+		normal: 'rgba(178, 50, 194, 1)',
+		selected: 'rgba(218, 90, 234, 1)'
+	},
+	yellow: {
+		normal: 'rgba(244, 198, 28, 1)',
+		selected: 'rgba(254, 238, 68, 1)'
 	}
 };
 let colors = [];
@@ -91,7 +103,7 @@ let ranking = [];
 for (let i = 0; i < GAME_PLAYERS_NUM; i++) {
 	ranking.push({id: '', name: ''});
 }
-let AInames = ['DeepBlue', 'AlphaZero', 'TARS'];
+let AInames = ['DeepBlue', 'AlphaZero', 'TARS', 'R2D2', 'Unity'];
 
 let waitingRoom = io.of('/waitingRoom');
 waitingRoom.on('connection', waitingConnection);
