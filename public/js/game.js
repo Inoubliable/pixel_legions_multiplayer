@@ -673,6 +673,8 @@ $(document).ready(function() {
 
 		// draw king's path
 		ctx.lineWidth = PATH_WIDTH;
+		ctx.lineJoin = 'round';
+		ctx.lineCap = 'round';
 		ctx.strokeStyle = PATH_COLOR;
 		if (myKing.path.length > 0) {
 			ctx.beginPath();
@@ -718,6 +720,8 @@ $(document).ready(function() {
 			let path = myLegions[i].path;
 			if (path.length > 0) {
 				ctx.lineWidth = PATH_WIDTH;
+				ctx.lineJoin = 'round';
+				ctx.lineCap = 'round';
 				ctx.strokeStyle = PATH_COLOR;
 				ctx.beginPath();
 				for (let j = 0; j < path.length; j++) {
