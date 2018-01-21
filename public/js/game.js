@@ -142,7 +142,7 @@ $(document).ready(function() {
 	canvas.addEventListener("mousedown", onMouseDown, false);
 	canvas.addEventListener("mouseup", onMouseUp, false);
 
-	const SHOW_BOUNDING_RECTANGLES = true;
+	const SHOW_BOUNDING_RECTANGLES = false;
 
 	const PLAYFIELD_WIDTH = 1000;
 	const PLAYFIELD_HEIGHT = 600;
@@ -689,8 +689,14 @@ $(document).ready(function() {
 
 			if (myKing.move) {
 				let pos = myKing.path.shift();
-				myKing.x = pos[0];
-				myKing.y = pos[1];
+
+				// check if it gets over playfield border
+				if (pos[0] > (KING_WIDTH*LEGION_OVER_BORDER) && pos[0] < (PLAYFIELD_WIDTH - KING_WIDTH*LEGION_OVER_BORDER)) {
+					myKing.x = pos[0];
+				}
+				if (pos[1] > (KING_WIDTH*LEGION_OVER_BORDER) && pos[1] < (PLAYFIELD_HEIGHT - KING_WIDTH*LEGION_OVER_BORDER)) {
+					myKing.y = pos[1];
+				}
 				if (myKing.path.length == 0) {
 					myKing.move = false;
 				}
@@ -874,11 +880,9 @@ $(document).ready(function() {
 		}
 
 		// drawing playfield border
-		if (SHOW_BOUNDING_RECTANGLES) {
-			ctx.strokeStyle = "#fff";
-			ctx.lineWidth = 3;
-			ctx.strokeRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
-		}
+		ctx.strokeStyle = "#fff";
+		ctx.lineWidth = 3;
+		ctx.strokeRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
 	}
 
 });

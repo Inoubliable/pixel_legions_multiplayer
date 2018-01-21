@@ -55,6 +55,7 @@ const HULL_SPACE_PX = 10;
 
 const AI_LOOP_INTERVAL = 2 * 1000;
 const SPAWN_INTERVAL = 10 * 1000;
+const SPAWN_ITERVAL_RANDOM_PART = 0.1;
 
 const SPAWN_AREA_WIDTH = 200;
 
@@ -180,6 +181,30 @@ function gameConnection(socket) {
 			}
 		}
 	});
+
+	// create spawn loops for every player
+	// TODO: when more human players, this shouldn't be called on every socket connection
+	for (let i = 0; i < allPlayers.length; i++) {
+		(function loop() {
+			let rand = SPAWN_INTERVAL + Math.round(Math.random() * SPAWN_INTERVAL * SPAWN_ITERVAL_RANDOM_PART);
+			setTimeout(function() {
+				let king = allKings.find(k => k.playerId == allPlayers[i].id);
+
+				if (king) {
+					let startX = king.x;
+					let startY = king.y;
+					let color = king.spawnedColor;
+					let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
+					let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
+					let isAI = king.isAI;
+					allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
+
+					loop();
+				}
+				
+			}, rand);
+		}());
+	}
 
 	socket.on('myPing', function() {
 		gameRoom.to(socket.id).emit('myPong', 'Pong');
@@ -374,22 +399,6 @@ function orientation(p, q, r) {
     if (val == 0) return 0;	// collinear
     return (val > 0) ? 1 : 2;	// clock or counterclock wise
 }
-
-// spawning new legions
-setInterval(function() {
-	for (let i = 0; i < allKings.length; i++) {
-		let king = allKings[i];
-
-		let playerId = king.playerId;
-		let startX = king.x;
-		let startY = king.y;
-		let color = king.spawnedColor;
-		let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
-		let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
-		let isAI = king.isAI;
-		allLegions.push(new Legion(playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
-	}
-}, SPAWN_INTERVAL);
 
 function battle() {
 	let deadPlayersIds = [];
