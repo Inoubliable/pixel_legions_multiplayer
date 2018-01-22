@@ -25,15 +25,27 @@ body {
 	margin-top: 50px;
 	padding-left: 50px;
 	color: #fff;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 1px;
+	font-size: 18px;
+	font-weight: 700;
+	letter-spacing: 1px;
 
-    li {
-    	width: 200px;
-    }
+	li {
+		width: 200px;
+	}
 
 	.player-rating {
 		float: right;
+	}
+}
+
+.countdown {
+	color: #fff;
+	font-size: 20px;
+	margin-top: 100px;
+	text-align: center;
+	display: none;
+
+	.countdown-seconds {
+		font-size: 22px;
 	}
 }

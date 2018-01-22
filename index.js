@@ -33,7 +33,7 @@ app.get('/ranking', (req, res) => {
 
 const STARTING_RATING = 1500;
 
-const GAME_PLAYERS_NUM = 3;
+const GAME_PLAYERS_NUM = 4;
 
 const PLAYFIELD_WIDTH = 1000;
 const PLAYFIELD_HEIGHT = 550;
@@ -119,26 +119,24 @@ function waitingConnection(socket) {
 	waitingRoom.to(socket.id).emit('myPlayer', {id: playerId, name: playerName, rating: playerRating});
 	allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
-	// generate AIs to fill the room
-	if (allPlayers.length == 1) {
-		for (let i = 1; i < GAME_PLAYERS_NUM; i++) {
-			let AIindex = Math.floor((Math.random() * AInames.length));
-			let AIid = uuidv1();
-			allPlayers.push({id: AIid, name: AInames[AIindex], rating: STARTING_RATING});
-			AInames.splice(AIindex, 1);
+	let humanPlayersCount = allPlayers.length;
+	setTimeout(function() {
+		if (humanPlayersCount == allPlayers.length) {
+			fillWithAI(humanPlayersCount);
+
+			if (allPlayers.length == GAME_PLAYERS_NUM) {
+				waitingRoom.emit('start countdown', allPlayers);
+
+				setTimeout(function() {
+					for (let i = humanPlayersCount; i < allPlayers.length; i++) {
+						initiatePlayer(allPlayers[i].id, true);
+					}
+				}, 5000);
+			}
 		}
-	}
+	}, 10000);
 
 	waitingRoom.emit('player joined', allPlayers);
-
-	if (allPlayers.length == GAME_PLAYERS_NUM) {
-		setTimeout(function() {
-			waitingRoom.emit('start game', allPlayers);
-			for (let i = 1; i < allPlayers.length; i++) {
-				initiatePlayer(allPlayers[i].id, true);
-			}
-		}, 2000);
-	}
 
 	socket.on('disconnect', function() {
 		let index = allPlayers.findIndex(function(player) {
@@ -149,6 +147,16 @@ function waitingConnection(socket) {
 	});
 };
 
+function fillWithAI(playerCount) {
+	// generate AIs to fill the room
+	for (let i = playerCount; i < GAME_PLAYERS_NUM; i++) {
+		let AIindex = Math.floor((Math.random() * AInames.length));
+		let AIid = uuidv1();
+		allPlayers.push({id: AIid, name: AInames[AIindex], rating: STARTING_RATING});
+		AInames.splice(AIindex, 1);
+	}
+}
+
 function gameConnection(socket) {
 	let playerId = socket.handshake.query.id;
 	let playerName = socket.handshake.query.name;
@@ -156,6 +164,31 @@ function gameConnection(socket) {
 	allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
 	initiatePlayer(playerId, false);
+
+	// create spawn loops for every player
+	if (allPlayers.length == GAME_PLAYERS_NUM) {
+		for (let i = 0; i < allPlayers.length; i++) {
+			(function loop() {
+				let rand = SPAWN_INTERVAL + Math.round(Math.random() * SPAWN_INTERVAL * SPAWN_ITERVAL_RANDOM_PART);
+				setTimeout(function() {
+					let king = allKings.find(k => k.playerId == allPlayers[i].id);
+	
+					if (king) {
+						let startX = king.x;
+						let startY = king.y;
+						let color = king.spawnedColor;
+						let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
+						let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
+						let isAI = king.isAI;
+						allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
+	
+						loop();
+					}
+					
+				}, rand);
+			}());
+		}
+	}
 
 	socket.on('move', function(data) {
 		let playerId = data.playerId;
@@ -181,30 +214,6 @@ function gameConnection(socket) {
 			}
 		}
 	});
-
-	// create spawn loops for every player
-	// TODO: when more human players, this shouldn't be called on every socket connection
-	for (let i = 0; i < allPlayers.length; i++) {
-		(function loop() {
-			let rand = SPAWN_INTERVAL + Math.round(Math.random() * SPAWN_INTERVAL * SPAWN_ITERVAL_RANDOM_PART);
-			setTimeout(function() {
-				let king = allKings.find(k => k.playerId == allPlayers[i].id);
-
-				if (king) {
-					let startX = king.x;
-					let startY = king.y;
-					let color = king.spawnedColor;
-					let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
-					let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
-					let isAI = king.isAI;
-					allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
-
-					loop();
-				}
-				
-			}, rand);
-		}());
-	}
 
 	socket.on('myPing', function() {
 		gameRoom.to(socket.id).emit('myPong', 'Pong');
