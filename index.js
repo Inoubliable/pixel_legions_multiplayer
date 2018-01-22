@@ -571,11 +571,13 @@ function AIAttackCheck() {
 					index2 = Math.floor(Math.random() * playersLegions.length);
 				}
 
-				if (!allLegions[index1].spawning) {
-					AIAttackPath(allLegions[index1]);
+				let AIlegion1 = allLegions[playersLegions[index1]];
+				let AIlegion2 = allLegions[playersLegions[index2]];
+				if (!AIlegion1.spawning) {
+					AIAttackPath(AIlegion1);
 				}
-				if (!allLegions[index2].spawning) {
-					AIAttackPath(allLegions[index2]);
+				if (!AIlegion2.spawning) {
+					AIAttackPath(AIlegion2);
 				}
 			}
 		}

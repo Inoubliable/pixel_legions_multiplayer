@@ -15,7 +15,6 @@ $(document).ready(function() {
 		let ranking = data.ranking;
 		let oldRating = 1500;
 		let newRating = 1500;
-		console.log(ranking);
 
 		for (let i = 0; i < ranking.length; i++) {
 			if (ranking[i].id == myId) {
