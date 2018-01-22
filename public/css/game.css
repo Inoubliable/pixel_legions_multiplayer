@@ -4,9 +4,23 @@
   box-sizing: border-box;
   font-family: "Arial"; }
 
-#gameCanvas {
-  display: block;
+body {
   background-color: #000; }
+
+#game-canvas-container {
+  text-align: center;
+  width: 1000px;
+  height: 550px;
+  position: relative;
+  margin: auto;
+  top: 10px; }
+
+#game-canvas {
+  background-color: #000;
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 2px solid #fff; }
 
 #lag {
   position: absolute;

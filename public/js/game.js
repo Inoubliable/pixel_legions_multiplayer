@@ -130,22 +130,10 @@ $(document).ready(function() {
 		}
 	});
 
-	let canvas = document.getElementById("gameCanvas");
-	let ctx = canvas.getContext("2d");
-
-	//make canvas fullscreen
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-
-	canvas.addEventListener("mousemove", onMouseMove, false);
-	let mousedown = false;
-	canvas.addEventListener("mousedown", onMouseDown, false);
-	canvas.addEventListener("mouseup", onMouseUp, false);
-
 	const SHOW_BOUNDING_RECTANGLES = false;
 
 	const PLAYFIELD_WIDTH = 1000;
-	const PLAYFIELD_HEIGHT = 600;
+	const PLAYFIELD_HEIGHT = 550;
 
 	const LEGION_OVER_BORDER = 0.2;
 
@@ -183,6 +171,19 @@ $(document).ready(function() {
 
 	let battleBeams = [];
 	let deadPixelsAnimations = [];
+
+	let canvasContainer = document.getElementById("game-canvas-container");
+	let canvas = document.getElementById("game-canvas");
+	let ctx = canvas.getContext("2d");
+
+	//make canvas fullscreen
+	canvas.width = PLAYFIELD_WIDTH;
+	canvas.height = PLAYFIELD_HEIGHT;
+
+	canvas.addEventListener("mousemove", onMouseMove, false);
+	let mousedown = false;
+	canvas.addEventListener("mousedown", onMouseDown, false);
+	canvas.addEventListener("mouseup", onMouseUp, false);
 
 	function win() {
 		window.location.href = '/gameOver';
@@ -301,17 +302,19 @@ $(document).ready(function() {
 	let mouseDownLegionIndex = -1;
 	function onMouseDown(e) {
 		mousedown = true;
+		let mouseX = e.clientX - canvasContainer.offsetLeft;
+		let mouseY = e.clientY - canvasContainer.offsetTop;
 
 		// check if mouse is down on my king
 		let kingWidthHalf = KING_WIDTH / 2;
-		if (e.clientX < myKing.x + kingWidthHalf && e.clientX > myKing.x - kingWidthHalf && e.clientY < myKing.y + kingWidthHalf && e.clientY > myKing.y - kingWidthHalf) {
+		if (mouseX < myKing.x + kingWidthHalf && mouseX > myKing.x - kingWidthHalf && mouseY < myKing.y + kingWidthHalf && mouseY > myKing.y - kingWidthHalf) {
 			mouseDownKingIndex = 1;
 			mousedown = false;
 		} else {
 			// check if mouse is down on my legion
 			for (let i = 0; i < myLegions.length; i++) {
 				let legionWidthHalf = legionCountToWidth(myLegions[i].count) / 2;
-				if (e.clientX < myLegions[i].x + legionWidthHalf && e.clientX > myLegions[i].x - legionWidthHalf && e.clientY < myLegions[i].y + legionWidthHalf && e.clientY > myLegions[i].y - legionWidthHalf) {
+				if (mouseX < myLegions[i].x + legionWidthHalf && mouseX > myLegions[i].x - legionWidthHalf && mouseY < myLegions[i].y + legionWidthHalf && mouseY > myLegions[i].y - legionWidthHalf) {
 					mouseDownLegionIndex = i;
 					mousedown = false;
 					break;
@@ -321,12 +324,14 @@ $(document).ready(function() {
 	}
 
 	function onMouseUp(e) {
+		let mouseX = e.clientX - canvasContainer.offsetLeft;
+		let mouseY = e.clientY - canvasContainer.offsetTop;
 
 		// check if mouse is up on my legion or king
 		if (mouseDownLegionIndex != -1) {
 			for (let i = 0; i < myLegions.length; i++) {
 				let legionWidthHalf = legionCountToWidth(myLegions[i].count) / 2;
-				if (e.clientX < myLegions[i].x + legionWidthHalf && e.clientX > myLegions[i].x - legionWidthHalf && e.clientY < myLegions[i].y + legionWidthHalf && e.clientY > myLegions[i].y - legionWidthHalf) {
+				if (mouseX < myLegions[i].x + legionWidthHalf && mouseX > myLegions[i].x - legionWidthHalf && mouseY < myLegions[i].y + legionWidthHalf && mouseY > myLegions[i].y - legionWidthHalf) {
 					if (mouseDownLegionIndex == i) {
 						// select my legion
 						myLegions[i].selected = true;
@@ -339,7 +344,7 @@ $(document).ready(function() {
 			}
 		} else if (mouseDownKingIndex != -1) {
 			let kingWidthHalf = KING_WIDTH / 2;
-			if (e.clientX < myKing.x + kingWidthHalf && e.clientX > myKing.x - kingWidthHalf && e.clientY < myKing.y + kingWidthHalf && e.clientY > myKing.y - kingWidthHalf) {
+			if (mouseX < myKing.x + kingWidthHalf && mouseX > myKing.x - kingWidthHalf && mouseY < myKing.y + kingWidthHalf && mouseY > myKing.y - kingWidthHalf) {
 				// select my king
 				myKing.selected = true;
 				mouseDownKingIndex = -1;
@@ -385,6 +390,8 @@ $(document).ready(function() {
 	}
 
 	function pushToPath(e) {
+		let mouseX = e.clientX - canvasContainer.offsetLeft;
+		let mouseY = e.clientY - canvasContainer.offsetTop;
 
 		if (myKing.selected) {
 			let path = myKing.path;
@@ -393,8 +400,8 @@ $(document).ready(function() {
 			if (path.length > 0) {
 				// stabilize speed
 				let lastPoint = path[path.length-1];
-				let dx = lastPoint[0] - e.clientX;
-				let dy = lastPoint[1] - e.clientY;
+				let dx = lastPoint[0] - mouseX;
+				let dy = lastPoint[1] - mouseY;
 				let distance = Math.sqrt(dx * dx + dy * dy);
 				if (distance >= KING_PX_PER_FRAME) {
 					let repeat = Math.floor(distance / KING_PX_PER_FRAME);
@@ -402,10 +409,10 @@ $(document).ready(function() {
 						let goTo = [path[path.length-1][0] - dx/repeat, path[path.length-1][1] - dy/repeat];
 						path.push(goTo);
 					}
-					path.push([e.clientX, e.clientY]);
+					path.push([mouseX, mouseY]);
 				}
 			} else {
-				path.push([e.clientX, e.clientY]);
+				path.push([mouseX, mouseY]);
 			}
 		}
 
@@ -417,8 +424,8 @@ $(document).ready(function() {
 				if (path.length > 0) {
 					// stabilize speed
 					let lastPoint = path[path.length-1];
-					let dx = lastPoint[0] - e.clientX;
-					let dy = lastPoint[1] - e.clientY;
+					let dx = lastPoint[0] - mouseX;
+					let dy = lastPoint[1] - mouseY;
 					let distance = Math.sqrt(dx * dx + dy * dy);
 					if (distance >= LEGION_PX_PER_FRAME) {
 						let repeat = Math.floor(distance / LEGION_PX_PER_FRAME);
@@ -426,10 +433,10 @@ $(document).ready(function() {
 							let goTo = [path[path.length-1][0] - dx/repeat, path[path.length-1][1] - dy/repeat];
 							path.push(goTo);
 						}
-						path.push([e.clientX, e.clientY]);
+						path.push([mouseX, mouseY]);
 					}
 				} else {
-					path.push([e.clientX, e.clientY]);
+					path.push([mouseX, mouseY]);
 				}
 			}
 		}
@@ -878,11 +885,7 @@ $(document).ready(function() {
 				ctx.fillRect(deadPixelsAnimations[i][j][0] - PIXEL_SIZE_PX/2, deadPixelsAnimations[i][j][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
 		}
-
-		// drawing playfield border
-		ctx.strokeStyle = "#fff";
-		ctx.lineWidth = 3;
-		ctx.strokeRect(0, 0, PLAYFIELD_WIDTH, PLAYFIELD_HEIGHT);
+		
 	}
 
 });
