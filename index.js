@@ -63,7 +63,7 @@ const BATTLE_COUNT_LOSE = 0.04;
 const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 const BATTLE_DISTANCE = 100;
 
-const RATING_K = 32;	// rating change per place
+const RATING_K = 26;	// rating change per place
 
 const COLORS = {
 	blue: {
@@ -134,7 +134,7 @@ function waitingConnection(socket) {
 				}, 5000);
 			}
 		}
-	}, 10000);
+	}, 1000);
 
 	waitingRoom.emit('player joined', allPlayers);
 
@@ -730,7 +730,10 @@ setInterval(function() {
 
 function calculateRating(rating, place) {
 	let avgPlace = (GAME_PLAYERS_NUM + 1) / 2;
-	let placeDifference = avgPlace - place;
+	let totalRating = allPlayers.reduce((total, player) => total + player.rating, 0);
+	let avgRating = totalRating / allPlayers.length;
+	let expectedPlace = avgPlace + (avgRating - rating) / 100;
+	let placeDifference = expectedPlace - place;
 
 	return rating + placeDifference*RATING_K;
 }
