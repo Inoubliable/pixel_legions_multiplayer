@@ -31,6 +31,8 @@ app.get('/ranking', (req, res) => {
 	res.json({ranking: ranking});
 });
 
+const WAIT_TIME_BEFORE_AI_FILL = 10 * 1000;
+
 const STARTING_RATING = 1500;
 
 const GAME_PLAYERS_NUM = 4;
@@ -126,15 +128,9 @@ function waitingConnection(socket) {
 
 			if (allPlayers.length == GAME_PLAYERS_NUM) {
 				waitingRoom.emit('start countdown', allPlayers);
-
-				setTimeout(function() {
-					for (let i = humanPlayersCount; i < allPlayers.length; i++) {
-						initiatePlayer(allPlayers[i].id, true);
-					}
-				}, 5000);
 			}
 		}
-	}, 1000);
+	}, WAIT_TIME_BEFORE_AI_FILL);
 
 	waitingRoom.emit('player joined', allPlayers);
 
@@ -154,6 +150,7 @@ function fillWithAI(playerCount) {
 		let AIid = uuidv1();
 		allPlayers.push({id: AIid, name: AInames[AIindex], rating: STARTING_RATING});
 		AInames.splice(AIindex, 1);
+		initiatePlayer(AIid, true);
 	}
 }
 
@@ -734,8 +731,9 @@ function calculateRating(rating, place) {
 	let avgRating = totalRating / allPlayers.length;
 	let expectedPlace = avgPlace + (avgRating - rating) / 100;
 	let placeDifference = expectedPlace - place;
+	let newRating = Math.floor(rating + placeDifference*RATING_K);
 
-	return rating + placeDifference*RATING_K;
+	return newRating;
 }
 
 const PORT = process.env.PORT || 3000;
