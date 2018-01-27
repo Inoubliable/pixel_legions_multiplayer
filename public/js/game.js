@@ -54,14 +54,15 @@ $(document).ready(function() {
 		allKings = data.allKings;
 		allLegions = data.allLegions;
 		// get my and enemy's king and legions
-		let myKingFound = allKings.find(king => king.playerId == myId);
-		if (myKingFound) {
+		let myKingFoundIndex = allKings.findIndex(king => king.playerId == myId);
+		if (myKingFoundIndex != -1) {
 			if (myKing.x > 0) {
 				// don't update my coordinates
-				myKing.count = myKingFound.count;
+				myKing.count = allKings[myKingFoundIndex].count;
+				allKings[myKingFoundIndex] = myKing;
 			} else {
 				// at the start, when myKing is not yet set
-				myKing = myKingFound;
+				myKing = allKings[myKingFoundIndex];
 			}
 		} else if (timeElapsed > 2000) {
 			lose();
@@ -145,6 +146,7 @@ $(document).ready(function() {
 	const KING_BORDER1_COLOR_SELECTED = "#aaa";
 	const KING_BORDER2_COLOR_NORMAL = "#000";
 	const KING_BORDER2_COLOR_SELECTED = "#333";
+	const KING_UNDER_ATTACK_COLOR = "rgba(187, 187, 187, 0.5)";
 
 	const KING_PX_PER_FRAME = 0.7;
 	const LEGION_PX_PER_FRAME = 3;
@@ -627,6 +629,9 @@ $(document).ready(function() {
 			// battle with king
 			for (let k = 0; k < allKings.length; k++) {
 				let king = allKings[k];
+				if (i == 0) {
+					king.isUnderAttack = false;
+				}
 				if (king.playerId != legion1.playerId) {
 					let kingDistanceX = Math.abs(king.x - legion1.x);
 					let kingDistanceY = Math.abs(king.y - legion1.y);
@@ -635,6 +640,8 @@ $(document).ready(function() {
 						battleBeams.push([king.x, king.y, legion1.x, legion1.y]);				
 						king.count -= BATTLE_COUNT_LOSE;
 						legion1.count -= BATTLE_COUNT_LOSE;
+
+						king.isUnderAttack = true;
 					}
 				}
 			}
@@ -723,6 +730,44 @@ $(document).ready(function() {
 		}
 		ctx.fillStyle = kingCountToColor(myKing.count, myKing.color);
 		ctx.fillRect(myKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, myKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
+		
+		// draw "under attack sign"
+		if (myKing.isUnderAttack) {
+			// first rotate sign a bit clockwise
+			if (myKing.underAttackAngle) {
+				myKing.underAttackAngle += 0.5;
+			} else {
+				myKing.underAttackAngle = 1;
+			}
+			let r = 35;
+			let angleRadian1 = myKing.underAttackAngle * Math.PI/180;
+			let angleRadian2 = (myKing.underAttackAngle + 90) * Math.PI/180;
+			let angleRadian3 = (myKing.underAttackAngle + 180) * Math.PI/180;
+			let angleRadian4 = (myKing.underAttackAngle + 270) * Math.PI/180;
+			// x = r * sin(angle)
+			// y = r * cos(angle)
+			let signX1 = myKing.x + r * Math.sin(angleRadian1);
+			let signY1 = myKing.y - r * Math.cos(angleRadian1);
+			let signX2 = myKing.x + r * Math.sin(angleRadian2);
+			let signY2 = myKing.y - r * Math.cos(angleRadian2);
+			let signX3 = myKing.x + r * Math.sin(angleRadian3);
+			let signY3 = myKing.y - r * Math.cos(angleRadian3);
+			let signX4 = myKing.x + r * Math.sin(angleRadian4);
+			let signY4 = myKing.y - r * Math.cos(angleRadian4);
+			ctx.save();
+			ctx.fillStyle = KING_UNDER_ATTACK_COLOR;
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = KING_UNDER_ATTACK_COLOR;
+			ctx.beginPath();
+			ctx.lineTo(signX1, signY1);
+			ctx.lineTo(signX2, signY2);
+			ctx.lineTo(signX3, signY3);
+			ctx.lineTo(signX4, signY4);
+			ctx.lineTo(signX1, signY1);
+			ctx.stroke();
+			ctx.fill();
+			ctx.restore();
+		}
 
 		// draw my legions
 		for (let i = 0; i < myLegions.length; i++) {
@@ -804,8 +849,6 @@ $(document).ready(function() {
 				ctx.strokeStyle = myLegions[i].borderNormal;
 				ctx.fillStyle = myLegions[i].colorNormal;
 			}
-			ctx.lineWidth = LEGION_BORDER_WIDTH;
-			ctx.beginPath();
 
 			// for testing
 			if (SHOW_BOUNDING_RECTANGLES) {
@@ -814,6 +857,8 @@ $(document).ready(function() {
 				ctx.fillRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
 			}
 			
+			ctx.lineWidth = LEGION_BORDER_WIDTH;
+			ctx.beginPath();
 			if (myLegions[i].hull) {
 				for (let h = 0; h < myLegions[i].hull.length; h++) {
 					ctx.lineTo(myLegions[i].hull[h][0], myLegions[i].hull[h][1]);
@@ -845,6 +890,44 @@ $(document).ready(function() {
 			}
 			ctx.fillStyle = kingCountToColor(enemyKing.count, enemyKing.color);
 			ctx.fillRect(enemyKing.x - KING_WIDTH/2 + KING_BORDER2_WIDTH, enemyKing.y - KING_WIDTH/2 + KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH, KING_WIDTH - 2*KING_BORDER2_WIDTH);
+			
+			// draw "under attack sign"
+			if (enemyKing.isUnderAttack) {
+				// first rotate sign a bit clockwise
+				if (enemyKing.underAttackAngle) {
+					enemyKing.underAttackAngle += 0.5;
+				} else {
+					enemyKing.underAttackAngle = 1;
+				}
+				let r = 35;
+				let angleRadian1 = enemyKing.underAttackAngle * Math.PI/180;
+				let angleRadian2 = (enemyKing.underAttackAngle + 90) * Math.PI/180;
+				let angleRadian3 = (enemyKing.underAttackAngle + 180) * Math.PI/180;
+				let angleRadian4 = (enemyKing.underAttackAngle + 270) * Math.PI/180;
+				// x = r * sin(angle)
+				// y = r * cos(angle)
+				let signX1 = enemyKing.x + r * Math.sin(angleRadian1);
+				let signY1 = enemyKing.y - r * Math.cos(angleRadian1);
+				let signX2 = enemyKing.x + r * Math.sin(angleRadian2);
+				let signY2 = enemyKing.y - r * Math.cos(angleRadian2);
+				let signX3 = enemyKing.x + r * Math.sin(angleRadian3);
+				let signY3 = enemyKing.y - r * Math.cos(angleRadian3);
+				let signX4 = enemyKing.x + r * Math.sin(angleRadian4);
+				let signY4 = enemyKing.y - r * Math.cos(angleRadian4);
+				ctx.save();
+				ctx.fillStyle = KING_UNDER_ATTACK_COLOR;
+				ctx.lineWidth = 1;
+				ctx.strokeStyle = KING_UNDER_ATTACK_COLOR;
+				ctx.beginPath();
+				ctx.lineTo(signX1, signY1);
+				ctx.lineTo(signX2, signY2);
+				ctx.lineTo(signX3, signY3);
+				ctx.lineTo(signX4, signY4);
+				ctx.lineTo(signX1, signY1);
+				ctx.stroke();
+				ctx.fill();
+				ctx.restore();
+			}
 		}
 
 		// draw enemy legions

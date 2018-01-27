@@ -31,7 +31,7 @@ app.get('/ranking', (req, res) => {
 	res.json({ranking: ranking});
 });
 
-const WAIT_TIME_BEFORE_AI_FILL = 10 * 1000;
+const WAIT_TIME_BEFORE_AI_FILL = 2 * 1000;
 
 const STARTING_RATING = 1500;
 
@@ -166,23 +166,26 @@ function gameConnection(socket) {
 	if (allPlayers.length == GAME_PLAYERS_NUM) {
 		for (let i = 0; i < allPlayers.length; i++) {
 			(function loop() {
-				let rand = SPAWN_INTERVAL + Math.round(Math.random() * SPAWN_INTERVAL * SPAWN_ITERVAL_RANDOM_PART);
+				let spawnTimeout = SPAWN_INTERVAL + Math.round(Math.random() * SPAWN_INTERVAL * SPAWN_ITERVAL_RANDOM_PART);
 				setTimeout(function() {
 					let king = allKings.find(k => k.playerId == allPlayers[i].id);
 	
 					if (king) {
-						let startX = king.x;
-						let startY = king.y;
-						let color = king.spawnedColor;
-						let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
-						let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
-						let isAI = king.isAI;
-						allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
-	
+						if (!king.isUnderAttack) {
+							// spawn new legion
+							let startX = king.x;
+							let startY = king.y;
+							let color = king.spawnedColor;
+							let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
+							let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
+							let isAI = king.isAI;
+							allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
+						}
+
 						loop();
 					}
 					
-				}, rand);
+				}, spawnTimeout);
 			}());
 		}
 	}
@@ -312,6 +315,7 @@ function King(playerId, x, y, count, color, isAI) {
 	this.color = COLORS[color].normal;
 	this.spawnedColor = color;
 	this.isAI = isAI;
+	this.isUnderAttack = false;
 }
 
 function legionCountToWidth(count) {
@@ -472,6 +476,9 @@ function battle() {
 
 		// battle with king
 		for (let k = allKings.length-1; k >= 0; k--) {
+			if (i == 0) {
+				allKings[k].isUnderAttack = false;
+			}
 			if (allKings[k].playerId != legion1.playerId) {
 				let kingDistanceX = Math.abs(allKings[k].x - legion1.x);
 				let kingDistanceY = Math.abs(allKings[k].y - legion1.y);
@@ -484,6 +491,8 @@ function battle() {
 						// get legions to defend
 						AIDefend(allKings[k].playerId, legion1.x, legion1.y);
 					}
+
+					allKings[k].isUnderAttack = true;
 				}
 
 				if (allKings[k].count <= 0) {

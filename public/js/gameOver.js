@@ -31,7 +31,7 @@ $(document).ready(function() {
 
 		let ratingPlus = (newRating - oldRating) > 0;
 		let rating = oldRating;
-		let intervalTime = 3000 / Math.abs(newRating - oldRating);
+		let intervalTime = 2000 / Math.abs(newRating - oldRating);
 		let ratingInterval = setInterval(function() {
 			ratingChange = rating - oldRating;
 			if (ratingPlus) {
