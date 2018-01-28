@@ -31,16 +31,15 @@ app.get('/ranking', (req, res) => {
 	res.json({ranking: ranking});
 });
 
-const WAIT_TIME_BEFORE_AI_FILL = 2 * 1000;
+const MAX_LEGIONS = 15;
 
 const STARTING_RATING = 1500;
 
 const GAME_PLAYERS_NUM = 4;
+const WAIT_TIME_BEFORE_AI_FILL = 2 * 1000;
 
 const PLAYFIELD_WIDTH = 1000;
 const PLAYFIELD_HEIGHT = 550;
-
-const LEGION_OVER_BORDER = 0.2;
 
 const KING_COUNT = 50;
 const KING_WIDTH = 30;
@@ -49,6 +48,7 @@ const INITIAL_LEGIONS_NUM = 2;
 const LEGION_COUNT = 25;
 const LEGION_COUNT_TO_WIDTH = 1.6;
 const LEGION_MINIMAL_PX = 30;
+const LEGION_OVER_BORDER = 0.2;
 
 const PIXEL_SIZE_PX = 4;	// preferably even number
 const PIXELS_NUM_MIN = 8;
@@ -172,14 +172,22 @@ function gameConnection(socket) {
 	
 					if (king) {
 						if (!king.isUnderAttack) {
-							// spawn new legion
-							let startX = king.x;
-							let startY = king.y;
-							let color = king.spawnedColor;
-							let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
-							let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
-							let isAI = king.isAI;
-							allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
+							let counter = 0;
+							for (let j = 0; j < allLegions.length; j++) {
+								if (allLegions[j].playerId == allPlayers[i].id) {
+									counter++;
+								}
+							}
+							if (counter < MAX_LEGIONS) {
+								// spawn new legion
+								let startX = king.x;
+								let startY = king.y;
+								let color = king.spawnedColor;
+								let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
+								let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
+								let isAI = king.isAI;
+								allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
+							}
 						}
 
 						loop();
@@ -253,7 +261,7 @@ function initiatePlayer(playerId, isAI) {
 			initialDx = allKings[i].x - x;
 			initialDy = allKings[i].y - y;
 			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
-			if (initialDistance < (BATTLE_DISTANCE + 70)) {
+			if (initialDistance < (BATTLE_DISTANCE * 2)) {
 				isTooClose = true;
 				break;
 			}
