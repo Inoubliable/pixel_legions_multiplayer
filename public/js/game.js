@@ -63,6 +63,7 @@ $(document).ready(function() {
 			} else {
 				// at the start, when myKing is not yet set
 				myKing = allKings[myKingFoundIndex];
+				showMe(myKing.x, myKing.y);
 			}
 		} else if (timeElapsed > 2000) {
 			lose();
@@ -562,6 +563,49 @@ $(document).ready(function() {
 		}
 	}
 
+	let showMeAnimation = [];
+	function showMe(kingX, kingY) {
+
+		// get arrow visible, depending on king's position
+		if (kingY < 50) {
+			let x = kingX;
+			let y = kingY + KING_WIDTH/2;
+			for (let j = 1; j <= 5; j++) {
+				for (let i = 0; i <= 20; i++) {
+					showMeAnimation.push([x, y + i]);
+				}
+				for (let i = 20; i >= 0; i--) {
+					showMeAnimation.push([x, y + i]);
+				}
+			}
+		} else {
+			let x = kingX;
+			let y = kingY - KING_WIDTH/2;
+			for (let j = 1; j <= 5; j++) {
+				for (let i = 0; i <= 20; i++) {
+					showMeAnimation.push([x, y - i]);
+				}
+				for (let i = 20; i >= 0; i--) {
+					showMeAnimation.push([x, y - i]);
+				}
+			}
+		}
+	}
+
+	function drawArrow(context, fromX, fromY, toX, toY) {
+		let headlen = 10;   // length of head in pixels
+		let angle = Math.atan2(toY-fromY, toX-fromX);
+		context.lineWidth = 5;
+		context.strokeStyle = "#fff";
+		context.beginPath();
+		context.moveTo(fromX, fromY);
+		context.lineTo(toX, toY);
+		context.lineTo(toX-headlen*Math.cos(angle-Math.PI/6), toY-headlen*Math.sin(angle-Math.PI/6));
+		context.moveTo(toX, toY);
+		context.lineTo(toX-headlen*Math.cos(angle+Math.PI/6), toY-headlen*Math.sin(angle+Math.PI/6));
+		context.stroke();
+	}
+
 	function battle() {
 		for (let i = 0; i < allLegions.length; i++) {
 			let legion1 = allLegions[i];
@@ -969,6 +1013,20 @@ $(document).ready(function() {
 			}
 		}
 		
+		if (showMeAnimation.length > 0) {
+			let arrowPosition = showMeAnimation.shift();
+			let toX = arrowPosition[0];
+			let toY = arrowPosition[1];
+			if (myKing.y < 50) {
+				let fromX = toX;
+				let fromY = toY + 30;
+				drawArrow(ctx, fromX, fromY, toX, toY);
+			} else {
+				let fromX = toX;
+				let fromY = toY - 30;
+				drawArrow(ctx, fromX, fromY, toX, toY);
+			}
+		}
 	}
 
 });
