@@ -185,8 +185,15 @@ function gameConnection(socket) {
 								let startX = king.x;
 								let startY = king.y;
 								let color = king.spawnedColor;
+								let legW = legionCountToWidth(LEGION_COUNT);
 								let spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
+								while (!(spawnX > (legW*LEGION_OVER_BORDER) && spawnX < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER))) {
+									spawnX = Math.random() * SPAWN_AREA_WIDTH + king.x - SPAWN_AREA_WIDTH/2;
+								}
 								let spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
+								while (!(spawnY > (legW*LEGION_OVER_BORDER) && spawnY < (PLAYFIELD_HEIGHT - legW*LEGION_OVER_BORDER))) {
+									spawnY = Math.random() * SPAWN_AREA_WIDTH + king.y - SPAWN_AREA_WIDTH/2;
+								}
 								let isAI = king.isAI;
 								allLegions.push(new Legion(king.playerId, startX, startY, LEGION_COUNT, color, true, spawnX, spawnY, isAI));
 							}
