@@ -65,6 +65,8 @@ const BATTLE_COUNT_LOSE = 0.04;
 const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 const BATTLE_DISTANCE = 100;
 
+const AI_ATTACK_LEGION_CHANCE = 0.2;
+
 const RATING_K = 26;	// rating change per place
 
 const COLORS = {
@@ -586,7 +588,7 @@ function AIAttackCheck() {
 				}
 			}
 
-			if (playersLegions.length > 4) {
+			if (playersLegions.length > 3) {
 				let index1 = Math.floor(Math.random() * playersLegions.length);
 				let index2 = Math.floor(Math.random() * playersLegions.length);
 
@@ -609,15 +611,43 @@ function AIAttackCheck() {
 
 function AIAttackPath(legion) {
 
-	// attack random king
-	let kingIndex = Math.floor(Math.random() * allKings.length);
-	while (allKings[kingIndex].playerId == legion.playerId) {
-		kingIndex = Math.floor(Math.random() * allKings.length);
-	}
+	// does it attack king or legion?
+	let attackLegion = Math.random() < AI_ATTACK_LEGION_CHANCE;
+	let enemyLegionsExist = allLegions.find(l => l.playerId != legion.playerId);
 
 	let a = Math.random() * BATTLE_DISTANCE;
-	let goToX = allKings[kingIndex].x + a - BATTLE_DISTANCE/2;
-	let goToY = allKings[kingIndex].y + a - BATTLE_DISTANCE/2;
+	let goToX = 0;
+	let goToY = 0;
+
+	if (attackLegion && enemyLegionsExist) {
+		// attack closest legion
+		let closestDistance = null;
+		let closestLegionIndex = null;
+		for (let i = 0; i < allLegions.length; i++) {
+			if (allLegions[i].playerId != legion.playerId) {
+				let distance = Math.sqrt((allLegions[i].x - legion.x)**2 + (allLegions[i].y - legion.y)**2);
+				if (closestDistance) {
+					if (distance < closestDistance) {
+						closestDistance = distance;
+						closestLegionIndex = i;
+					}
+				} else {
+					closestDistance = distance;
+					closestLegionIndex = i;
+				}
+			}
+		}
+		goToX = allLegions[closestLegionIndex].x + a - BATTLE_DISTANCE/2;
+		goToY = allLegions[closestLegionIndex].y + a - BATTLE_DISTANCE/2;
+	} else {
+		// attack random king
+		let kingIndex = Math.floor(Math.random() * allKings.length);
+		while (allKings[kingIndex].playerId == legion.playerId) {
+			kingIndex = Math.floor(Math.random() * allKings.length);
+		}
+		goToX = allKings[kingIndex].x + a - BATTLE_DISTANCE/2;
+		goToY = allKings[kingIndex].y + a - BATTLE_DISTANCE/2;
+	}
 
 	let dx = goToX - legion.x;
 	let dy = goToY - legion.y;
