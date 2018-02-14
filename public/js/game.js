@@ -153,8 +153,8 @@ $(document).ready(function() {
 	const LEGION_PX_PER_FRAME = 3;
 
 	const LEGION_COUNT = 25;
-	const LEGION_COUNT_TO_WIDTH = 1.6;
-	const LEGION_MINIMAL_PX = 30;
+	const LEGION_COUNT_TO_WIDTH = 1.7;
+	const LEGION_MINIMAL_PX = 40;
 	const LEGION_BORDER_WIDTH = 3;
 
 	const BATTLE_BEAM_COLOR = "#bbb";
@@ -493,15 +493,20 @@ $(document).ready(function() {
 				let y = myLegions[i].y;
 				let w = legionCountToWidth(myLegions[i].count);
 				let h = legionCountToWidth(myLegions[i].count);
-				if (pixel[0] >= x + w/2 - HULL_SPACE_PX) {
-					pixel[2] = 1;
-				} else if (pixel[0] <= x - w/2 + HULL_SPACE_PX) {
-					pixel[2] = 0;
-				}
-				if (pixel[1] >= y + h/2 - HULL_SPACE_PX) {
-					pixel[3] = 1;
-				} else if (pixel[1] <= y - h/2 + HULL_SPACE_PX) {
-					pixel[3] = 0;
+				let disX = x - pixel[0];
+				let disY = y - pixel[1];
+				let dis = Math.sqrt(disX**2 + disY**2);
+				if (dis > w/2 - HULL_SPACE_PX) {
+					if (pixel[0] >= x + w/3 - HULL_SPACE_PX) {
+						pixel[2] = 1;
+					} else if (pixel[0] <= x - w/3 + HULL_SPACE_PX) {
+						pixel[2] = 0;
+					}
+					if (pixel[1] >= y + h/3 - HULL_SPACE_PX) {
+						pixel[3] = 1;
+					} else if (pixel[1] <= y - h/3 + HULL_SPACE_PX) {
+						pixel[3] = 0;
+					}
 				}
 			}
 
@@ -532,15 +537,20 @@ $(document).ready(function() {
 				let y = enemyLegions[i].y;
 				let w = legionCountToWidth(enemyLegions[i].count);
 				let h = legionCountToWidth(enemyLegions[i].count);
-				if (pixel[0] >= x + w/2 - HULL_SPACE_PX) {
-					pixel[2] = 1;
-				} else if (pixel[0] <= x - w/2 + HULL_SPACE_PX) {
-					pixel[2] = 0;
-				}
-				if (pixel[1] >= y + h/2 - HULL_SPACE_PX) {
-					pixel[3] = 1;
-				} else if (pixel[1] <= y - h/2 + HULL_SPACE_PX) {
-					pixel[3] = 0;
+				let disX = x - pixel[0];
+				let disY = y - pixel[1];
+				let dis = Math.sqrt(disX**2 + disY**2);
+				if (dis > (w/2 - HULL_SPACE_PX)) {
+					if (pixel[0] >= x + w/3 - HULL_SPACE_PX) {
+						pixel[2] = 1;
+					} else if (pixel[0] <= x - w/3 + HULL_SPACE_PX) {
+						pixel[2] = 0;
+					}
+					if (pixel[1] >= y + h/3 - HULL_SPACE_PX) {
+						pixel[3] = 1;
+					} else if (pixel[1] <= y - h/3 + HULL_SPACE_PX) {
+						pixel[3] = 0;
+					}
 				}
 			}
 
