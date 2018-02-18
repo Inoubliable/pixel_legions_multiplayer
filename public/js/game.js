@@ -7,6 +7,7 @@ $(document).ready(function() {
 
 	if (localStorage.getItem('pixelLegionsPlayer')) {
 		myPlayer = JSON.parse(localStorage.getItem('pixelLegionsPlayer'));
+		room = myPlayer.room;
 		myId = myPlayer.id;
 		myName = myPlayer.name;
 		myRating = myPlayer.rating;
@@ -15,7 +16,7 @@ $(document).ready(function() {
 		$.get('/login', function(data) {});
 	}
 
-	let socket = io('/game', { query: "&id=" + myId + "&name=" + myName + "&rating=" + myRating});
+	let socket = io('/game', { query: "&room=" + room + "&id=" + myId + "&name=" + myName + "&rating=" + myRating});
 
 	let sentTime = Date.now();
 	let lag = 0;
@@ -465,7 +466,7 @@ $(document).ready(function() {
 	}, 1000/60);
 
 	function emitMove() {
-		socket.emit('move', {id: myId, king: myKing, legions: myLegions});
+		socket.emit('move', {room: room, id: myId, king: myKing, legions: myLegions});
 	}
 
 	function movePixels() {

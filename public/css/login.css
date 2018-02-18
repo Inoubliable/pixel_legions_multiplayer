@@ -47,12 +47,14 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   display: none; }
-  #login-as-form input[type='submit'] {
+  #login-as-form .login-as-btn {
     padding: 8px 12px;
     border-radius: 4px;
     background-color: #37c;
     color: white;
     border: none;
     font-size: 16px; }
+    #login-as-form .login-as-btn:hover {
+      cursor: pointer; }
 
 /*# sourceMappingURL=login.css.map */

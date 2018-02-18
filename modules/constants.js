@@ -62,3 +62,5 @@ module.exports.COLORS = {
 		selected: 'rgba(254, 238, 68, 1)'
 	}
 };
+
+module.exports.AI_NAMES = ['DeepBlue', 'AlphaZero', 'TARS', 'R2D2', 'Unity'];

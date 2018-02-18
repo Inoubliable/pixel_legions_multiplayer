@@ -61,12 +61,16 @@ body {
 	transform: translate(-50%, -50%);
 	display: none;
 
-	input[type='submit'] {
+	.login-as-btn {
 		padding: 8px 12px;
 		border-radius: 4px;
 		background-color: $bluish;
 		color: white;
 		border: none;
 		font-size: 16px;
+
+		&:hover {
+			cursor: pointer;
+		}
 	}
 }

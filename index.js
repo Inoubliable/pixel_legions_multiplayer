@@ -5,10 +5,11 @@ let http = require('http').Server(app);
 let io = require('socket.io')(http);
 let uuidv1 = require('uuid/v1');
 
-let AI = require('./modules/AI');
-let helpers = require('./modules/helpers');
 let c = require('./modules/constants');
+let helpers = require('./modules/helpers');
+let AI = require('./modules/AI');
 
+let Room = require('./modules/classes/Room');
 let King = require('./modules/classes/King');
 let Legion = require('./modules/classes/Legion');
 
@@ -39,20 +40,12 @@ app.get('/ranking', (req, res) => {
 });
 
 
-let colors = [];
-for (let color in c.COLORS) {
-	colors.push(color);
-}
+let allRooms = [];
 
-let allKings = [];
-let allLegions = [];
-
-let allPlayers = [];
 let ranking = [];
 for (let i = 0; i < c.GAME_PLAYERS_NUM; i++) {
 	ranking.push({id: '', name: ''});
 }
-let AInames = ['DeepBlue', 'AlphaZero', 'TARS', 'R2D2', 'Unity'];
 
 let waitingRoom = io.of('/waitingRoom');
 waitingRoom.on('connection', waitingConnection);
@@ -60,67 +53,86 @@ waitingRoom.on('connection', waitingConnection);
 let gameRoom = io.of('/game');
 gameRoom.on('connection', gameConnection);
 
+let roomCounter = 0;
 function waitingConnection(socket) {
+	// search for free room
+	let room = {};
+	let freeRoom = allRooms.find(r => r.allPlayers.length < c.GAME_PLAYERS_NUM);
+	if (freeRoom) {
+		socket.join(freeRoom.name);
+	} else {
+		roomCounter++;
+		let roomName = 'room' + roomCounter;
+		room = new Room(roomName);
+		allRooms.push(room);
+		socket.join(roomName);
+	}
+
 	let playerName = socket.handshake.query.name;
 	let playerId = socket.handshake.query.id || uuidv1();
 	let playerRating = +socket.handshake.query.rating || c.STARTING_RATING;
-	waitingRoom.to(socket.id).emit('myPlayer', {id: playerId, name: playerName, rating: playerRating});
-	allPlayers.push({id: playerId, name: playerName, rating: playerRating});
+	waitingRoom.to(socket.id).emit('myPlayer', {room: room.name, id: playerId, name: playerName, rating: playerRating});
+	room.allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
-	let humanPlayersCount = allPlayers.length;
+	let humanPlayersCount = room.allPlayers.length;
 	setTimeout(function() {
-		if (humanPlayersCount == allPlayers.length) {
-			fillWithAI(humanPlayersCount);
+		if (humanPlayersCount == room.allPlayers.length) {
+			fillWithAI(room, humanPlayersCount);
 
-			if (allPlayers.length == c.GAME_PLAYERS_NUM) {
-				waitingRoom.emit('start countdown', allPlayers);
+			if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
+				waitingRoom.to(room.name).emit('start countdown', room.allPlayers);
 			}
 		}
 	}, c.WAIT_TIME_BEFORE_AI_FILL);
 
-	waitingRoom.emit('player joined', allPlayers);
+	waitingRoom.to(room.name).emit('player joined', room.allPlayers);
 
 	socket.on('disconnect', function() {
-		let index = allPlayers.findIndex(function(player) {
+		let index = room.allPlayers.findIndex(function(player) {
 			return player.id == playerId;
 		});
-		allPlayers.splice(index, 1);
+		room.allPlayers.splice(index, 1);
 		console.log('User disconnected');
 	});
 };
 
-function fillWithAI(playerCount) {
+function fillWithAI(room, playerCount) {
 	// generate AIs to fill the room
 	for (let i = playerCount; i < c.GAME_PLAYERS_NUM; i++) {
-		let AIindex = Math.floor((Math.random() * AInames.length));
+		let AIindex = Math.floor((Math.random() * room.availableAINames.length));
 		let AIid = uuidv1();
-		allPlayers.push({id: AIid, name: AInames[AIindex], rating: c.STARTING_RATING});
-		AInames.splice(AIindex, 1);
-		initiatePlayer(AIid, true);
+		room.allPlayers.push({id: AIid, name: room.availableAINames[AIindex], rating: c.STARTING_RATING});
+		room.availableAINames.splice(AIindex, 1);
+		initiatePlayer(room, AIid, true);
 	}
 }
 
 function gameConnection(socket) {
+	let roomName = socket.handshake.query.room;
+	console.log(roomName);
+	let room = allRooms.find(r => r.name == roomName);
+	console.log(room);
 	let playerId = socket.handshake.query.id;
 	let playerName = socket.handshake.query.name;
 	let playerRating = +socket.handshake.query.rating || c.STARTING_RATING;
-	allPlayers.push({id: playerId, name: playerName, rating: playerRating});
+	socket.join(roomName);
+	room.allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
-	initiatePlayer(playerId, false);
+	initiatePlayer(room, playerId, false);
 
 	// create spawn loops for every player
-	if (allPlayers.length == c.GAME_PLAYERS_NUM) {
-		for (let i = 0; i < allPlayers.length; i++) {
+	if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
+		for (let i = 0; i < room.allPlayers.length; i++) {
 			(function loop() {
 				let spawnTimeout = c.SPAWN_INTERVAL + Math.round(Math.random() * c.SPAWN_INTERVAL * c.SPAWN_ITERVAL_RANDOM_PART);
 				setTimeout(function() {
-					let king = allKings.find(k => k.playerId == allPlayers[i].id);
+					let king = room.allKings.find(k => k.playerId == room.allPlayers[i].id);
 	
 					if (king) {
 						if (!king.isUnderAttack) {
 							let counter = 0;
-							for (let j = 0; j < allLegions.length; j++) {
-								if (allLegions[j].playerId == allPlayers[i].id) {
+							for (let j = 0; j < room.allLegions.length; j++) {
+								if (room.allLegions[j].playerId == room.allPlayers[i].id) {
 									counter++;
 								}
 							}
@@ -139,7 +151,7 @@ function gameConnection(socket) {
 									spawnY = Math.random() * c.SPAWN_AREA_WIDTH + king.y - c.SPAWN_AREA_WIDTH/2;
 								}
 								let isAI = king.isAI;
-								allLegions.push(new Legion(king.playerId, startX, startY, c.LEGION_COUNT, color, true, spawnX, spawnY, isAI));
+								room.allLegions.push(new Legion(king.playerId, startX, startY, c.LEGION_COUNT, color, true, spawnX, spawnY, isAI));
 							}
 						}
 
@@ -152,11 +164,13 @@ function gameConnection(socket) {
 	}
 
 	socket.on('move', function(data) {
+		let roomName = data.room;
+		let room = allRooms.find(r => r.name == roomName);
 		let playerId = data.playerId;
 		let dataKing = data.king;
 		let dataLegions = data.legions;
 
-		let foundKing = allKings.find(king => king.id == dataKing.id);
+		let foundKing = room.allKings.find(king => king.id == dataKing.id);
 		if (foundKing) {
 			foundKing.x = dataKing.x;
 			foundKing.y = dataKing.y;
@@ -165,7 +179,7 @@ function gameConnection(socket) {
 
 		if (dataLegions.length > 0) {
 			for (let i = 0; i < dataLegions.length; i++) {
-				let foundLegion = allLegions.find(legion => legion.id == dataLegions[i].id);
+				let foundLegion = room.allLegions.find(legion => legion.id == dataLegions[i].id);
 				if (foundLegion) {
 					foundLegion.x = dataLegions[i].x;
 					foundLegion.y = dataLegions[i].y;
@@ -187,22 +201,26 @@ function gameConnection(socket) {
 
 // game physics loop
 setInterval(function() {
-	if (allLegions.length > 0) {
-		battle();
-		AI.moveAI(allLegions);
+	for (let i = 0; i < allRooms.length; i++) {
+		if (allRooms[i].allLegions.length > 0) {
+			battle(allRooms[i]);
+			AI.moveAI(allRooms[i].allLegions);
+		}
 	}
 }, 1000/60);
 
 // send game state loop
 setInterval(function() {
-	let gameUpdate = {allKings: allKings, allLegions: allLegions};
-	gameRoom.emit('game update', gameUpdate);
+	for (let i = 0; i < allRooms.length; i++) {
+		let gameUpdate = {allKings: allRooms[i].allKings, allLegions: allRooms[i].allLegions};
+		gameRoom.to(allRooms[i].name).emit('game update', gameUpdate);
+	}
 }, 1000/60);
 
-function initiatePlayer(playerId, isAI) {
-	let colorIndex = Math.floor(Math.random() * colors.length);
-	let color = colors[colorIndex];
-	colors.splice(colorIndex, 1);
+function initiatePlayer(room, playerId, isAI) {
+	let colorIndex = Math.floor(Math.random() * room.availableColors.length);
+	let color = room.availableColors[colorIndex];
+	room.availableColors.splice(colorIndex, 1);
 
 	let x, y, initialDx, initialDy, initialDistance;
 	let isTooClose = true;
@@ -210,9 +228,9 @@ function initiatePlayer(playerId, isAI) {
 		x = Math.floor(Math.random() * c.PLAYFIELD_WIDTH);
 		y = Math.floor(Math.random() * c.PLAYFIELD_HEIGHT);
 		isTooClose = false;
-		for (let i = 0; i < allKings.length; i++) {
-			initialDx = allKings[i].x - x;
-			initialDy = allKings[i].y - y;
+		for (let i = 0; i < room.allKings.length; i++) {
+			initialDx = room.allKings[i].x - x;
+			initialDy = room.allKings[i].y - y;
 			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
 			if (initialDistance < (c.BATTLE_DISTANCE * 2)) {
 				isTooClose = true;
@@ -222,7 +240,7 @@ function initiatePlayer(playerId, isAI) {
 	}
 
 	// initiate king
-	allKings.push(new King(playerId, x, y, c.KING_COUNT, color, isAI));
+	room.allKings.push(new King(playerId, x, y, c.KING_COUNT, color, isAI));
 
 	// initiate legions
 	for (let i = 0; i < c.INITIAL_LEGIONS_NUM; i++) {
@@ -238,16 +256,16 @@ function initiatePlayer(playerId, isAI) {
 			legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
 		}
 
-		allLegions.push(new Legion(playerId, legionX, legionY, c.LEGION_COUNT, color, false, 0, 0, isAI));
+		room.allLegions.push(new Legion(playerId, legionX, legionY, c.LEGION_COUNT, color, false, 0, 0, isAI));
 	}
 }
 
-function battle() {
+function battle(room) {
 	let deadPlayersIds = [];
-	for (let i = 0; i < allLegions.length; i++) {
-		let legion1 = allLegions[i];
-		for (let j = i+1; j < allLegions.length; j++) {
-			let legion2 = allLegions[j];
+	for (let i = 0; i < room.allLegions.length; i++) {
+		let legion1 = room.allLegions[i];
+		for (let j = i+1; j < room.allLegions.length; j++) {
+			let legion2 = room.allLegions[j];
 			if (legion1.playerId != legion2.playerId) {
 
 				// distance to legion
@@ -307,42 +325,42 @@ function battle() {
 		}
 
 		// battle with king
-		for (let k = allKings.length-1; k >= 0; k--) {
+		for (let k = room.allKings.length-1; k >= 0; k--) {
 			if (i == 0) {
-				allKings[k].isUnderAttack = false;
+				room.allKings[k].isUnderAttack = false;
 			}
-			if (allKings[k].playerId != legion1.playerId) {
-				let kingDistanceX = Math.abs(allKings[k].x - legion1.x);
-				let kingDistanceY = Math.abs(allKings[k].y - legion1.y);
+			if (room.allKings[k].playerId != legion1.playerId) {
+				let kingDistanceX = Math.abs(room.allKings[k].x - legion1.x);
+				let kingDistanceY = Math.abs(room.allKings[k].y - legion1.y);
 	
 				if (kingDistanceX < c.BATTLE_DISTANCE && kingDistanceY < c.BATTLE_DISTANCE) {
-					allKings[k].count -= c.BATTLE_COUNT_LOSE;
+					room.allKings[k].count -= c.BATTLE_COUNT_LOSE;
 					legion1.count -= c.BATTLE_COUNT_LOSE;
 
-					if (allKings[k].isAI) {
+					if (room.allKings[k].isAI) {
 						// get legions to defend
-						AI.AIDefend(allKings[k].playerId, legion1.x, legion1.y, allLegions);
+						AI.AIDefend(room.allKings[k].playerId, legion1.x, legion1.y, room.allLegions);
 					}
 
-					allKings[k].isUnderAttack = true;
+					room.allKings[k].isUnderAttack = true;
 				}
 
-				if (allKings[k].count <= 0) {
-					let deadPlayerId = allKings[k].playerId;
+				if (room.allKings[k].count <= 0) {
+					let deadPlayerId = room.allKings[k].playerId;
 					deadPlayersIds.push(deadPlayerId);
-					allKings.splice(k, 1);
+					room.allKings.splice(k, 1);
 
 					// rank the player
 					for (let i = ranking.length-1; i >= 0; i--) {
 						if (ranking[i].id == '') {
-							ranking[i] = allPlayers.find(p => p.id == deadPlayerId);
-							ranking[i].newRating = helpers.calculateRating(ranking[i].rating, i+1, allPlayers);
+							ranking[i] = room.allPlayers.find(p => p.id == deadPlayerId);
+							ranking[i].newRating = helpers.calculateRating(ranking[i].rating, i+1, room.allPlayers);
 
 							// check if only one player is still alive
 							if (ranking[1].id != '') {
-								let winnerKing = allKings.find(k => k.count > 0);
-								ranking[0] = allPlayers.find(p => p.id == winnerKing.playerId);
-								ranking[0].newRating = helpers.calculateRating(ranking[0].rating, 1, allPlayers);
+								let winnerKing = room.allKings.find(k => k.count > 0);
+								ranking[0] = room.allPlayers.find(p => p.id == winnerKing.playerId);
+								ranking[0].newRating = helpers.calculateRating(ranking[0].rating, 1, room.allPlayers);
 							}
 							break;
 						}
@@ -357,17 +375,19 @@ function battle() {
 	}
 
 	// remove dead legions
-	for (let i = allLegions.length-1; i >= 0; i--) {
-		if ((allLegions[i].count <= 0) || (deadPlayersIds.indexOf(allLegions[i].playerId) > -1)) {
-			allLegions.splice(i, 1);
+	for (let i = room.allLegions.length-1; i >= 0; i--) {
+		if ((room.allLegions[i].count <= 0) || (deadPlayersIds.indexOf(room.allLegions[i].playerId) > -1)) {
+			room.allLegions.splice(i, 1);
 		}
 	}
 }
 
 // AI loop
 setInterval(function() {
-	AI.AIClearDefending(allLegions);
-	AI.AIAttackCheck(allKings, allLegions);
+	for (var i = 0; i < allRooms.length; i++) {
+		AI.AIClearDefending(allRooms[i].allLegions);
+		AI.AIAttackCheck(allRooms[i].allKings, allRooms[i].allLegions);
+	}
 }, c.AI_LOOP_INTERVAL);
 
 const PORT = process.env.PORT || 3000;
