@@ -3,7 +3,7 @@ module.exports.MAX_LEGIONS = 15;
 module.exports.STARTING_RATING = 1500;
 
 module.exports.GAME_PLAYERS_NUM = 4;
-module.exports.WAIT_TIME_BEFORE_AI_FILL = 2 * 1000;
+module.exports.WAIT_TIME_BEFORE_AI_FILL = 1 * 1000;
 
 module.exports.PLAYFIELD_WIDTH = 1000;
 module.exports.PLAYFIELD_HEIGHT = 550;

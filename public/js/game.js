@@ -1,13 +1,14 @@
 $(document).ready(function() {
 
 	let myPlayer = {};
+	let roomId = 'DefaultId';
 	let myId = 'DefaultId';
 	let myName = 'Default name';
 	let myRating = 1500;
 
 	if (localStorage.getItem('pixelLegionsPlayer')) {
 		myPlayer = JSON.parse(localStorage.getItem('pixelLegionsPlayer'));
-		room = myPlayer.room;
+		roomId = myPlayer.roomId;
 		myId = myPlayer.id;
 		myName = myPlayer.name;
 		myRating = myPlayer.rating;
@@ -16,7 +17,7 @@ $(document).ready(function() {
 		$.get('/login', function(data) {});
 	}
 
-	let socket = io('/game', { query: "&room=" + room + "&id=" + myId + "&name=" + myName + "&rating=" + myRating});
+	let socket = io('/game', { query: "&roomId=" + roomId + "&id=" + myId + "&name=" + myName + "&rating=" + myRating});
 
 	let sentTime = Date.now();
 	let lag = 0;
@@ -466,7 +467,7 @@ $(document).ready(function() {
 	}, 1000/60);
 
 	function emitMove() {
-		socket.emit('move', {room: room, id: myId, king: myKing, legions: myLegions});
+		socket.emit('move', {roomId: roomId, id: myId, king: myKing, legions: myLegions});
 	}
 
 	function movePixels() {

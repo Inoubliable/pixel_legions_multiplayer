@@ -2,16 +2,18 @@ $(document).ready(function() {
 
 	let myPlayer = {};
 	let myId = 'DefaultId';
+	let roomId = 'DefaultId';
 
 	if (localStorage.getItem('pixelLegionsPlayer')) {
 		myPlayer = JSON.parse(localStorage.getItem('pixelLegionsPlayer'));
 		myId = myPlayer.id;
+		roomId = myPlayer.roomId;
 	} else {
 		// send user to login
 		$.get('/login', function(data) {});
 	}
 
-	$.get('/ranking', function(data) {
+	$.post('/ranking', {roomId: roomId}, function(data) {
 		let ranking = data.ranking;
 		let oldRating = 1500;
 		let newRating = 1500;

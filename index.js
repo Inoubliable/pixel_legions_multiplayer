@@ -1,5 +1,6 @@
 let express = require('express');
 let app = express();
+var bodyParser = require('body-parser');
 let path = require('path');
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
@@ -16,6 +17,12 @@ let Legion = require('./modules/classes/Legion');
 let public = __dirname + '/public/';
 
 app.use(express.static(public));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+// parse application/json
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
 	res.sendFile(path.join(public + 'login.html'));
@@ -35,17 +42,16 @@ app.get('/game', (req, res) => {
 app.get('/gameOver', (req, res) => {
 	res.sendFile(path.join(public + 'gameOver.html'));
 });
-app.get('/ranking', (req, res) => {
-	res.json({ranking: ranking});
+app.post('/ranking', (req, res) => {
+	// get ranking for room
+	let roomId = req.body.roomId;
+	let room = allRooms.find(r => r.id == roomId);
+
+	res.json({ranking: room.ranking});
 });
 
 
 let allRooms = [];
-
-let ranking = [];
-for (let i = 0; i < c.GAME_PLAYERS_NUM; i++) {
-	ranking.push({id: '', name: ''});
-}
 
 let waitingRoom = io.of('/waitingRoom');
 waitingRoom.on('connection', waitingConnection);
@@ -53,25 +59,22 @@ waitingRoom.on('connection', waitingConnection);
 let gameRoom = io.of('/game');
 gameRoom.on('connection', gameConnection);
 
-let roomCounter = 0;
 function waitingConnection(socket) {
 	// search for free room
 	let room = {};
 	let freeRoom = allRooms.find(r => r.allPlayers.length < c.GAME_PLAYERS_NUM);
 	if (freeRoom) {
-		socket.join(freeRoom.name);
+		socket.join(freeRoom.id);
 	} else {
-		roomCounter++;
-		let roomName = 'room' + roomCounter;
-		room = new Room(roomName);
+		room = new Room();
 		allRooms.push(room);
-		socket.join(roomName);
+		socket.join(room.id);
 	}
 
 	let playerName = socket.handshake.query.name;
 	let playerId = socket.handshake.query.id || uuidv1();
 	let playerRating = +socket.handshake.query.rating || c.STARTING_RATING;
-	waitingRoom.to(socket.id).emit('myPlayer', {room: room.name, id: playerId, name: playerName, rating: playerRating});
+	waitingRoom.to(socket.id).emit('myPlayer', {roomId: room.id, id: playerId, name: playerName, rating: playerRating});
 	room.allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
 	let humanPlayersCount = room.allPlayers.length;
@@ -80,12 +83,12 @@ function waitingConnection(socket) {
 			fillWithAI(room, humanPlayersCount);
 
 			if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
-				waitingRoom.to(room.name).emit('start countdown', room.allPlayers);
+				waitingRoom.to(room.id).emit('start countdown', room.allPlayers);
 			}
 		}
 	}, c.WAIT_TIME_BEFORE_AI_FILL);
 
-	waitingRoom.to(room.name).emit('player joined', room.allPlayers);
+	waitingRoom.to(room.id).emit('player joined', room.allPlayers);
 
 	socket.on('disconnect', function() {
 		let index = room.allPlayers.findIndex(function(player) {
@@ -108,14 +111,12 @@ function fillWithAI(room, playerCount) {
 }
 
 function gameConnection(socket) {
-	let roomName = socket.handshake.query.room;
-	console.log(roomName);
-	let room = allRooms.find(r => r.name == roomName);
-	console.log(room);
+	let roomId = socket.handshake.query.roomId;
+	let room = allRooms.find(r => r.id == roomId);
 	let playerId = socket.handshake.query.id;
 	let playerName = socket.handshake.query.name;
 	let playerRating = +socket.handshake.query.rating || c.STARTING_RATING;
-	socket.join(roomName);
+	socket.join(roomId);
 	room.allPlayers.push({id: playerId, name: playerName, rating: playerRating});
 
 	initiatePlayer(room, playerId, false);
@@ -164,8 +165,8 @@ function gameConnection(socket) {
 	}
 
 	socket.on('move', function(data) {
-		let roomName = data.room;
-		let room = allRooms.find(r => r.name == roomName);
+		let roomId = data.roomId;
+		let room = allRooms.find(r => r.id == roomId);
 		let playerId = data.playerId;
 		let dataKing = data.king;
 		let dataLegions = data.legions;
@@ -213,7 +214,7 @@ setInterval(function() {
 setInterval(function() {
 	for (let i = 0; i < allRooms.length; i++) {
 		let gameUpdate = {allKings: allRooms[i].allKings, allLegions: allRooms[i].allLegions};
-		gameRoom.to(allRooms[i].name).emit('game update', gameUpdate);
+		gameRoom.to(allRooms[i].id).emit('game update', gameUpdate);
 	}
 }, 1000/60);
 
@@ -351,16 +352,16 @@ function battle(room) {
 					room.allKings.splice(k, 1);
 
 					// rank the player
-					for (let i = ranking.length-1; i >= 0; i--) {
-						if (ranking[i].id == '') {
-							ranking[i] = room.allPlayers.find(p => p.id == deadPlayerId);
-							ranking[i].newRating = helpers.calculateRating(ranking[i].rating, i+1, room.allPlayers);
+					for (let i = room.ranking.length-1; i >= 0; i--) {
+						if (room.ranking[i].id == '') {
+							room.ranking[i] = room.allPlayers.find(p => p.id == deadPlayerId);
+							room.ranking[i].newRating = helpers.calculateRating(room.ranking[i].rating, i+1, room.allPlayers);
 
 							// check if only one player is still alive
-							if (ranking[1].id != '') {
+							if (room.ranking[1].id != '') {
 								let winnerKing = room.allKings.find(k => k.count > 0);
-								ranking[0] = room.allPlayers.find(p => p.id == winnerKing.playerId);
-								ranking[0].newRating = helpers.calculateRating(ranking[0].rating, 1, room.allPlayers);
+								room.ranking[0] = room.allPlayers.find(p => p.id == winnerKing.playerId);
+								room.ranking[0].newRating = helpers.calculateRating(room.ranking[0].rating, 1, room.allPlayers);
 							}
 							break;
 						}
