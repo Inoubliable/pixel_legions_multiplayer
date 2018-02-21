@@ -11,6 +11,7 @@ let helpers = require('./modules/helpers');
 let AI = require('./modules/AI');
 
 let Room = require('./modules/classes/Room');
+let Player = require('./modules/classes/Player');
 let King = require('./modules/classes/King');
 let Legion = require('./modules/classes/Legion');
 
@@ -75,7 +76,7 @@ function waitingConnection(socket) {
 	let playerId = socket.handshake.query.id || uuidv1();
 	let playerRating = +socket.handshake.query.rating || c.STARTING_RATING;
 	waitingRoom.to(socket.id).emit('myPlayer', {roomId: room.id, id: playerId, name: playerName, rating: playerRating});
-	room.allPlayers.push({id: playerId, name: playerName, rating: playerRating});
+	room.allPlayers.push(new Player(playerName, playerRating, playerId));
 
 	let humanPlayersCount = room.allPlayers.length;
 	setTimeout(function() {
@@ -102,11 +103,15 @@ function waitingConnection(socket) {
 function fillWithAI(room, playerCount) {
 	// generate AIs to fill the room
 	for (let i = playerCount; i < c.GAME_PLAYERS_NUM; i++) {
-		let AIindex = Math.floor((Math.random() * room.availableAINames.length));
+		let AIIndex = Math.floor((Math.random() * room.availableAINames.length));
 		let AIid = uuidv1();
-		room.allPlayers.push({id: AIid, name: room.availableAINames[AIindex], rating: c.STARTING_RATING});
-		room.availableAINames.splice(AIindex, 1);
-		initiatePlayer(room, AIid, true);
+		let name = room.availableAINames[AIIndex];
+		let rating = c.STARTING_RATING;
+
+		let newPlayer = new Player(name, rating, AIid);
+		room.allPlayers.push(newPlayer);
+		room.availableAINames.splice(AIIndex, 1);
+		newPlayer.initiatePlayer(room, AIid, true);
 	}
 }
 
@@ -117,9 +122,10 @@ function gameConnection(socket) {
 	let playerName = socket.handshake.query.name;
 	let playerRating = +socket.handshake.query.rating || c.STARTING_RATING;
 	socket.join(roomId);
-	room.allPlayers.push({id: playerId, name: playerName, rating: playerRating});
-
-	initiatePlayer(room, playerId, false);
+	
+	let newPlayer = new Player(playerName, playerRating, playerId);
+	room.allPlayers.push(newPlayer);
+	newPlayer.initiatePlayer(room, playerId, false);
 
 	// create spawn loops for every player
 	if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
@@ -217,49 +223,6 @@ setInterval(function() {
 		gameRoom.to(allRooms[i].id).emit('game update', gameUpdate);
 	}
 }, 1000/60);
-
-function initiatePlayer(room, playerId, isAI) {
-	let colorIndex = Math.floor(Math.random() * room.availableColors.length);
-	let color = room.availableColors[colorIndex];
-	room.availableColors.splice(colorIndex, 1);
-
-	let x, y, initialDx, initialDy, initialDistance;
-	let isTooClose = true;
-	while (isTooClose) {
-		x = Math.floor(Math.random() * c.PLAYFIELD_WIDTH);
-		y = Math.floor(Math.random() * c.PLAYFIELD_HEIGHT);
-		isTooClose = false;
-		for (let i = 0; i < room.allKings.length; i++) {
-			initialDx = room.allKings[i].x - x;
-			initialDy = room.allKings[i].y - y;
-			initialDistance = Math.sqrt(initialDx * initialDx + initialDy * initialDy);
-			if (initialDistance < (c.BATTLE_DISTANCE * 2)) {
-				isTooClose = true;
-				break;
-			}
-		}
-	}
-
-	// initiate king
-	room.allKings.push(new King(playerId, x, y, c.KING_COUNT, color, isAI));
-
-	// initiate legions
-	for (let i = 0; i < c.INITIAL_LEGIONS_NUM; i++) {
-		let legionX = Math.random() * c.SPAWN_AREA_WIDTH + x - c.SPAWN_AREA_WIDTH/2;
-		let legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
-		let legW = helpers.legionCountToWidth(c.LEGION_COUNT);
-
-		// check if it spawns over playfield border
-		while (!(legionX > (legW*c.LEGION_OVER_BORDER) && legionX < (c.PLAYFIELD_WIDTH - legW*c.LEGION_OVER_BORDER))) {
-			legionX = Math.random() * c.SPAWN_AREA_WIDTH + x - c.SPAWN_AREA_WIDTH/2;
-		}
-		while (!(legionY > (legW*c.LEGION_OVER_BORDER) && legionY < (c.PLAYFIELD_HEIGHT - legW*c.LEGION_OVER_BORDER))) {
-			legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
-		}
-
-		room.allLegions.push(new Legion(playerId, legionX, legionY, c.LEGION_COUNT, color, false, 0, 0, isAI));
-	}
-}
 
 function battle(room) {
 	let deadPlayersIds = [];
