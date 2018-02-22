@@ -47,4 +47,8 @@ $(document).ready(function() {
 		}, intervalTime);
 	});
 
+	$('.play-again-btn').click(function(event) {
+		window.location.href = '/waitingRoom';
+	});
+
 });

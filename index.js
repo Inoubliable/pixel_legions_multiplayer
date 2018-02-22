@@ -63,7 +63,7 @@ gameRoom.on('connection', gameConnection);
 function waitingConnection(socket) {
 	// search for free room
 	let room = {};
-	let freeRoom = allRooms.find(r => r.allPlayers.length < c.GAME_PLAYERS_NUM);
+	let freeRoom = allRooms.find(r => r.open);
 	if (freeRoom) {
 		socket.join(freeRoom.id);
 	} else {
@@ -84,6 +84,7 @@ function waitingConnection(socket) {
 			fillWithAI(room, humanPlayersCount);
 
 			if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
+				room.open = false;
 				waitingRoom.to(room.id).emit('start countdown', room.allPlayers);
 			}
 		}
@@ -177,21 +178,23 @@ function gameConnection(socket) {
 		let dataKing = data.king;
 		let dataLegions = data.legions;
 
-		let foundKing = room.allKings.find(king => king.id == dataKing.id);
-		if (foundKing) {
-			foundKing.x = dataKing.x;
-			foundKing.y = dataKing.y;
-			foundKing.path = dataKing.path;
-		}
+		if (room) {
+			let foundKing = room.allKings.find(king => king.id == dataKing.id);
+			if (foundKing) {
+				foundKing.x = dataKing.x;
+				foundKing.y = dataKing.y;
+				foundKing.path = dataKing.path;
+			}
 
-		if (dataLegions.length > 0) {
-			for (let i = 0; i < dataLegions.length; i++) {
-				let foundLegion = room.allLegions.find(legion => legion.id == dataLegions[i].id);
-				if (foundLegion) {
-					foundLegion.x = dataLegions[i].x;
-					foundLegion.y = dataLegions[i].y;
-					foundLegion.path = dataLegions[i].path;
-					foundLegion.spawning = dataLegions[i].spawning;
+			if (dataLegions.length > 0) {
+				for (let i = 0; i < dataLegions.length; i++) {
+					let foundLegion = room.allLegions.find(legion => legion.id == dataLegions[i].id);
+					if (foundLegion) {
+						foundLegion.x = dataLegions[i].x;
+						foundLegion.y = dataLegions[i].y;
+						foundLegion.path = dataLegions[i].path;
+						foundLegion.spawning = dataLegions[i].spawning;
+					}
 				}
 			}
 		}
@@ -208,12 +211,15 @@ function gameConnection(socket) {
 
 // game physics loop
 setInterval(function() {
+	// remove rooms without human players
+	allRooms = allRooms.filter(r => !r.isEmpty);
+
 	for (let i = 0; i < allRooms.length; i++) {
-		if (allRooms[i].allLegions.length > 0) {
-			battle(allRooms[i]);
-			AI.moveAI(allRooms[i].allLegions);
-		}
+		battle(allRooms[i]);
+		AI.moveAI(allRooms[i].allLegions);
 	}
+
+	console.log(allRooms);
 }, 1000/60);
 
 // send game state loop
@@ -328,6 +334,12 @@ function battle(room) {
 							}
 							break;
 						}
+					}
+
+					// if no human player in room is alive, delete the room
+					let foundHuman = room.allKings.find(k => !k.isAI);
+					if (!foundHuman) {
+						room.isEmpty = true;
 					}
 				}
 			}

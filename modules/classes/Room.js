@@ -11,6 +11,8 @@ class Room {
 		this.availableColors = getColors();
 		this.availableAINames = getAINames();
 		this.ranking = getRanking();
+		this.open = true;
+		this.isEmpty = false;
 	}
 }
 
