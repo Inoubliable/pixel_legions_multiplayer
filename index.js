@@ -46,13 +46,19 @@ app.get('/gameOver', (req, res) => {
 app.post('/ranking', (req, res) => {
 	// get ranking for room
 	let roomId = req.body.roomId;
-	let room = allRooms.find(r => r.id == roomId);
+	let finishedRoom = finishedRooms.find(r => r.id == roomId);
+	let ranking = null;
 
-	res.json({ranking: room.ranking});
+	if (finishedRoom) {
+		ranking = finishedRoom.ranking;
+	}
+
+	res.json({ranking: ranking});
 });
 
 
 let allRooms = [];
+let finishedRooms = [];
 
 let waitingRoom = io.of('/waitingRoom');
 waitingRoom.on('connection', waitingConnection);
@@ -112,7 +118,7 @@ function fillWithAI(room, playerCount) {
 		let newPlayer = new Player(name, rating, AIid);
 		room.allPlayers.push(newPlayer);
 		room.availableAINames.splice(AIIndex, 1);
-		newPlayer.initiatePlayer(room, AIid, true);
+		newPlayer.initiatePlayer(room, true);
 	}
 }
 
@@ -126,7 +132,7 @@ function gameConnection(socket) {
 	
 	let newPlayer = new Player(playerName, playerRating, playerId);
 	room.allPlayers.push(newPlayer);
-	newPlayer.initiatePlayer(room, playerId, false);
+	newPlayer.initiatePlayer(room, false);
 
 	// create spawn loops for every player
 	if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
@@ -219,7 +225,6 @@ setInterval(function() {
 		AI.moveAI(allRooms[i].allLegions);
 	}
 
-	console.log(allRooms);
 }, 1000/60);
 
 // send game state loop
@@ -337,9 +342,9 @@ function battle(room) {
 					}
 
 					// if no human player in room is alive, delete the room
-					let foundHuman = room.allKings.find(k => !k.isAI);
-					if (!foundHuman) {
-						room.isEmpty = true;
+					room.checkIfEmpty();
+					if (room.isEmpty) {
+						finishedRooms.push(room);
 					}
 				}
 			}

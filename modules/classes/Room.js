@@ -14,6 +14,14 @@ class Room {
 		this.open = true;
 		this.isEmpty = false;
 	}
+
+	checkIfEmpty() {
+		let foundHuman = this.allKings.find(k => !k.isAI);
+		let numOfPlayers = this.allKings.length;
+		if (!foundHuman || numOfPlayers <= 1) {
+			this.isEmpty = true;
+		}
+	}
 }
 
 function getColors() {
