@@ -467,7 +467,7 @@ $(document).ready(function() {
 	}, 1000/60);
 
 	function emitMove() {
-		socket.emit('move', {roomId: roomId, id: myId, king: myKing, legions: myLegions});
+		socket.emit('move', {king: myKing, legions: myLegions});
 	}
 
 	function movePixels() {

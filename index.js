@@ -99,13 +99,16 @@ function waitingConnection(socket) {
 	waitingRoom.to(room.id).emit('player joined', room.allPlayers);
 
 	socket.on('disconnect', function() {
-		let index = room.allPlayers.findIndex(function(player) {
-			return player.id == playerId;
-		});
-		room.allPlayers.splice(index, 1);
+		removePlayer(room, playerId);
 		console.log('User disconnected');
 	});
 };
+
+function removePlayer(room, playerId) {
+	room.allPlayers = room.allPlayers.filter(p => p.id != playerId);
+	room.allKings = room.allKings.filter(k => k.playerId != playerId);
+	room.allLegions = room.allLegions.filter(l => l.playerId != playerId);
+}
 
 function fillWithAI(room, playerCount) {
 	// generate AIs to fill the room
@@ -178,9 +181,6 @@ function gameConnection(socket) {
 	}
 
 	socket.on('move', function(data) {
-		let roomId = data.roomId;
-		let room = allRooms.find(r => r.id == roomId);
-		let playerId = data.playerId;
 		let dataKing = data.king;
 		let dataLegions = data.legions;
 
@@ -211,6 +211,7 @@ function gameConnection(socket) {
 	});
 
 	socket.on('disconnect', function() {
+		removePlayer(room, playerId);
 		console.log('User disconnected');
 	});
 };
