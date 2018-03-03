@@ -1,33 +1,40 @@
 let c = require('./constants');
 let helpers = require('./helpers');
 
-function AIAttackCheck(allKings, allLegions) {
+function AIAttackCheck(room) {
 	let checkedPlayers = [];
-	for (let i = 0; i < allLegions.length; i++) {
-		if (allLegions[i].isAI && (checkedPlayers.indexOf(allLegions[i].playerId) == -1)) {
-			checkedPlayers.push(allLegions[i].playerId);
-			let playersLegions = [];
-			for (let j = 0; j < allLegions.length; j++) {
-				if (allLegions[j].playerId == allLegions[i].playerId) {
-					playersLegions.push(j);
-				}
-			}
+	for (let i = 0; i < room.allLegions.length; i++) {
+		if (room.allLegions[i].isAI && (checkedPlayers.indexOf(room.allLegions[i].playerId) == -1)) {
+			let player = room.allPlayers.find(p => p.id == room.allLegions[i].playerId);
+			let partsInSpawn = c.SPAWN_INTERVAL / c.AI_LOOP_INTERVAL;
+			let playerSpawnPartAggressiveness = 1 - (Math.pow((1 - player.aggressiveness), partsInSpawn));
+			let rand = Math.random();
 
-			if (playersLegions.length > 3) {
-				let index1 = Math.floor(Math.random() * playersLegions.length);
-				let index2 = Math.floor(Math.random() * playersLegions.length);
-
-				while (index2 == index1) {
-					index2 = Math.floor(Math.random() * playersLegions.length);
+			if (playerSpawnPartAggressiveness > rand) {
+				checkedPlayers.push(room.allLegions[i].playerId);
+				let playersLegions = [];
+				for (let j = 0; j < room.allLegions.length; j++) {
+					if (room.allLegions[j].playerId == room.allLegions[i].playerId) {
+						playersLegions.push(j);
+					}
 				}
 
-				let AIlegion1 = allLegions[playersLegions[index1]];
-				let AIlegion2 = allLegions[playersLegions[index2]];
-				if (!AIlegion1.spawning) {
-					AIAttackPath(AIlegion1, allKings, allLegions);
-				}
-				if (!AIlegion2.spawning) {
-					AIAttackPath(AIlegion2, allKings, allLegions);
+				if (playersLegions.length > 2) {
+					let index1 = Math.floor(Math.random() * playersLegions.length);
+					let index2 = Math.floor(Math.random() * playersLegions.length);
+
+					while (index2 == index1) {
+						index2 = Math.floor(Math.random() * playersLegions.length);
+					}
+
+					let AIlegion1 = room.allLegions[playersLegions[index1]];
+					let AIlegion2 = room.allLegions[playersLegions[index2]];
+					if (!AIlegion1.spawning) {
+						AIAttackPath(AIlegion1, room.allKings, room.allLegions);
+					}
+					if (!AIlegion2.spawning) {
+						AIAttackPath(AIlegion2, room.allKings, room.allLegions);
+					}
 				}
 			}
 		}

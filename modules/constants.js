@@ -1,4 +1,4 @@
-module.exports.MAX_LEGIONS = 15;
+module.exports.MAX_LEGIONS = 10;
 
 module.exports.STARTING_RATING = 1500;
 
@@ -63,4 +63,25 @@ module.exports.COLORS = {
 	}
 };
 
-module.exports.AI_NAMES = ['DeepBlue', 'AlphaZero', 'TARS', 'R2D2', 'Unity'];
+module.exports.AI_OBJECTS = [
+	{
+		name: 'DeepBlue',
+		aggressiveness: 0.40
+	},
+	{
+		name: 'AlphaZero',
+		aggressiveness: 0.75
+	},
+	{
+		name: 'TARS',
+		aggressiveness: 0.62
+	},
+	{
+		name: 'R2D2',
+		aggressiveness: 0.20
+	},
+	{
+		name: 'Unity',
+		aggressiveness: 0.30
+	}
+];

@@ -113,15 +113,16 @@ function removePlayer(room, playerId) {
 function fillWithAI(room, playerCount) {
 	// generate AIs to fill the room
 	for (let i = playerCount; i < c.GAME_PLAYERS_NUM; i++) {
-		let AIIndex = Math.floor((Math.random() * room.availableAINames.length));
+		let AIIndex = Math.floor((Math.random() * room.availableAIObjects.length));
 		let AIid = uuidv1();
-		let name = room.availableAINames[AIIndex];
+		let name = room.availableAIObjects[AIIndex].name;
+		let aggressiveness = room.availableAIObjects[AIIndex].aggressiveness;
 		let rating = c.STARTING_RATING;
 
 		let newPlayer = new Player(name, rating, AIid);
 		room.allPlayers.push(newPlayer);
-		room.availableAINames.splice(AIIndex, 1);
-		newPlayer.initiatePlayer(room, true);
+		room.availableAIObjects.splice(AIIndex, 1);
+		newPlayer.initiatePlayer(room, true, aggressiveness);
 	}
 }
 
@@ -135,7 +136,7 @@ function gameConnection(socket) {
 	
 	let newPlayer = new Player(playerName, playerRating, playerId);
 	room.allPlayers.push(newPlayer);
-	newPlayer.initiatePlayer(room, false);
+	newPlayer.initiatePlayer(room, false, null);
 
 	// create spawn loops for every player
 	if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
@@ -368,7 +369,7 @@ function battle(room) {
 setInterval(function() {
 	for (var i = 0; i < allRooms.length; i++) {
 		AI.AIClearDefending(allRooms[i].allLegions);
-		AI.AIAttackCheck(allRooms[i].allKings, allRooms[i].allLegions);
+		AI.AIAttackCheck(allRooms[i]);
 	}
 }, c.AI_LOOP_INTERVAL);
 

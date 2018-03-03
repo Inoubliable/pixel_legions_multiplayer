@@ -9,7 +9,7 @@ class Room {
 		this.allKings = [];
 		this.allLegions = [];
 		this.availableColors = getColors();
-		this.availableAINames = getAINames();
+		this.availableAIObjects = getAIObjects();
 		this.ranking = getRanking();
 		this.open = true;
 		this.isEmpty = false;
@@ -33,13 +33,13 @@ function getColors() {
 	return availableColors;
 }
 
-function getAINames() {
-	let availableAINames = [];
-	for (let i = 0; i < c.AI_NAMES.length; i++) {
-		availableAINames.push(c.AI_NAMES[i]);
+function getAIObjects() {
+	let availableAIObjects = [];
+	for (let i = 0; i < c.AI_OBJECTS.length; i++) {
+		availableAIObjects.push(c.AI_OBJECTS[i]);
 	}
 
-	return availableAINames;
+	return availableAIObjects;
 }
 
 function getRanking() {

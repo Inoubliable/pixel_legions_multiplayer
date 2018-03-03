@@ -13,7 +13,7 @@ class Player {
 		this.rating = rating;
 	}
 
-	initiatePlayer(room, isAI) {
+	initiatePlayer(room, isAI, aggressiveness) {
 	    let colorIndex = Math.floor(Math.random() * room.availableColors.length);
 	    let color = room.availableColors[colorIndex];
 	    room.availableColors.splice(colorIndex, 1);
@@ -54,6 +54,8 @@ class Player {
 
 	        room.allLegions.push(new Legion(this.id, legionX, legionY, c.LEGION_COUNT, color, false, 0, 0, isAI));
 	    }
+
+	    this.aggressiveness = aggressiveness;
 	}
 }
 
