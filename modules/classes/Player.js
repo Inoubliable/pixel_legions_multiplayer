@@ -45,10 +45,10 @@ class Player {
 	        let legW = helpers.legionCountToWidth(c.LEGION_COUNT);
 
 	        // check if it spawns over playfield border
-	        while (!(legionX > (legW*c.LEGION_OVER_BORDER) && legionX < (c.PLAYFIELD_WIDTH - legW*c.LEGION_OVER_BORDER))) {
+	        while (!helpers.isInsidePlayfieldX(legionX, legW)) {
 	            legionX = Math.random() * c.SPAWN_AREA_WIDTH + x - c.SPAWN_AREA_WIDTH/2;
 	        }
-	        while (!(legionY > (legW*c.LEGION_OVER_BORDER) && legionY < (c.PLAYFIELD_HEIGHT - legW*c.LEGION_OVER_BORDER))) {
+	        while (!helpers.isInsidePlayfieldY(legionY, legW)) {
 	            legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
 	        }
 

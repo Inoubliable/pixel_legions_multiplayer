@@ -87,8 +87,33 @@ function calculateRating(rating, place, allPlayers) {
 	return newRating;
 }
 
+function pushIfNotIn(array, value) {
+    if (array.indexOf(value) == -1) {
+        array.push(value);
+    }
+}
+
+function isInsidePlayfieldX(x, width) {
+    if (x > (width*c.LEGION_OVER_BORDER) && x < (c.PLAYFIELD_WIDTH - width*c.LEGION_OVER_BORDER)) {
+        return true;
+    }
+
+    return false;
+}
+
+function isInsidePlayfieldY(y, height) {
+    if (y > (height*c.LEGION_OVER_BORDER) && y < (c.PLAYFIELD_HEIGHT - height*c.LEGION_OVER_BORDER)) {
+        return true;
+    }
+
+    return false;
+}
+
 module.exports = {
     legionCountToWidth: legionCountToWidth,
     calculateHull: calculateHull,
-    calculateRating: calculateRating
+    calculateRating: calculateRating,
+    pushIfNotIn: pushIfNotIn,
+    isInsidePlayfieldX: isInsidePlayfieldX,
+    isInsidePlayfieldY: isInsidePlayfieldY
 }

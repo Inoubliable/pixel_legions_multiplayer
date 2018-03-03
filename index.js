@@ -142,15 +142,16 @@ function gameConnection(socket) {
 	if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
 		for (let i = 0; i < room.allPlayers.length; i++) {
 			(function loop() {
+				let playerId = room.allPlayers[i].id;
 				let spawnTimeout = c.SPAWN_INTERVAL + Math.round(Math.random() * c.SPAWN_INTERVAL * c.SPAWN_ITERVAL_RANDOM_PART);
 				setTimeout(function() {
-					let king = room.allKings.find(k => k.playerId == room.allPlayers[i].id);
+					let king = room.allKings.find(k => k.playerId == playerId);
 	
 					if (king) {
 						if (!king.isUnderAttack) {
 							let counter = 0;
 							for (let j = 0; j < room.allLegions.length; j++) {
-								if (room.allLegions[j].playerId == room.allPlayers[i].id) {
+								if (room.allLegions[j].playerId == playerId) {
 									counter++;
 								}
 							}
@@ -258,28 +259,22 @@ function battle(room) {
 					if (legionsDistanceX > enemyHalfWidth) {
 						// is legion on the left or right of enemy
 						if ((legion2.x - legion1.x) > 0) {
-							pushIfNotIn(legion1.nearbyEnemies, 2);
-							pushIfNotIn(legion2.nearbyEnemies, 4);
+							helpers.pushIfNotIn(legion1.nearbyEnemies, 2);
+							helpers.pushIfNotIn(legion2.nearbyEnemies, 4);
 						} else {
-							pushIfNotIn(legion1.nearbyEnemies, 4);
-							pushIfNotIn(legion2.nearbyEnemies, 2);
+							helpers.pushIfNotIn(legion1.nearbyEnemies, 4);
+							helpers.pushIfNotIn(legion2.nearbyEnemies, 2);
 						}
 					}
 
 					if (legionsDistanceY > enemyHalfWidth) {
 						// is legion on the top or bottom of enemy
 						if ((legion2.y - legion1.y) > 0) {
-							pushIfNotIn(legion1.nearbyEnemies, 3);
-							pushIfNotIn(legion2.nearbyEnemies, 1);
+							helpers.pushIfNotIn(legion1.nearbyEnemies, 3);
+							helpers.pushIfNotIn(legion2.nearbyEnemies, 1);
 						} else {
-							pushIfNotIn(legion1.nearbyEnemies, 1);
-							pushIfNotIn(legion2.nearbyEnemies, 3);
-						}
-					}
-
-					function pushIfNotIn(array, value) {
-						if (array.indexOf(value) == -1) {
-							array.push(value);
+							helpers.pushIfNotIn(legion1.nearbyEnemies, 1);
+							helpers.pushIfNotIn(legion2.nearbyEnemies, 3);
 						}
 					}
 
@@ -316,6 +311,21 @@ function battle(room) {
 
 					if (room.allKings[k].isAI) {
 						// get legions to defend
+						let vecX = room.allKings[k].x - legion1.x;
+						let vecY = room.allKings[k].y - legion1.y;
+						let vecLength = Math.sqrt(vecX**2 + vecY**2);
+						// vector length to 0.5
+						let newX = room.allKings[k].x + vecX/vecLength/2;
+						let newY = room.allKings[k].y + vecY/vecLength/2;
+						let width = c.KING_WIDTH;
+						let height = c.KING_WIDTH;
+						if (helpers.isInsidePlayfieldX(newX, width)) {
+							room.allKings[k].x = newX;
+						}
+						if (helpers.isInsidePlayfieldY(newY, height)) {
+							room.allKings[k].y = newY;
+						}
+
 						AI.AIDefend(room.allKings[k].playerId, legion1.x, legion1.y, room.allLegions);
 					}
 
@@ -327,21 +337,7 @@ function battle(room) {
 					deadPlayersIds.push(deadPlayerId);
 					room.allKings.splice(k, 1);
 
-					// rank the player
-					for (let i = room.ranking.length-1; i >= 0; i--) {
-						if (room.ranking[i].id == '') {
-							room.ranking[i] = room.allPlayers.find(p => p.id == deadPlayerId);
-							room.ranking[i].newRating = helpers.calculateRating(room.ranking[i].rating, i+1, room.allPlayers);
-
-							// check if only one player is still alive
-							if (room.ranking[1].id != '') {
-								let winnerKing = room.allKings.find(k => k.count > 0);
-								room.ranking[0] = room.allPlayers.find(p => p.id == winnerKing.playerId);
-								room.ranking[0].newRating = helpers.calculateRating(room.ranking[0].rating, 1, room.allPlayers);
-							}
-							break;
-						}
-					}
+					room.rankPlayer(deadPlayerId);
 
 					// if no human player in room is alive, delete the room
 					room.checkIfEmpty();

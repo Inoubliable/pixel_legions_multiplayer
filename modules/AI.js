@@ -173,10 +173,10 @@ function moveAI(allLegions) {
 				let newY = allLegions[i].y + dy;
 
 				// check if it gets over playfield border
-				if (newX > (legW*c.LEGION_OVER_BORDER) && newX < (c.PLAYFIELD_WIDTH - legW*c.LEGION_OVER_BORDER)) {
+				if (helpers.isInsidePlayfieldX(newX, legW)) {
 					allLegions[i].x = newX;
 				}
-				if (newY > (legH*c.LEGION_OVER_BORDER) && newY < (c.PLAYFIELD_HEIGHT - legH*c.LEGION_OVER_BORDER)) {
+				if (helpers.isInsidePlayfieldY(newY, legH)) {
 					allLegions[i].y = newY;
 				}
 			} else {
@@ -188,10 +188,10 @@ function moveAI(allLegions) {
 			let pos = allLegions[i].AIPath.shift();
 
 			// check if it gets over playfield border
-			if (pos[0] > (legW*c.LEGION_OVER_BORDER) && pos[0] < (c.PLAYFIELD_WIDTH - legW*c.LEGION_OVER_BORDER)) {
+			if (helpers.isInsidePlayfieldX(pos[0], legW)) {
 				allLegions[i].x = pos[0];
 			}
-			if (pos[1] > (legH*c.LEGION_OVER_BORDER) && pos[1] < (c.PLAYFIELD_HEIGHT - legH*c.LEGION_OVER_BORDER)) {
+			if (helpers.isInsidePlayfieldY(pos[1], legH)) {
 				allLegions[i].y = pos[1];
 			}
 		}
