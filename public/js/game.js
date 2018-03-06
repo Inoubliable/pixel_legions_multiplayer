@@ -37,7 +37,6 @@ $(document).ready(function() {
 		count: 0,
 		path: [],
 		selected: false,
-		move: false,
 		color: "#000"
 	};
 	let myLegions = [];
@@ -315,7 +314,7 @@ $(document).ready(function() {
 		if (mouseX < myKing.x + kingWidthHalf && mouseX > myKing.x - kingWidthHalf && mouseY < myKing.y + kingWidthHalf && mouseY > myKing.y - kingWidthHalf) {
 			mouseDownKingIndex = 1;
 			mousedown = false;
-		} else {
+		} else {					
 			// check if mouse is down on my legion
 			for (let i = 0; i < myLegions.length; i++) {
 				let legionWidthHalf = legionCountToWidth(myLegions[i].count) / 2;
@@ -323,17 +322,42 @@ $(document).ready(function() {
 					mouseDownLegionIndex = i;
 					mousedown = false;
 					break;
+				} else {
+					if (myLegions[i].selected) {
+						myLegions[i].path = [];
+						myLegions[i].isPathVisible = true;
+					}
 				}
 			}
+
+			// if my king is selected and nothing new was selected
+			if (myKing.selected && mousedown) {
+				myKing.path = [];
+				myKing.isPathVisible = true;
+			}
 		}
+
+		if (mousedown) {
+			pushToPath(e);
+		}
+		
 	}
 
 	function onMouseUp(e) {
 		let mouseX = e.clientX - canvasContainer.offsetLeft;
 		let mouseY = e.clientY - canvasContainer.offsetTop;
 
-		// check if mouse is up on my legion or king
-		if (mouseDownLegionIndex != -1) {
+		// check if mouse is up on my king or legion
+		if (mouseDownKingIndex != -1) {
+			let kingWidthHalf = KING_WIDTH / 2;
+			if (mouseX < myKing.x + kingWidthHalf && mouseX > myKing.x - kingWidthHalf && mouseY < myKing.y + kingWidthHalf && mouseY > myKing.y - kingWidthHalf) {
+				// select my king
+				myKing.selected = true;
+				mouseDownKingIndex = -1;
+			} else {
+				myKing.selected = false;
+			}
+		} else if (mouseDownLegionIndex != -1) {
 			for (let i = 0; i < myLegions.length; i++) {
 				let legionWidthHalf = legionCountToWidth(myLegions[i].count) / 2;
 				if (mouseX < myLegions[i].x + legionWidthHalf && mouseX > myLegions[i].x - legionWidthHalf && mouseY < myLegions[i].y + legionWidthHalf && mouseY > myLegions[i].y - legionWidthHalf) {
@@ -347,48 +371,12 @@ $(document).ready(function() {
 					myLegions[i].selected = false;
 				}
 			}
-		} else if (mouseDownKingIndex != -1) {
-			let kingWidthHalf = KING_WIDTH / 2;
-			if (mouseX < myKing.x + kingWidthHalf && mouseX > myKing.x - kingWidthHalf && mouseY < myKing.y + kingWidthHalf && mouseY > myKing.y - kingWidthHalf) {
-				// select my king
-				myKing.selected = true;
-				mouseDownKingIndex = -1;
-			} else {
-				myKing.selected = false;
-			}
 		} else {
-			pushToPath(e);
-
-			if (myKing.path.length > 0) {
-				let dx = myKing.path[0][0] - myKing.x;
-				let dy = myKing.path[0][1] - myKing.y;
-				let distance = Math.sqrt(dx * dx + dy * dy);
-				let repeat = Math.floor(distance / KING_PX_PER_FRAME);
-				for (let j = 0; j < repeat; j++) {
-					let goTo = [myKing.path[0][0] - dx/repeat, myKing.path[0][1] - dy/repeat];
-					myKing.path.unshift(goTo);
-				}
-
-				myKing.move = true;
-			}
+			myKing.isPathVisible = false;
 
 			for (let i = 0; i < myLegions.length; i++) {
-				if (myLegions[i].path.length > 0) {
-					let path = myLegions[i].path;
-					let dx = path[0][0] - myLegions[i].x;
-					let dy = path[0][1] - myLegions[i].y;
-					let distance = Math.sqrt(dx * dx + dy * dy);
-					let repeat = Math.floor(distance / LEGION_PX_PER_FRAME);
-					for (let j = 0; j < repeat; j++) {
-						let goTo = [path[0][0] - dx/repeat, path[0][1] - dy/repeat];
-						path.unshift(goTo);
-					}
-
-					myLegions[i].move = true;
-					myLegions[i].hull = calculateHull(myLegions[i].pixels, myLegions[i].x, myLegions[i].y);
-				}
+				myLegions[i].isPathVisible = false;
 			}
-
 		}
 		
 		mousedown = false;
@@ -418,6 +406,7 @@ $(document).ready(function() {
 				}
 			} else {
 				path.push([mouseX, mouseY]);
+				pathToFirstPoint(myKing, KING_PX_PER_FRAME);
 			}
 		}
 
@@ -442,8 +431,21 @@ $(document).ready(function() {
 					}
 				} else {
 					path.push([mouseX, mouseY]);
+					pathToFirstPoint(myLegions[i], LEGION_PX_PER_FRAME);
 				}
 			}
+		}
+	}
+
+	function pathToFirstPoint(object, pixels) {
+		let path = object.path;
+		let dx = path[0][0] - object.x;
+		let dy = path[0][1] - object.y;
+		let distance = Math.sqrt(dx * dx + dy * dy);
+		let repeat = Math.floor(distance / pixels);
+		for (let j = 0; j < repeat; j++) {
+			let goTo = [path[0][0] - dx/repeat, path[0][1] - dy/repeat];
+			path.unshift(goTo);
 		}
 	}
 
@@ -741,35 +743,33 @@ $(document).ready(function() {
 		}
 		battleBeams = [];
 
-		// draw king's path
-		ctx.lineWidth = PATH_WIDTH;
-		ctx.lineJoin = 'round';
-		ctx.lineCap = 'round';
-		ctx.strokeStyle = PATH_COLOR;
 		if (myKing.path.length > 0) {
-			ctx.beginPath();
-			for (let j = 0; j < myKing.path.length; j++) {
-				if (j == 0) {
-					ctx.moveTo(myKing.path[j][0], myKing.path[j][1]);
-				} else {
-					ctx.lineTo(myKing.path[j][0], myKing.path[j][1]);
+
+			if (myKing.isPathVisible) {
+				// draw king's path
+				ctx.lineWidth = PATH_WIDTH;
+				ctx.lineJoin = 'round';
+				ctx.lineCap = 'round';
+				ctx.strokeStyle = PATH_COLOR;
+				ctx.beginPath();
+				for (let j = 0; j < myKing.path.length; j++) {
+					if (j == 0) {
+						ctx.moveTo(myKing.path[j][0], myKing.path[j][1]);
+					} else {
+						ctx.lineTo(myKing.path[j][0], myKing.path[j][1]);
+					}
 				}
+				ctx.stroke();
 			}
-			ctx.stroke();
 
-			if (myKing.move) {
-				let pos = myKing.path.shift();
+			let pos = myKing.path.shift();
 
-				// check if it gets over playfield border
-				if (pos[0] > (KING_WIDTH*LEGION_OVER_BORDER) && pos[0] < (PLAYFIELD_WIDTH - KING_WIDTH*LEGION_OVER_BORDER)) {
-					myKing.x = pos[0];
-				}
-				if (pos[1] > (KING_WIDTH*LEGION_OVER_BORDER) && pos[1] < (PLAYFIELD_HEIGHT - KING_WIDTH*LEGION_OVER_BORDER)) {
-					myKing.y = pos[1];
-				}
-				if (myKing.path.length == 0) {
-					myKing.move = false;
-				}
+			// check if it gets over playfield border
+			if (pos[0] > (KING_WIDTH*LEGION_OVER_BORDER) && pos[0] < (PLAYFIELD_WIDTH - KING_WIDTH*LEGION_OVER_BORDER)) {
+				myKing.x = pos[0];
+			}
+			if (pos[1] > (KING_WIDTH*LEGION_OVER_BORDER) && pos[1] < (PLAYFIELD_HEIGHT - KING_WIDTH*LEGION_OVER_BORDER)) {
+				myKing.y = pos[1];
 			}
 		}
 
@@ -833,39 +833,37 @@ $(document).ready(function() {
 			// draw path
 			let path = myLegions[i].path;
 			if (path.length > 0) {
-				ctx.lineWidth = PATH_WIDTH;
-				ctx.lineJoin = 'round';
-				ctx.lineCap = 'round';
-				ctx.strokeStyle = PATH_COLOR;
-				ctx.beginPath();
-				for (let j = 0; j < path.length; j++) {
-					if (j == 0) {
-						ctx.moveTo(path[j][0], path[j][1]);
-					} else {
-						ctx.lineTo(path[j][0], path[j][1]);
-					}
-				}
-				ctx.stroke();
 
-				if (myLegions[i].move) {
-					let pos = path.shift();
-					let dx = 0;
-					let dy = 0;
-
-					// check if it gets over playfield border
-					if (pos[0] > (legW*LEGION_OVER_BORDER) && pos[0] < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER)) {
-						dx = pos[0] - myLegions[i].x;
-						myLegions[i].x = pos[0];
+				if (myLegions[i].isPathVisible) {
+					ctx.lineWidth = PATH_WIDTH;
+					ctx.lineJoin = 'round';
+					ctx.lineCap = 'round';
+					ctx.strokeStyle = PATH_COLOR;
+					ctx.beginPath();
+					for (let j = 0; j < path.length; j++) {
+						if (j == 0) {
+							ctx.moveTo(path[j][0], path[j][1]);
+						} else {
+							ctx.lineTo(path[j][0], path[j][1]);
+						}
 					}
-					if (pos[1] > (legH*LEGION_OVER_BORDER) && pos[1] < (PLAYFIELD_HEIGHT - legH*LEGION_OVER_BORDER)) {
-						dy = pos[1] - myLegions[i].y;
-						myLegions[i].y = pos[1];
-					}
-					updatePixelsPosition(myLegions[i].pixels, dx, dy);
-					if (path.length == 0) {
-						myLegions[i].move = false;
-					}
+					ctx.stroke();
 				}
+
+				let pos = path.shift();
+				let dx = 0;
+				let dy = 0;
+
+				// check if it gets over playfield border
+				if (pos[0] > (legW*LEGION_OVER_BORDER) && pos[0] < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER)) {
+					dx = pos[0] - myLegions[i].x;
+					myLegions[i].x = pos[0];
+				}
+				if (pos[1] > (legH*LEGION_OVER_BORDER) && pos[1] < (PLAYFIELD_HEIGHT - legH*LEGION_OVER_BORDER)) {
+					dy = pos[1] - myLegions[i].y;
+					myLegions[i].y = pos[1];
+				}
+				updatePixelsPosition(myLegions[i].pixels, dx, dy);
 			}
 
 			// move spawning legions

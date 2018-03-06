@@ -11,6 +11,7 @@ class Legion {
 		this.y = y;
 		this.count = count;
 		this.path = [];
+		this.isPathVisible = false;
 		this.selected = false;
 		this.move = false;
 		this.pixels = createPixels(x, y, helpers.legionCountToWidth(count), helpers.legionCountToWidth(count), count);

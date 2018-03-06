@@ -11,6 +11,8 @@ module.exports.PLAYFIELD_HEIGHT = 550;
 module.exports.KING_COUNT = 50;
 module.exports.KING_WIDTH = 30;
 
+module.exports.KING_PX_PER_FRAME = 0.7;
+
 module.exports.INITIAL_LEGIONS_NUM = 2;
 module.exports.LEGION_COUNT = 25;
 module.exports.LEGION_COUNT_TO_WIDTH = 1.6;

@@ -10,6 +10,7 @@ class King {
 		this.y = y;
 		this.count = count;
 		this.path = [];
+		this.isPathVisible = false;
 		this.selected = false;
 		this.move = false;
 		this.color = c.COLORS[color].normal;

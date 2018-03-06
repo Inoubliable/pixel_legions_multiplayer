@@ -314,9 +314,9 @@ function battle(room) {
 						let vecX = room.allKings[k].x - legion1.x;
 						let vecY = room.allKings[k].y - legion1.y;
 						let vecLength = Math.sqrt(vecX**2 + vecY**2);
-						// vector length to 0.5
-						let newX = room.allKings[k].x + vecX/vecLength/2;
-						let newY = room.allKings[k].y + vecY/vecLength/2;
+						// vector length to king's frame speed
+						let newX = room.allKings[k].x + (vecX/vecLength) * c.KING_PX_PER_FRAME;
+						let newY = room.allKings[k].y + (vecY/vecLength) * c.KING_PX_PER_FRAME;
 						let width = c.KING_WIDTH;
 						let height = c.KING_WIDTH;
 						if (helpers.isInsidePlayfieldX(newX, width)) {
