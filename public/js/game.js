@@ -184,10 +184,10 @@ $(document).ready(function() {
 	canvas.width = PLAYFIELD_WIDTH;
 	canvas.height = PLAYFIELD_HEIGHT;
 
-	canvas.addEventListener("mousemove", onMouseMove, false);
+	document.body.addEventListener("mousemove", onMouseMove, false);
 	let mousedown = false;
-	canvas.addEventListener("mousedown", onMouseDown, false);
-	canvas.addEventListener("mouseup", onMouseUp, false);
+	document.body.addEventListener("mousedown", onMouseDown, false);
+	document.body.addEventListener("mouseup", onMouseUp, false);
 
 	function win() {
 		window.location.href = '/gameOver';

@@ -4,8 +4,11 @@
   box-sizing: border-box;
   font-family: "Arial"; }
 
-body {
-  background-color: #000; }
+html, body {
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  position: relative; }
 
 #game-canvas-container {
   text-align: center;
