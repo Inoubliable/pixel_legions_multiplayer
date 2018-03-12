@@ -1,23 +1,6 @@
 $(document).ready(function() {
 
-	let myPlayer = {};
-	let roomId = 'DefaultId';
-	let myId = 'DefaultId';
-	let myName = 'Default name';
-	let myRating = 1500;
-
-	if (localStorage.getItem('pixelLegionsPlayer')) {
-		myPlayer = JSON.parse(localStorage.getItem('pixelLegionsPlayer'));
-		roomId = myPlayer.roomId;
-		myId = myPlayer.id;
-		myName = myPlayer.name;
-		myRating = myPlayer.rating;
-	} else {
-		// send user to login
-		$.get('/login', function(data) {});
-	}
-
-	let socket = io('/game', { query: "&roomId=" + roomId + "&id=" + myId + "&name=" + myName + "&rating=" + myRating});
+	let socket = io('/game');
 
 	let sentTime = Date.now();
 	let lag = 0;
