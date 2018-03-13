@@ -23,6 +23,9 @@ let Legion = require('./modules/classes/Legion');
 
 let public = __dirname + '/public/';
 
+io.use(function(socket, next) {
+    session(socket.request, socket.request.res, next);
+});
 app.use(session);
 app.use(express.static(public));
 // parse application/x-www-form-urlencoded
@@ -40,6 +43,8 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
+	//dbConnection.removeAllPlayers();
+	dbConnection.getAllPlayers();
 	// check if name already exists
 	let playerName = req.body.name;
 	dbConnection.getPlayerByName(playerName, function(player) {
@@ -109,10 +114,11 @@ function waitingConnection(socket) {
 		socket.join(room.id);
 	}
 
-	let playerId = socket.handshake.query.id;
+	let playerId = socket.request.session.playerId;
 
 	dbConnection.getPlayerById(playerId, function(playerDB) {
-		room.allPlayers.push(new Player(playerDB.name, playerDB.rating, playerDB.id));
+		dbConnection.updatePlayer(playerId, {roomId: room.id});
+		room.allPlayers.push(new Player(playerDB.name, playerDB.rating, playerId));
 
 		let humanPlayersCount = room.allPlayers.length;
 		setTimeout(function() {
@@ -158,7 +164,7 @@ function fillWithAI(room, playerCount) {
 }
 
 function gameConnection(socket) {
-	let playerId = req.session.id;
+	let playerId = socket.request.session.playerId;
 	dbConnection.getPlayerById(playerId, function(player) {
 		let room = allRooms.find(r => r.id == player.roomId);
 		socket.join(player.roomId);

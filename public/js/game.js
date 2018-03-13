@@ -1,5 +1,11 @@
 $(document).ready(function() {
 
+	let myId = null;
+
+	$.get('/getPlayer', function(data) {
+		myId = data.id;
+	});
+
 	let socket = io('/game');
 
 	let sentTime = Date.now();

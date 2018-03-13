@@ -9,7 +9,9 @@ function insertPlayer(playerObject, callback) {
 
 	mongodb.MongoClient.connect(uri, function(err, db) {
 		db.db('pixel_legions').collection('players').insert(playerObject, function(err, player) {
-			callback(player);
+			if (callback) {
+				callback(player);
+			}
 		});
 
 	});
@@ -21,7 +23,9 @@ function getPlayerById(playerId, callback) {
 	mongodb.MongoClient.connect(uri, function(err, db) {
 
 		db.db('pixel_legions').collection('players').findOne({_id: ObjectId(playerId)}, function(err, player) {
-			callback(player);
+			if (callback) {
+				callback(player);
+			}
 		});
 
 	});
@@ -33,7 +37,45 @@ function getPlayerByName(playerName, callback) {
 	mongodb.MongoClient.connect(uri, function(err, db) {
 
 		db.db('pixel_legions').collection('players').findOne({name: playerName}, function(err, player) {
-			callback(player);
+			if (callback) {
+				callback(player);
+			}
+		});
+
+	});
+
+}
+
+function getAllPlayers() {
+
+	mongodb.MongoClient.connect(uri, function(err, db) {
+
+		db.db('pixel_legions').collection('players').find().forEach(function(doc) {
+			console.log(doc);
+		});
+
+	});
+
+}
+
+function removeAllPlayers() {
+
+	mongodb.MongoClient.connect(uri, function(err, db) {
+
+		db.db('pixel_legions').collection('players').remove({});
+
+	});
+
+}
+
+function updatePlayer(playerId, updatedObject, callback) {
+
+	mongodb.MongoClient.connect(uri, function(err, db) {
+
+		db.db('pixel_legions').collection('players').update({_id: ObjectId(playerId)}, {$set: updatedObject}, function(err, player) {
+			if (callback) {
+				callback(player);
+			}
 		});
 
 	});
@@ -43,5 +85,8 @@ function getPlayerByName(playerName, callback) {
 module.exports = {
 	insertPlayer: insertPlayer,
 	getPlayerById: getPlayerById,
-	getPlayerByName: getPlayerByName
+	getPlayerByName: getPlayerByName,
+	getAllPlayers: getAllPlayers,
+	removeAllPlayers: removeAllPlayers,
+	updatePlayer: updatePlayer
 }
