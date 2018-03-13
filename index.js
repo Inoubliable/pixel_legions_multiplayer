@@ -30,7 +30,7 @@ app.use(session);
 app.use(express.static(public));
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
-  extended: true
+	extended: true
 }));
 // parse application/json
 app.use(bodyParser.json());
@@ -44,7 +44,8 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
 	//dbConnection.removeAllPlayers();
-	dbConnection.getAllPlayers();
+	//dbConnection.getAllPlayers();
+
 	// check if name already exists
 	let playerName = req.body.name;
 	dbConnection.getPlayerByName(playerName, function(player) {
@@ -75,14 +76,15 @@ app.get('/gameOver', (req, res) => {
 app.post('/ranking', (req, res) => {
 	// get ranking for room
 	let roomId = req.body.roomId;
-	let finishedRoom = finishedRooms.find(r => r.id == roomId);
-	let ranking = null;
+	dbConnection.getRoom(roomId, function(room) {
+		let ranking = null;
 
-	if (finishedRoom) {
-		ranking = finishedRoom.ranking;
-	}
+		if (room) {
+			ranking = room.ranking;
+		}
 
-	res.json({ranking: ranking});
+		res.json({ranking: ranking});
+	});
 });
 
 app.get('/getPlayer', (req, res) => {
@@ -94,7 +96,6 @@ app.get('/getPlayer', (req, res) => {
 
 
 let allRooms = [];
-let finishedRooms = [];
 
 let waitingRoom = io.of('/waitingRoom');
 waitingRoom.on('connection', waitingConnection);
@@ -378,7 +379,7 @@ function battle(room) {
 					// if no human player in room is alive, delete the room
 					room.checkIfEmpty();
 					if (room.isEmpty) {
-						finishedRooms.push(room);
+						dbConnection.insertRoom(room);
 					}
 				}
 			}

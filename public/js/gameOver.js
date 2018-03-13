@@ -10,11 +10,8 @@ $(document).ready(function() {
 				oldRating = ranking[i].rating;
 				newRating = ranking[i].newRating;
 				$('.place').html(i+1);
-
-				// save users new rating
-				myPlayer.rating = newRating;
-				localStorage.setItem('pixelLegionsPlayer', JSON.stringify(myPlayer));
 			}
+			
 			$('.ranking').append('<li>' + (i+1) + '. ' + ranking[i].name + '</li>');
 		}
 

@@ -82,11 +82,41 @@ function updatePlayer(playerId, updatedObject, callback) {
 
 }
 
+function insertRoom(roomObject, callback) {
+
+	mongodb.MongoClient.connect(uri, function(err, db) {
+
+		db.db('pixel_legions').collection('rooms').insert(roomObject, function(err, room) {
+			if (callback) {
+				callback(room);
+			}
+		});
+
+	});
+
+}
+
+function getRoom(roomId, callback) {
+
+	mongodb.MongoClient.connect(uri, function(err, db) {
+
+		db.db('pixel_legions').collection('rooms').findOne({_id: ObjectId(roomId)}, function(err, room) {
+			if (callback) {
+				callback(room);
+			}
+		});
+
+	});
+
+}
+
 module.exports = {
 	insertPlayer: insertPlayer,
 	getPlayerById: getPlayerById,
 	getPlayerByName: getPlayerByName,
 	getAllPlayers: getAllPlayers,
 	removeAllPlayers: removeAllPlayers,
-	updatePlayer: updatePlayer
+	updatePlayer: updatePlayer,
+	insertRoom: insertRoom,
+	getRoom: getRoom
 }
