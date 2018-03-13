@@ -75,15 +75,17 @@ app.get('/gameOver', (req, res) => {
 });
 app.post('/ranking', (req, res) => {
 	// get ranking for room
-	let roomId = req.body.roomId;
-	dbConnection.getRoom(roomId, function(room) {
-		let ranking = null;
+	let playerId = req.session.playerId;
+	dbConnection.getPlayerById(playerId, function(player) {
+		dbConnection.getRoom(player.roomId, function(room) {
+			let ranking = null;
 
-		if (room) {
-			ranking = room.ranking;
-		}
+			if (room) {
+				ranking = room.ranking;
+			}
 
-		res.json({ranking: ranking});
+			res.json({ranking: ranking, playerId: playerId});
+		});
 	});
 });
 
@@ -119,7 +121,7 @@ function waitingConnection(socket) {
 
 	dbConnection.getPlayerById(playerId, function(playerDB) {
 		dbConnection.updatePlayer(playerId, {roomId: room.id});
-		room.allPlayers.push(new Player(playerDB.name, playerDB.rating, playerId));
+		room.allPlayers.push(new Player(playerId, playerDB.name, playerDB.rating));
 
 		let humanPlayersCount = room.allPlayers.length;
 		setTimeout(function() {
@@ -157,7 +159,7 @@ function fillWithAI(room, playerCount) {
 		let aggressiveness = room.availableAIObjects[AIIndex].aggressiveness;
 		let rating = c.STARTING_RATING;
 
-		let newPlayer = new Player(name, rating, AIid);
+		let newPlayer = new Player(AIid, name, rating);
 		room.allPlayers.push(newPlayer);
 		room.availableAIObjects.splice(AIIndex, 1);
 		newPlayer.initiatePlayer(room, true, aggressiveness);
@@ -170,7 +172,7 @@ function gameConnection(socket) {
 		let room = allRooms.find(r => r.id == player.roomId);
 		socket.join(player.roomId);
 		
-		let newPlayer = new Player(player.name, player.rating, playerId);
+		let newPlayer = new Player(playerId, player.name, player.rating);
 		room.allPlayers.push(newPlayer);
 		newPlayer.initiatePlayer(room, false, null);
 

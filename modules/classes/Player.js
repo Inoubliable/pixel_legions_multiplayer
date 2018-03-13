@@ -7,8 +7,8 @@ let King = require('./King');
 let Legion = require('./Legion');
 
 class Player {
-	constructor(name, rating, id) {
-		this.id = id || uuidv1();
+	constructor(id, name, rating) {
+		this.id = id;
 		this.name = name;
 		this.rating = rating;
 	}

@@ -100,7 +100,7 @@ function getRoom(roomId, callback) {
 
 	mongodb.MongoClient.connect(uri, function(err, db) {
 
-		db.db('pixel_legions').collection('rooms').findOne({_id: ObjectId(roomId)}, function(err, room) {
+		db.db('pixel_legions').collection('rooms').findOne({id: roomId}, function(err, room) {
 			if (callback) {
 				callback(room);
 			}

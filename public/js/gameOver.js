@@ -1,7 +1,8 @@
 $(document).ready(function() {
 
-	$.post('/ranking', {roomId: roomId}, function(data) {
+	$.post('/ranking', function(data) {
 		let ranking = data.ranking;
+		let myId = data.playerId;
 		let oldRating = 1500;
 		let newRating = 1500;
 
