@@ -8,7 +8,10 @@ let uuidv1 = require('uuid/v1');
 var session = require('express-session')({
 	secret: 'somerandomstring',
 	resave: false,
-	saveUninitialized: false
+	saveUninitialized: false,
+	cookie: {
+		maxAge: 30*24*60*1000
+	}
 });
 
 let c = require('./modules/constants');
@@ -44,7 +47,6 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
 	//dbConnection.removeAllPlayers();
-	//dbConnection.getAllPlayers();
 
 	// check if name already exists
 	let playerName = req.body.name;
@@ -90,10 +92,20 @@ app.post('/ranking', (req, res) => {
 });
 
 app.get('/getPlayer', (req, res) => {
-	// get ranking for room
 	let playerId = req.session.playerId;
+	dbConnection.getPlayerById(playerId, function(player) {
+		res.json(player);
+	});
+});
 
-	res.json({id: playerId});
+app.get('/getLeaderboard', (req, res) => {
+	dbConnection.getLeaderboard(function(leaderboard) {
+		res.json(leaderboard);
+	});
+});
+
+app.get('/leaderboard', (req, res) => {
+	res.sendFile(path.join(public + 'leaderboard.html'));
 });
 
 

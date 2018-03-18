@@ -8,16 +8,19 @@
 	</head>
 	<body>
 		<video autoplay muted loop id="bgVideo">
-			<!--<source src="assets/myVideo.mp4" type="video/mp4">-->
+			<source src="assets/myVideo.mp4" type="video/mp4">
 		</video>
+
+		<a href="leaderboard">
+			<button class="leaderboard-btn">Leaderboard</button>
+		</a>
 
 		<h1 class="main-header">PIXEL LEGIONS</h1>
 
 		<form id="login-form" action="/login" method="POST">
-			<input type="text" class="name" name="name" placeholder="Name"  maxlength="10" required>
-			<input type="submit" value="Play">
+			<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
+			<input type="submit" class="login-btn" value="Play">
 		</form>
-
 
 		<form id="login-as-form" action="/login" method="POST">
 			<input type="submit" class="login-as-btn" value="Play as">

@@ -2,8 +2,8 @@ $(document).ready(function() {
 
 	let myId = null;
 
-	$.get('/getPlayer', function(data) {
-		myId = data.id;
+	$.get('getPlayer', function(data) {
+		myId = data._id;
 	});
 
 	let socket = io('/game');

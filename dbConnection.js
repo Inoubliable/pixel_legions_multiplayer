@@ -110,6 +110,20 @@ function getRoom(roomId, callback) {
 
 }
 
+function getLeaderboard(callback) {
+
+	mongodb.MongoClient.connect(uri, function(err, db) {
+
+		db.db('pixel_legions').collection('players').find().sort({rating: -1}).toArray(function(err, leaderboard) {
+			if (callback) {
+				callback(leaderboard);
+			}
+		});
+
+	});
+
+}
+
 module.exports = {
 	insertPlayer: insertPlayer,
 	getPlayerById: getPlayerById,
@@ -118,5 +132,6 @@ module.exports = {
 	removeAllPlayers: removeAllPlayers,
 	updatePlayer: updatePlayer,
 	insertRoom: insertRoom,
-	getRoom: getRoom
+	getRoom: getRoom,
+	getLeaderboard: getLeaderboard
 }

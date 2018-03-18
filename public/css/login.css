@@ -13,7 +13,21 @@ body {
   right: 0;
   bottom: 0;
   min-width: 100%;
-  min-height: 100%; }
+  min-height: 100%;
+  z-index: -1; }
+
+.leaderboard-btn {
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: #37c;
+  color: white;
+  border: none;
+  font-size: 16px;
+  float: right;
+  margin-right: 80px;
+  margin-top: 40px; }
+  .leaderboard-btn:hover {
+    cursor: pointer; }
 
 .main-header {
   position: absolute;
@@ -33,13 +47,15 @@ body {
     border-radius: 2px;
     border: 1px solid #888;
     font-size: 16px; }
-  #login-form input[type='submit'] {
+  #login-form .login-btn {
     padding: 8px 12px;
     border-radius: 4px;
     background-color: #37c;
     color: white;
     border: none;
     font-size: 16px; }
+    #login-form .login-btn:hover {
+      cursor: pointer; }
 
 #login-as-form {
   position: absolute;
