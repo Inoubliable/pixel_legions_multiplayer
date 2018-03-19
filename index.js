@@ -10,7 +10,7 @@ var session = require('express-session')({
 	resave: false,
 	saveUninitialized: false,
 	cookie: {
-		maxAge: 30*24*60*1000
+		maxAge: 30*24*60*60*1000
 	}
 });
 
@@ -133,7 +133,7 @@ function waitingConnection(socket) {
 
 	dbConnection.getPlayerById(playerId, function(playerDB) {
 		dbConnection.updatePlayer(playerId, {roomId: room.id});
-		room.allPlayers.push(new Player(playerId, playerDB.name, playerDB.rating));
+		room.allPlayers.push(new Player(playerId, playerDB.name, playerDB.rating, false));
 
 		let humanPlayersCount = room.allPlayers.length;
 		setTimeout(function() {
@@ -171,10 +171,10 @@ function fillWithAI(room, playerCount) {
 		let aggressiveness = room.availableAIObjects[AIIndex].aggressiveness;
 		let rating = c.STARTING_RATING;
 
-		let newPlayer = new Player(AIid, name, rating);
+		let newPlayer = new Player(AIid, name, rating, true);
 		room.allPlayers.push(newPlayer);
 		room.availableAIObjects.splice(AIIndex, 1);
-		newPlayer.initiatePlayer(room, true, aggressiveness);
+		newPlayer.initiatePlayer(room, aggressiveness);
 	}
 }
 
@@ -184,9 +184,9 @@ function gameConnection(socket) {
 		let room = allRooms.find(r => r.id == player.roomId);
 		socket.join(player.roomId);
 		
-		let newPlayer = new Player(playerId, player.name, player.rating);
+		let newPlayer = new Player(playerId, player.name, player.rating, false);
 		room.allPlayers.push(newPlayer);
-		newPlayer.initiatePlayer(room, false, null);
+		newPlayer.initiatePlayer(room, null);
 
 		// create spawn loops for every player
 		if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {

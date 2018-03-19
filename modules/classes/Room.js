@@ -3,6 +3,8 @@ let uuidv1 = require('uuid/v1');
 let c = require('../constants');
 let helpers = require('../helpers');
 
+let dbConnection = require('../../dbConnection');
+
 class Room {
 	constructor() {
 		this.id = uuidv1();
@@ -30,11 +32,21 @@ class Room {
 				this.ranking[i] = this.allPlayers.find(p => p.id == deadPlayerId);
 				this.ranking[i].newRating = helpers.calculateRating(this.ranking[i].rating, i+1, this.allPlayers);
 
+				// save new rating to db
+				if (!this.ranking[i].isAI) {
+					dbConnection.updatePlayer(deadPlayerId, {rating: this.ranking[i].newRating});
+				}
+
 				// check if only one player is still alive
 				if (this.ranking[1].id != '') {
 					let winnerKing = this.allKings.find(k => k.count > 0);
 					this.ranking[0] = this.allPlayers.find(p => p.id == winnerKing.playerId);
 					this.ranking[0].newRating = helpers.calculateRating(this.ranking[0].rating, 1, this.allPlayers);
+
+					// save new rating to db
+					if (!this.ranking[0].isAI) {
+						dbConnection.updatePlayer(winnerKing.playerId, {rating: this.ranking[0].newRating});
+					}
 				}
 				break;
 			}

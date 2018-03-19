@@ -7,13 +7,14 @@ let King = require('./King');
 let Legion = require('./Legion');
 
 class Player {
-	constructor(id, name, rating) {
+	constructor(id, name, rating, isAI) {
 		this.id = id;
 		this.name = name;
 		this.rating = rating;
+		this.isAI = isAI;
 	}
 
-	initiatePlayer(room, isAI, aggressiveness) {
+	initiatePlayer(room, aggressiveness) {
 	    let colorIndex = Math.floor(Math.random() * room.availableColors.length);
 	    let color = room.availableColors[colorIndex];
 	    room.availableColors.splice(colorIndex, 1);
@@ -36,7 +37,7 @@ class Player {
 	    }
 
 	    // initiate king
-	    room.allKings.push(new King(this.id, x, y, c.KING_COUNT, color, isAI));
+	    room.allKings.push(new King(this.id, x, y, c.KING_COUNT, color, this.isAI));
 
 	    // initiate legions
 	    for (let i = 0; i < c.INITIAL_LEGIONS_NUM; i++) {
@@ -52,7 +53,7 @@ class Player {
 	            legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
 	        }
 
-	        room.allLegions.push(new Legion(this.id, legionX, legionY, c.LEGION_COUNT, color, false, 0, 0, isAI));
+	        room.allLegions.push(new Legion(this.id, legionX, legionY, c.LEGION_COUNT, color, false, 0, 0, this.isAI));
 	    }
 
 	    this.aggressiveness = aggressiveness;
