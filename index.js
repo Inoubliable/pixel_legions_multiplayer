@@ -124,7 +124,7 @@ app.post('/register', (req, res) => {
 			};
 			dbConnection.insertPlayer(newPlayer, function(data) {
 				req.session.playerId = data.insertedIds[0];
-				res.redirect(path.join('login'));
+				res.redirect('login');
 			});
 		} else {
 			res.json({error: 'Player with that name already exists.'});
