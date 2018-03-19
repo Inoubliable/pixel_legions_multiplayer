@@ -7,24 +7,16 @@
 		<script src="js/login.js"></script>
 	</head>
 	<body>
-		<video autoplay muted loop id="bgVideo">
-			<source src="assets/myVideo.mp4" type="video/mp4">
-		</video>
-
-		<a href="leaderboard">
-			<button class="leaderboard-btn">Leaderboard</button>
-		</a>
-
 		<h1 class="main-header">PIXEL LEGIONS</h1>
 
-		<form id="login-form" action="/login" method="POST">
+		<form id="register-form" action="/register" method="POST">
 			<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
 			<input type="text" class="password" name="password" placeholder="Password" maxlength="10" required>
-			<input type="submit" class="login-btn" value="Play">
+			<input type="submit" class="register-btn" value="Register">
 		</form>
 
-		<a href="register">
-			<button class="register-btn-link">Register</button>
+		<a href="login">
+			<button class="login-btn-link">Login</button>
 		</a>
 	</body>
 </html>

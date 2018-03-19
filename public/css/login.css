@@ -6,7 +6,8 @@
 
 body {
   width: 100%;
-  height: 100%; }
+  height: 100%;
+  background-color: #000; }
 
 #bgVideo {
   position: absolute;
@@ -37,40 +38,48 @@ body {
   width: 100%;
   color: white; }
 
-#login-form {
+#login-form,
+#register-form {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%); }
-  #login-form input[type='text'] {
+  #login-form input[type='text'],
+  #register-form input[type='text'] {
     padding: 7px;
     border-radius: 2px;
     border: 1px solid #888;
     font-size: 16px; }
-  #login-form .login-btn {
+  #login-form .login-btn,
+  #login-form .register-btn,
+  #register-form .login-btn,
+  #register-form .register-btn {
     padding: 8px 12px;
     border-radius: 4px;
     background-color: #37c;
     color: white;
     border: none;
     font-size: 16px; }
-    #login-form .login-btn:hover {
+    #login-form .login-btn:hover,
+    #login-form .register-btn:hover,
+    #register-form .login-btn:hover,
+    #register-form .register-btn:hover {
       cursor: pointer; }
 
-#login-as-form {
+.register-btn-link,
+.login-btn-link {
   position: absolute;
-  top: 60%;
+  top: 70%;
   left: 50%;
   transform: translate(-50%, -50%);
-  display: none; }
-  #login-as-form .login-as-btn {
-    padding: 8px 12px;
-    border-radius: 4px;
-    background-color: #37c;
-    color: white;
-    border: none;
-    font-size: 16px; }
-    #login-as-form .login-as-btn:hover {
-      cursor: pointer; }
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: #37c;
+  color: white;
+  border: none;
+  font-size: 16px; }
+  .register-btn-link:hover,
+  .login-btn-link:hover {
+    cursor: pointer; }
 
 /*# sourceMappingURL=login.css.map */

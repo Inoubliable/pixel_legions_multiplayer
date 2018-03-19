@@ -10,7 +10,7 @@ var session = require('express-session')({
 	resave: false,
 	saveUninitialized: false,
 	cookie: {
-		maxAge: 30*24*60*60*1000
+		maxAge: 5*24*60*60*1000
 	}
 });
 
@@ -46,24 +46,23 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-	//dbConnection.removeAllPlayers();
 
 	// check if name already exists
 	let playerName = req.body.name;
+	let playerPassword = req.body.password;
 	dbConnection.getPlayerByName(playerName, function(player) {
-		if (!player) {
-			let newPlayer = {
-				name: playerName,
-				rating: c.STARTING_RATING
-			};
-			dbConnection.insertPlayer(newPlayer, function(data) {
-				req.session.playerId = data.insertedIds[0];
+		if (player) {
+			if (player.password == playerPassword) {
+				req.session.playerId = player._id;
 				res.sendFile(path.join(public + 'waitingRoom.html'));
-			});
+			} else {
+				res.json({error: 'Wrong password.'});
+			}
 		} else {
-			res.json({error: 'Player with that name already exists.'});
+			res.json({error: 'Player with that name does not exist.'});
 		}
 	});
+
 });
 
 app.get('/waitingRoom', (req, res) => {
@@ -106,6 +105,32 @@ app.get('/getLeaderboard', (req, res) => {
 
 app.get('/leaderboard', (req, res) => {
 	res.sendFile(path.join(public + 'leaderboard.html'));
+});
+
+app.get('/register', (req, res) => {
+	res.sendFile(path.join(public + 'register.html'));
+});
+app.post('/register', (req, res) => {
+
+	// check if name already exists
+	let playerName = req.body.name;
+	let playerPassword = req.body.password;
+	dbConnection.getPlayerByName(playerName, function(player) {
+		if (!player) {
+			let newPlayer = {
+				name: playerName,
+				password: playerPassword,
+				rating: c.STARTING_RATING
+			};
+			dbConnection.insertPlayer(newPlayer, function(data) {
+				req.session.playerId = data.insertedIds[0];
+				res.redirect(path.join('login'));
+			});
+		} else {
+			res.json({error: 'Player with that name already exists.'});
+		}
+	});
+
 });
 
 

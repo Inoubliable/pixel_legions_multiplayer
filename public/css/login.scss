@@ -12,6 +12,7 @@ $bluish: #37c;
 body {
     width: 100%;
     height: 100%;
+    background-color: #000;
 }
 
 #bgVideo {
@@ -48,7 +49,8 @@ body {
 	color: white;
 }
 
-#login-form {
+#login-form,
+#register-form {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -61,7 +63,8 @@ body {
 		font-size: 16px;
 	}
 
-	.login-btn {
+	.login-btn,
+	.register-btn {
 		padding: 8px 12px;
 		border-radius: 4px;
 		background-color: $bluish;
@@ -75,23 +78,20 @@ body {
 	}
 }
 
-#login-as-form {
+.register-btn-link,
+.login-btn-link {
 	position: absolute;
-	top: 60%;
+	top: 70%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	display: none;
+	padding: 8px 12px;
+	border-radius: 4px;
+	background-color: $bluish;
+	color: white;
+	border: none;
+	font-size: 16px;
 
-	.login-as-btn {
-		padding: 8px 12px;
-		border-radius: 4px;
-		background-color: $bluish;
-		color: white;
-		border: none;
-		font-size: 16px;
-
-		&:hover {
-			cursor: pointer;
-		}
+	&:hover {
+		cursor: pointer;
 	}
 }
