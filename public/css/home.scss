@@ -1,0 +1,56 @@
+$mainFont: 'Arial';
+$dark-gray: #888;
+$bluish: #37c;
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: $mainFont;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+}
+
+.leaderboard-btn {
+	padding: 8px 12px;
+	border-radius: 4px;
+	background-color: $bluish;
+	color: white;
+	border: none;
+	font-size: 16px;
+	float: right;
+	margin-right: 80px;
+	margin-top: 40px;
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+.game-btns-container {	
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translateX(-50%);
+
+	.ffa-btn,
+	.team-btn {
+		width: 120px;
+		height: 120px;
+		border-radius: 8px;
+		background-color: #739abc;
+		color: white;
+		border: none;
+		font-size: 22px;
+		margin-right: 90px;
+
+		&:hover {
+			cursor: pointer;
+			background-color: #93aacc;
+		}
+	}
+}

@@ -54,7 +54,7 @@ app.post('/login', (req, res) => {
 		if (player) {
 			if (player.password == playerPassword) {
 				req.session.playerId = player._id;
-				res.sendFile(path.join(public + 'waitingRoom.html'));
+				res.redirect('home');
 			} else {
 				res.json({error: 'Wrong password.'});
 			}
@@ -65,6 +65,9 @@ app.post('/login', (req, res) => {
 
 });
 
+app.get('/home', (req, res) => {
+	res.sendFile(path.join(public + 'home.html'));
+});
 app.get('/waitingRoom', (req, res) => {
 	res.sendFile(path.join(public + 'waitingRoom.html'));
 });

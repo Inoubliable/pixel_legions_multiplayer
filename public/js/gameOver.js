@@ -33,7 +33,7 @@ $(document).ready(function() {
 	});
 
 	$('.play-again-btn').click(function(event) {
-		window.location.href = '/waitingRoom';
+		window.location.href = '/home';
 	});
 
 });
