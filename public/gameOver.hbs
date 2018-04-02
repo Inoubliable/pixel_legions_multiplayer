@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Pixel Legions</title>
+		<link rel="stylesheet" href="css/gameOver.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="js/gameOver.js"></script>
+	</head>
+	<body>
+		<div>You have finished on <span class="place">{{place}}</span>. place</div>
+
+		<ul class="ranking">
+			{{#each ranking}}
+				<li>{{indexToPlace @index}}. {{this.name}}</li>
+			{{/each}}
+		</ul>
+
+		<div class="rating-change">
+			New rating: {{newRating}} ({{ratingDiff}})
+		</div>
+		<br>
+		<a href="home" class="play-again-btn">Play again</a>
+	</body>
+</html>

@@ -5,7 +5,8 @@ let path = require('path');
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 let uuidv1 = require('uuid/v1');
-var session = require('express-session')({
+let hbs = require('express-handlebars');
+let session = require('express-session')({
 	secret: 'somerandomstring',
 	resave: false,
 	saveUninitialized: false,
@@ -26,6 +27,37 @@ let King = require('./modules/classes/King');
 let Legion = require('./modules/classes/Legion');
 
 let public = __dirname + '/public/';
+
+
+app.engine('hbs', hbs({
+	extname: 'hbs',
+	layoutsDir: public,
+	helpers: {
+		if_eq: function (a, b, opts) {
+			if(a == b)
+				return opts.fn(this);
+			else
+				return opts.inverse(this);
+		},
+		if_neq: function (a, b, opts) {
+			if(a == b)
+				return opts.inverse(this);
+			else
+				return opts.fn(this);
+		},
+		if_gt: function (a, b, opts) {
+			if(a > b)
+				return opts.fn(this);
+			else
+				return opts.inverse(this);
+		},
+		indexToPlace: function(index, options) {
+			return parseInt(index) + 1;
+		}
+	}
+}));
+app.set('views', public);
+app.set('view engine', 'hbs');
 
 io.use(function(socket, next) {
     session(socket.request, socket.request.res, next);
@@ -50,10 +82,10 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-	res.sendFile(path.join(public + 'login.html'));
+	res.render(path.join(public + 'login.hbs'));
 });
 app.get('/login', (req, res) => {
-	res.sendFile(path.join(public + 'login.html'));
+	res.render(path.join(public + 'login.hbs'));
 });
 
 app.post('/login', (req, res) => {
@@ -77,24 +109,21 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-	res.sendFile(path.join(public + 'home.html'));
+	res.render(path.join(public + 'home.hbs'));
 });
 app.get('/waitingRoom', (req, res) => {
-	res.sendFile(path.join(public + 'waitingRoom.html'));
+	res.render(path.join(public + 'waitingRoom.hbs'));
 });
 app.get('/game', (req, res) => {
 	let playerId = req.session.playerId;
 	let room = allRooms.find(r => r.allPlayers.map(p => p.id).includes(playerId));
 	if (room) {
-		res.sendFile(path.join(public + 'game.html'));
+		res.render(path.join(public + 'game.hbs'));
 	} else {
 		res.redirect('home');
 	}
 });
 app.get('/gameOver', (req, res) => {
-	res.sendFile(path.join(public + 'gameOver.html'));
-});
-app.post('/ranking', (req, res) => {
 	// get ranking for room
 	let playerId = req.session.playerId;
 	dbConnection.getPlayerById(playerId, function(player) {
@@ -105,7 +134,20 @@ app.post('/ranking', (req, res) => {
 				ranking = room.ranking;
 			}
 
-			res.json({ranking: ranking, playerId: playerId});
+			let playerRankingIndex = ranking.findIndex(r => r.id == playerId);
+			let playerRanking = ranking[playerRankingIndex];
+			let ratingDiff = playerRanking.newRating - playerRanking.rating;
+			if (ratingDiff > 0) {
+				ratingDiff = '+' + ratingDiff;
+			}
+
+			res.render(path.join(public + 'gameOver.hbs'), {
+				ranking: ranking,
+				oldRating: playerRanking.rating,
+				newRating: playerRanking.newRating,
+				ratingDiff: ratingDiff,
+				place: playerRankingIndex+1
+			});
 		});
 	});
 });
@@ -117,18 +159,14 @@ app.get('/getPlayer', (req, res) => {
 	});
 });
 
-app.get('/getLeaderboard', (req, res) => {
+app.get('/leaderboard', (req, res) => {
 	dbConnection.getLeaderboard(function(leaderboard) {
-		res.json(leaderboard);
+		res.render(path.join(public + 'leaderboard.hbs'), {leaderboard: leaderboard});
 	});
 });
 
-app.get('/leaderboard', (req, res) => {
-	res.sendFile(path.join(public + 'leaderboard.html'));
-});
-
 app.get('/register', (req, res) => {
-	res.sendFile(path.join(public + 'register.html'));
+	res.render(path.join(public + 'register.hbs'));
 });
 app.post('/register', (req, res) => {
 
