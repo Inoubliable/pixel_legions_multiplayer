@@ -10,7 +10,8 @@ var session = require('express-session')({
 	resave: false,
 	saveUninitialized: false,
 	cookie: {
-		maxAge: 5*24*60*60*1000
+		//maxAge: 5*24*60*60*1000
+		expires: false  // enable the cookie to remain only for the duration of the user-agent
 	}
 });
 
@@ -37,6 +38,16 @@ app.use(bodyParser.urlencoded({
 }));
 // parse application/json
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+	let playerId = req.session.playerId;
+	let urlEnd = req.originalUrl;
+	if (playerId || urlEnd == '/login' || urlEnd == '/register') {
+		next();
+	} else {
+		res.redirect('login');
+	}
+});
 
 app.get('/', (req, res) => {
 	res.sendFile(path.join(public + 'login.html'));
@@ -72,7 +83,13 @@ app.get('/waitingRoom', (req, res) => {
 	res.sendFile(path.join(public + 'waitingRoom.html'));
 });
 app.get('/game', (req, res) => {
-	res.sendFile(path.join(public + 'game.html'));
+	let playerId = req.session.playerId;
+	let room = allRooms.find(r => r.allPlayers.map(p => p.id).includes(playerId));
+	if (room) {
+		res.sendFile(path.join(public + 'game.html'));
+	} else {
+		res.redirect('home');
+	}
 });
 app.get('/gameOver', (req, res) => {
 	res.sendFile(path.join(public + 'gameOver.html'));
@@ -150,6 +167,7 @@ function waitingConnection(socket) {
 	let room = {};
 	let freeRoom = allRooms.find(r => r.open);
 	if (freeRoom) {
+		room = freeRoom;
 		socket.join(freeRoom.id);
 	} else {
 		room = new Room();
@@ -421,7 +439,14 @@ function battle(room) {
 					// if no human player in room is alive, delete the room
 					room.checkIfEmpty();
 					if (room.isEmpty) {
-						dbConnection.insertRoom(room);
+						let roomToInsert = {
+							id: room.id,
+							allPlayers: room.allPlayers,
+							ranking: room.ranking,
+							open: room.open,
+							isEmpty: room.isEmpty
+						};
+						dbConnection.insertRoom(roomToInsert);
 					}
 				}
 			}
