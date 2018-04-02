@@ -311,18 +311,22 @@ $(document).ready(function() {
 					mouseDownLegionIndex = i;
 					mousedown = false;
 					break;
-				} else {
-					if (myLegions[i].selected) {
-						myLegions[i].path = [];
-						myLegions[i].isPathVisible = true;
-					}
 				}
 			}
 
-			// if my king is selected and nothing new was selected
-			if (myKing.selected && mousedown) {
-				myKing.path = [];
-				myKing.isPathVisible = true;
+			// if nothing new was selected, override path with new one
+			if (mousedown) {
+				if (myKing.selected) {
+					myKing.path = [];
+					myKing.isPathVisible = true;
+				} else {
+					for (let i = 0; i < myLegions.length; i++) {
+						if (myLegions[i].selected) {
+							myLegions[i].path = [];
+							myLegions[i].isPathVisible = true;
+						}
+					}
+				}
 			}
 		}
 
