@@ -9,37 +9,59 @@ body {
   height: 100%;
   background-color: #000; }
 
-.leaderboard-btn {
-  padding: 8px 12px;
-  border-radius: 4px;
-  background-color: #37c;
-  color: white;
-  border: none;
-  font-size: 16px;
-  float: right;
-  margin-right: 80px;
-  margin-top: 40px; }
-  .leaderboard-btn:hover {
-    cursor: pointer; }
-
 .game-btns-container {
   position: absolute;
-  top: 40%;
+  top: 25%;
   left: 50%;
   transform: translateX(-50%); }
   .game-btns-container .ffa-btn,
   .game-btns-container .team-btn {
-    width: 120px;
-    height: 120px;
-    border-radius: 8px;
-    background-color: #739abc;
+    width: 150px;
+    height: 240px;
+    border-radius: 5px;
+    background-color: #6187a9;
     color: white;
     border: none;
     font-size: 22px;
-    margin-right: 90px; }
+    position: relative; }
     .game-btns-container .ffa-btn:hover,
     .game-btns-container .team-btn:hover {
       cursor: pointer;
-      background-color: #93aacc; }
+      background-color: #59d;
+      border: 1px solid #59d; }
+    .game-btns-container .ffa-btn .caption,
+    .game-btns-container .team-btn .caption {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 15px; }
+  .game-btns-container .ffa-btn {
+    margin-right: 90px;
+    background: url("../assets/pl_ffa.svg") no-repeat top left;
+    background-size: contain; }
+  .game-btns-container .team-btn {
+    background: url("../assets/pl_team.svg") no-repeat top left;
+    background-size: contain; }
+
+.statistics-btns-container {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translateX(-50%); }
+  .statistics-btns-container .upgrades-btn,
+  .statistics-btns-container .leaderboard-btn {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background-color: #37c;
+    color: white;
+    border: none;
+    font-size: 16px;
+    margin-top: 40px; }
+    .statistics-btns-container .upgrades-btn:hover,
+    .statistics-btns-container .leaderboard-btn:hover {
+      cursor: pointer;
+      background-color: #59d; }
+  .statistics-btns-container .upgrades-btn {
+    margin-right: 40px; }
 
 /*# sourceMappingURL=home.css.map */
