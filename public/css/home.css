@@ -4,7 +4,7 @@
   box-sizing: border-box;
   font-family: "Arial"; }
 
-body {
+html, body {
   width: 100%;
   height: 100%;
   background-color: #000; }
@@ -23,7 +23,8 @@ body {
     color: white;
     border: none;
     font-size: 22px;
-    position: relative; }
+    position: relative;
+    border: 1px solid #444; }
     .game-btns-container .ffa-btn:hover,
     .game-btns-container .team-btn:hover {
       cursor: pointer;
@@ -63,5 +64,39 @@ body {
       background-color: #59d; }
   .statistics-btns-container .upgrades-btn {
     margin-right: 40px; }
+
+.upgrades-bar {
+  width: 80%;
+  height: 90%;
+  background-color: #222;
+  border-radius: 0 0 22px 22px;
+  color: #fff;
+  font-size: 28px;
+  font-variant: small-caps;
+  text-align: center;
+  padding: 20px;
+  margin-left: 50%;
+  transform: translate(-50%, -100%);
+  transition: transform 1s; }
+  .upgrades-bar .upgrades {
+    margin-top: 20px;
+    padding: 10px; }
+    .upgrades-bar .upgrades .upgrade {
+      border: 2px solid #555;
+      border-radius: 4px;
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+      margin: 20px;
+      float: left; }
+  .upgrades-bar .close {
+    position: absolute;
+    bottom: 10px;
+    padding: 10px;
+    margin-left: 50%;
+    transform: translateX(-50%); }
+    .upgrades-bar .close:hover {
+      cursor: pointer; }
 
 /*# sourceMappingURL=home.css.map */

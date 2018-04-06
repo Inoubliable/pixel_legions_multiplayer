@@ -166,7 +166,7 @@ app.get('/leaderboard', (req, res) => {
 });
 
 app.get('/upgrades', (req, res) => {
-	res.render(path.join(public + 'upgrades.hbs'));
+	
 });
 
 app.get('/register', (req, res) => {
