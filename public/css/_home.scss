@@ -1,22 +1,3 @@
-$mainFont: 'Arial';
-$dark-gray: #888;
-$bluish: #37c;
-$bluish-hover: #59d;
-$upgrade-height: 100px;
-
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	font-family: $mainFont;
-}
-
-html, body {
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-}
-
 .game-btns-container {	
 	position: absolute;
 	top: 25%;
@@ -89,7 +70,7 @@ html, body {
 }
 
 .upgrades-bar {
-	width: 80%;
+	width: 50%;
 	height: 90%;
 	background-color: #222;
 	border-radius: 0 0 22px 22px;

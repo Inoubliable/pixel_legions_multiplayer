@@ -1,27 +1,9 @@
-$mainFont: 'Arial';
-$dark-gray: #888;
-$bluish: #37c;
-
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	font-family: $mainFont;
-}
-
-body {
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-}
-
 #bgVideo {
 	position: absolute;
     right: 0;
     bottom: 0;
     min-width: 100%; 
     min-height: 100%;
-    z-index: -1;
 }
 
 .main-header {

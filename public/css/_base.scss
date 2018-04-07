@@ -1,0 +1,30 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: $font-main;
+	color: #fff;
+}
+
+html, body {
+	position: relative;
+	height: 100%;
+	width: 100%;
+	background-color: $bgc-main;
+}
+
+a {
+	text-decoration: none;
+}
+
+ul {
+	list-style: none;
+}
+
+.clearfix {
+    clear: both;
+}
+
+.hide {
+	display: none;
+}

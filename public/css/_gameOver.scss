@@ -1,20 +1,12 @@
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-	font-family: 'Arial';
-	color: white;
-}
-
-body {
-	padding: 100px 50px;
-	background-color: #000;
+.place-sentence {
+	margin-top: 30px;
+	margin-left: 30px;
 }
 
 .ranking {
-	list-style-type: none;
 	font-size: 20px;
 	margin-top: 30px;
+	margin-left: 30px;
 }
 
 .ranking li {
@@ -34,7 +26,6 @@ body {
 	background-color: #37c;
 	border-radius: 3px;
 	font-size: 20px;
-	text-decoration: none;
 	margin-top: 40px;
 	margin-left: 50%;
 	transform: translateX(-50%);
