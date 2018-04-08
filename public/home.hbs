@@ -29,18 +29,21 @@
 		</div>
 
 		<div class="upgrades-bar">
-			Upgrades
+			<div class="upgrades-bar-header">Upgrades</div>
 			<div class="upgrades">
-				<div class="upgrade" id="legion-speed">&#10514;</div>
-				<div class="upgrade" id="king-speed">&#10514;</div>
-				<div class="upgrade" id="legion-hp">&#10514;</div>
-				<div class="upgrade" id="king-hp">&#10514;</div>
-				<div class="upgrade" id="spawn-rate">&#10514;</div>
-				<div class="upgrade" id="legion-a">&#10514;</div>
-				<div class="upgrade" id="legion-b">&#10514;</div>
-				<div class="upgrade" id="legion-c">&#10514;</div>
-				<div class="upgrade" id="legion-d">&#10514;</div>
-				<div class="upgrade" id="legion-e">&#10514;</div>
+				{{#each upgradesArray}}
+					<div class="upgrade" id={{this.id}}>
+						<img src={{this.icon}}>
+					</div>
+				{{/each}}
+			</div>
+			<div class="upgrades-info">
+				<div class="upgrade-name"></div>
+				<div class="upgrade-icon">
+					<img src="">
+				</div>
+				<div class="upgrade-description"></div>
+				<div class="upgrade-cost"></div>
 			</div>
 
 			<div class="close">&#10514;</div>

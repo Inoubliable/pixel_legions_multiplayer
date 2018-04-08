@@ -28,6 +28,65 @@ let Legion = require('./modules/classes/Legion');
 
 let public = __dirname + '/public/';
 
+let upgradesArray = [
+	{
+		id: 'speed_legion',
+		name: 'Legion speed',
+		icon: 'assets/speed_legion.svg',
+		description: 'Increase speed of your legions by 1%.',
+		cost: 300
+	},
+	{
+		id: 'speed_king',
+		name: 'King speed',
+		icon: 'assets/speed_king.svg',
+		description: 'Increase speed of your king by 1%.',
+		cost: 200
+	},
+	{
+		id: 'hp_legion',
+		name: 'Legion HP',
+		icon: 'assets/hp_legion.svg',
+		description: 'Increase hit points of your legions by 5.',
+		cost: 350
+	},
+	{
+		id: 'hp_king',
+		name: 'King HP',
+		icon: 'assets/hp_king.svg',
+		description: 'Increase hit points of your king by 5.',
+		cost: 500
+	},
+	{
+		id: 'legion_attack',
+		name: 'Legion attack',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A'
+	},
+	{
+		id: 'king_attack',
+		name: 'King attack',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A'
+	},
+	{
+		id: 'spawn_rate',
+		name: 'Spawn rate',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A'
+	},
+	{
+		id: 'coin_revenue',
+		name: 'Coin revenue',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A'
+	}
+];
+
 
 app.engine('hbs', hbs({
 	extname: 'hbs',
@@ -109,7 +168,7 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
-	res.render(path.join(public + 'home.hbs'));
+	res.render(path.join(public + 'home.hbs'), {upgradesArray: upgradesArray});
 });
 app.get('/waitingRoom', (req, res) => {
 	res.render(path.join(public + 'waitingRoom.hbs'));
@@ -166,7 +225,7 @@ app.get('/leaderboard', (req, res) => {
 });
 
 app.get('/upgrades', (req, res) => {
-	
+	res.json(upgradesArray);
 });
 
 app.get('/register', (req, res) => {
