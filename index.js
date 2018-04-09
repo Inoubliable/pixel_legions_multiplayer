@@ -58,18 +58,18 @@ let upgradesArray = [
 		cost: 500
 	},
 	{
-		id: 'legion_attack',
+		id: 'attack_legion',
 		name: 'Legion attack',
-		icon: 'assets/wax_badge.svg',
-		description: 'Not yet available.',
-		cost: 'N/A'
+		icon: 'assets/attack_legion.svg',
+		description: 'Increase attack of your legion by 2%.',
+		cost: 650
 	},
 	{
-		id: 'king_attack',
+		id: 'attack_king',
 		name: 'King attack',
-		icon: 'assets/wax_badge.svg',
-		description: 'Not yet available.',
-		cost: 'N/A'
+		icon: 'assets/attack_king.svg',
+		description: 'Increase attack of your king by 2%.',
+		cost: 550
 	},
 	{
 		id: 'spawn_rate',
