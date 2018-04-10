@@ -34,56 +34,64 @@ let upgradesArray = [
 		name: 'Legion speed',
 		icon: 'assets/speed_legion.svg',
 		description: 'Increase speed of your legions by 1%.',
-		cost: 300
+		cost: [300, 350, 400, 450, 500],
+		available: true
 	},
 	{
 		id: 'speed_king',
 		name: 'King speed',
 		icon: 'assets/speed_king.svg',
 		description: 'Increase speed of your king by 1%.',
-		cost: 200
+		cost: [200, 250, 300, 350, 400],
+		available: true
 	},
 	{
 		id: 'hp_legion',
 		name: 'Legion HP',
 		icon: 'assets/hp_legion.svg',
 		description: 'Increase hit points of your legions by 5.',
-		cost: 350
+		cost: [350, 400, 450, 500, 550],
+		available: true
 	},
 	{
 		id: 'hp_king',
 		name: 'King HP',
 		icon: 'assets/hp_king.svg',
 		description: 'Increase hit points of your king by 5.',
-		cost: 500
+		cost: [500, 550, 600, 650, 700],
+		available: true
 	},
 	{
 		id: 'attack_legion',
 		name: 'Legion attack',
 		icon: 'assets/attack_legion.svg',
 		description: 'Increase attack of your legion by 2%.',
-		cost: 650
+		cost: [650, 700, 750, 800, 850],
+		available: true
 	},
 	{
 		id: 'attack_king',
 		name: 'King attack',
 		icon: 'assets/attack_king.svg',
 		description: 'Increase attack of your king by 2%.',
-		cost: 550
+		cost: [550, 600, 650, 700, 750],
+		available: true
 	},
 	{
 		id: 'spawn_rate',
 		name: 'Spawn rate',
 		icon: 'assets/wax_badge.svg',
 		description: 'Not yet available.',
-		cost: 'N/A'
+		cost: 'N/A',
+		available: false
 	},
 	{
 		id: 'coin_revenue',
 		name: 'Coin revenue',
 		icon: 'assets/wax_badge.svg',
 		description: 'Not yet available.',
-		cost: 'N/A'
+		cost: 'N/A',
+		available: false
 	}
 ];
 
@@ -143,6 +151,7 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
 	res.render(path.join(public + 'login.hbs'));
 });
+
 app.get('/login', (req, res) => {
 	res.render(path.join(public + 'login.hbs'));
 });
@@ -168,11 +177,21 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/home', (req, res) => {
+	let playerId = req.session.playerId;
 	res.render(path.join(public + 'home.hbs'), {upgradesArray: upgradesArray});
 });
+
+app.get('/upgrades', (req, res) => {
+	let playerId = req.session.playerId;
+	dbConnection.getPlayerById(playerId, function(player) {
+		res.json({upgradesArray: upgradesArray, player: player});
+	});
+});
+
 app.get('/waitingRoom', (req, res) => {
 	res.render(path.join(public + 'waitingRoom.hbs'));
 });
+
 app.get('/game', (req, res) => {
 	let playerId = req.session.playerId;
 	let room = allRooms.find(r => r.allPlayers.map(p => p.id).includes(playerId));
@@ -182,6 +201,7 @@ app.get('/game', (req, res) => {
 		res.redirect('home');
 	}
 });
+
 app.get('/gameOver', (req, res) => {
 	// get ranking for room
 	let playerId = req.session.playerId;
@@ -224,10 +244,6 @@ app.get('/leaderboard', (req, res) => {
 	});
 });
 
-app.get('/upgrades', (req, res) => {
-	res.json(upgradesArray);
-});
-
 app.get('/register', (req, res) => {
 	res.render(path.join(public + 'register.hbs'));
 });
@@ -238,10 +254,14 @@ app.post('/register', (req, res) => {
 	let playerPassword = req.body.password;
 	dbConnection.getPlayerByName(playerName, function(player) {
 		if (!player) {
+			let upgradesObject = {};
+			upgradesArray.map(u => upgradesObject[u.id] = 0);
 			let newPlayer = {
 				name: playerName,
 				password: playerPassword,
-				rating: c.STARTING_RATING
+				rating: c.STARTING_RATING,
+				coins: c.STARTING_COINS,
+				upgrades: upgradesObject
 			};
 			dbConnection.insertPlayer(newPlayer, function(data) {
 				req.session.playerId = data.insertedIds[0];

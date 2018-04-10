@@ -1,6 +1,8 @@
 module.exports.MAX_LEGIONS = 10;
 
+module.exports.STARTING_COINS = 1000;
 module.exports.STARTING_RATING = 1500;
+module.exports.RATING_K = 26;	// rating change per place
 
 module.exports.GAME_PLAYERS_NUM = 4;
 module.exports.WAIT_TIME_BEFORE_AI_FILL = 1 * 1000;
@@ -35,8 +37,6 @@ module.exports.BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 module.exports.BATTLE_DISTANCE = 100;
 
 module.exports.AI_ATTACK_LEGION_CHANCE = 0.2;
-
-module.exports.RATING_K = 26;	// rating change per place
 
 module.exports.COLORS = {
 	blue: {
