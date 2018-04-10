@@ -178,13 +178,39 @@ app.post('/login', (req, res) => {
 
 app.get('/home', (req, res) => {
 	let playerId = req.session.playerId;
-	res.render(path.join(public + 'home.hbs'), {upgradesArray: upgradesArray});
+	dbConnection.getPlayerById(playerId, function(player) {
+		let upgradeArrayWithLevels = upgradesArray.map(u => {
+			let upgradeLevel = player.upgrades[u.id];
+			u.level = upgradeLevel;
+
+			return u;
+		});
+
+		res.render(path.join(public + 'home.hbs'), {upgradesArray: upgradeArrayWithLevels});
+	});
 });
 
 app.get('/upgrades', (req, res) => {
 	let playerId = req.session.playerId;
 	dbConnection.getPlayerById(playerId, function(player) {
 		res.json({upgradesArray: upgradesArray, player: player});
+	});
+});
+
+app.post('/buyUpgrade', (req, res) => {
+	let playerId = req.session.playerId;
+	let upgradeId = req.body.upgradeId;
+	dbConnection.getPlayerById(playerId, function(player) {
+		let playerUpgrades = player.upgrades;
+		let upgradeCost = upgradesArray.find(u => u.id == upgradeId).cost[playerUpgrades[upgradeId]];
+		let remainingCoins = player.coins - upgradeCost;
+
+		if (remainingCoins >= 0) {
+			playerUpgrades[upgradeId] = playerUpgrades[upgradeId] + 1;
+			dbConnection.updatePlayer(playerId, {coins: remainingCoins, upgrades: playerUpgrades}, function(pl) {
+				
+			});
+		}
 	});
 });
 

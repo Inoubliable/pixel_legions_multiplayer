@@ -34,6 +34,9 @@
 				{{#each upgradesArray}}
 					<div class="upgrade" id={{this.id}}>
 						<img src={{this.icon}}>
+						{{#if_gt this.level 0}}
+							<div class="upgrade-level">{{this.level}}</div>
+						{{/if_gt}}
 					</div>
 				{{/each}}
 			</div>
@@ -44,6 +47,8 @@
 				</div>
 				<div class="upgrade-description"></div>
 				<div class="upgrade-cost"></div>
+
+				<div class="buy-btn">BUY</div>
 			</div>
 
 			<div class="close">&#10514;</div>

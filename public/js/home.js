@@ -3,13 +3,17 @@ $(document).ready(function() {
 	let player = null;
 	let upgradesArray = [];
 
+	let clickedId = null;
+
+	$('.buy-btn').hide();
+
 	$.get('upgrades', function(data) {
 		player = data.player;
 		upgradesArray = data.upgradesArray;
 	});
 
 	$('.upgrade').click(function(event) {
-		let clickedId = $(this).attr('id');
+		clickedId = $(this).attr('id');
 		let upgrade = upgradesArray.find(u => u.id == clickedId);
 
 		if (upgrade.available) {
@@ -23,8 +27,14 @@ $(document).ready(function() {
 			$('.buy-btn').show();
 			if (upgradeCost > player.coins) {
 				$('.buy-btn').addClass('disabled');
+				$('body').off('click', '.buy-btn');
 			} else {
 				$('.buy-btn').removeClass('disabled');
+				$('.buy-btn').click(function(event) {
+					$.post('buyUpgrade', {upgradeId: clickedId}, function(data) {
+						
+					});
+				});
 			}
 		} else {
 			$('.upgrade-name').text(upgrade.name);
@@ -34,10 +44,6 @@ $(document).ready(function() {
 
 			$('.buy-btn').hide();
 		}
-	});
-
-	$('.buy-btn').click(function(event) {
-		//buy upgrade
 	});
 
 	$('.upgrades-btn').click(function(event) {

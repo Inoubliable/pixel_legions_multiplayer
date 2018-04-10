@@ -104,6 +104,7 @@
 			line-height: 140px;
 			margin: 13px;
 			float: left;
+			position: relative;
 
 			&:hover {
 				cursor: pointer;
@@ -113,6 +114,16 @@
 			img {
 				height: 100%;
 				width: 100%;
+			}
+
+			.upgrade-level {
+				display: inline-block;
+				height: auto;
+				line-height: normal;
+				position: absolute;
+				right: 6px;
+				bottom: 6px;
+				font-size: 23px;
 			}
 		}
 	}
@@ -153,6 +164,24 @@
 				margin-left: 12px;
 				margin-bottom: 8px;
 				vertical-align: middle;
+			}
+		}
+
+		.buy-btn {
+			background-color: #3498DB;
+			font-size: 23px;
+			font-variant: normal;
+			border-radius: 5px;
+			padding: 12px 34px;
+			display: inline-block;
+			letter-spacing: 1px;
+
+			&:hover {
+				cursor: pointer;
+			}
+
+			&.disabled {
+				background-color: #555;
 			}
 		}
 	}
