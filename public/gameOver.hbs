@@ -11,7 +11,7 @@
 
 		<ul class="ranking">
 			{{#each ranking}}
-				<li>{{indexToPlace @index}}. {{this.name}}</li>
+				<li>{{indexToPlace @index}}. {{this.name}} <span class="prize">{{prizes.[@index]}} <span class="coin"></span></span></li>
 			{{/each}}
 		</ul>
 
@@ -19,6 +19,6 @@
 			New rating: {{newRating}} ({{ratingDiff}})
 		</div>
 		<br>
-		<a href="home" class="play-again-btn">Play again</a>
+		<a href="home" class="play-again-btn btn-bluish">Play again</a>
 	</body>
 </html>

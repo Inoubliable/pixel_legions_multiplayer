@@ -5,6 +5,8 @@ module.exports.STARTING_RATING = 1500;
 module.exports.RATING_K = 26;	// rating change per place
 
 module.exports.GAME_PLAYERS_NUM = 4;
+module.exports.PRIZES = [100, 60, 20, 0];
+
 module.exports.WAIT_TIME_BEFORE_AI_FILL = 1 * 1000;
 
 module.exports.PLAYFIELD_WIDTH = 1000;

@@ -251,7 +251,8 @@ app.get('/gameOver', (req, res) => {
 				oldRating: playerRanking.rating,
 				newRating: playerRanking.newRating,
 				ratingDiff: ratingDiff,
-				place: playerRankingIndex+1
+				place: playerRankingIndex+1,
+				prizes: c.PRIZES
 			});
 		});
 	});

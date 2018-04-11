@@ -52,16 +52,10 @@
 	.leaderboard-btn {
 		padding: 8px 12px;
 		border-radius: 4px;
-		background-color: $bluish;
 		color: white;
 		border: none;
 		font-size: 16px;
 		margin-top: 40px;
-
-		&:hover {
-			cursor: pointer;
-			background-color: $bluish-hover;
-		}
 	}
 
 	.upgrades-btn {
@@ -168,17 +162,12 @@
 		}
 
 		.buy-btn {
-			background-color: #3498DB;
 			font-size: 23px;
 			font-variant: normal;
 			border-radius: 5px;
 			padding: 12px 34px;
 			display: inline-block;
 			letter-spacing: 1px;
-
-			&:hover {
-				cursor: pointer;
-			}
 
 			&.disabled {
 				background-color: #555;
