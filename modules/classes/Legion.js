@@ -4,12 +4,13 @@ let c = require('../constants');
 let helpers = require('../helpers');
 
 class Legion {
-	constructor(playerId, x, y, count, color, spawning, spawnX, spawnY, isAI) {
+	constructor(playerId, x, y, count, attack, color, spawning, spawnX, spawnY, isAI) {
 		this.id = uuidv1();
 		this.playerId = playerId;
 		this.x = x;
 		this.y = y;
 		this.count = count;
+		this.attack = attack;
 		this.path = [];
 		this.isPathVisible = false;
 		this.selected = false;

@@ -34,7 +34,8 @@ module.exports.SPAWN_ITERVAL_RANDOM_PART = 0.1;
 
 module.exports.SPAWN_AREA_WIDTH = 200;
 
-module.exports.BATTLE_COUNT_LOSE = 0.04;
+module.exports.KING_ATTACK = 0.04;
+module.exports.LEGION_ATTACK = 0.04;
 module.exports.BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 module.exports.BATTLE_DISTANCE = 100;
 

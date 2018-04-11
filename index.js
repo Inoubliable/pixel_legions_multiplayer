@@ -78,8 +78,32 @@ let upgradesArray = [
 		available: true
 	},
 	{
+		id: 'range_legion',
+		name: 'Legion range',
+		icon: 'assets/range_legion.svg',
+		description: 'Increase range of your legion by 3%.',
+		cost: 'N/A',
+		available: false
+	},
+	{
+		id: 'range_king',
+		name: 'King range',
+		icon: 'assets/range_king.svg',
+		description: 'Increase range of your king by 3%.',
+		cost: 'N/A',
+		available: false
+	},
+	{
 		id: 'spawn_rate',
 		name: 'Spawn rate',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A',
+		available: false
+	},
+	{
+		id: 'ambush_damage',
+		name: 'Ambush damage',
 		icon: 'assets/wax_badge.svg',
 		description: 'Not yet available.',
 		cost: 'N/A',
@@ -386,8 +410,11 @@ function gameConnection(socket) {
 		if (room.allPlayers.length == c.GAME_PLAYERS_NUM) {
 			for (let i = 0; i < room.allPlayers.length; i++) {
 				(function loop() {
-					let playerId = room.allPlayers[i].id;
+					let player = room.allPlayers[i];
+					let playerId = player.id;
+					let legionAttack = (1 + player.upgrades['attack_legion']*0.01) * c.LEGION_ATTACK;
 					let spawnTimeout = c.SPAWN_INTERVAL + Math.round(Math.random() * c.SPAWN_INTERVAL * c.SPAWN_ITERVAL_RANDOM_PART);
+					
 					setTimeout(function() {
 						let king = room.allKings.find(k => k.playerId == playerId);
 		
@@ -414,7 +441,7 @@ function gameConnection(socket) {
 										spawnY = Math.random() * c.SPAWN_AREA_WIDTH + king.y - c.SPAWN_AREA_WIDTH/2;
 									}
 									let isAI = king.isAI;
-									room.allLegions.push(new Legion(king.playerId, startX, startY, c.LEGION_COUNT, color, true, spawnX, spawnY, isAI));
+									room.allLegions.push(new Legion(king.playerId, startX, startY, c.LEGION_COUNT, legionAttack, color, true, spawnX, spawnY, isAI));
 								}
 							}
 
@@ -496,8 +523,8 @@ function battle(room) {
 				let legionsDistanceY = Math.abs(legion2.y - legion1.y);
 
 				if (legionsDistanceX < c.BATTLE_DISTANCE && legionsDistanceY < c.BATTLE_DISTANCE) {
-					legion2.count -= c.BATTLE_COUNT_LOSE;
-					legion1.count -= c.BATTLE_COUNT_LOSE;
+					legion2.count -= legion1.attack;
+					legion1.count -= legion2.attack;
 
 					// find nearby enemies position
 					let enemyHalfWidth = helpers.legionCountToWidth(legion1.count) / 2;
@@ -551,8 +578,8 @@ function battle(room) {
 				let kingDistanceY = Math.abs(room.allKings[k].y - legion1.y);
 	
 				if (kingDistanceX < c.BATTLE_DISTANCE && kingDistanceY < c.BATTLE_DISTANCE) {
-					room.allKings[k].count -= c.BATTLE_COUNT_LOSE;
-					legion1.count -= c.BATTLE_COUNT_LOSE;
+					room.allKings[k].count -= legion1.attack;
+					legion1.count -= c.KING_ATTACK;
 
 					if (room.allKings[k].isAI) {
 						// get legions to defend
