@@ -29,13 +29,18 @@ class Room {
 	rankPlayer(deadPlayerId) {
 		for (let i = this.ranking.length-1; i >= 0; i--) {
 			if (this.ranking[i].id == '') {
-				this.ranking[i] = this.allPlayers.find(p => p.id == deadPlayerId);
-				this.ranking[i].newRating = helpers.calculateRating(this.ranking[i].rating, i+1, this.allPlayers);
+				let deadPlayer = this.allPlayers.find(p => p.id == deadPlayerId);
+				deadPlayer.newRating = helpers.calculateRating(deadPlayer.rating, i+1, this.allPlayers);
 
 				// save new rating to db
-				if (!this.ranking[i].isAI) {
-					dbConnection.updatePlayer(deadPlayerId, {rating: this.ranking[i].newRating});
+				if (!deadPlayer.isAI) {
+					let prize = c.PRIZES[i];
+					let coins = deadPlayer.coins + prize;
+					console.log(deadPlayer);
+					dbConnection.updatePlayer(deadPlayerId, {rating: deadPlayer.newRating, coins: coins});
 				}
+
+				this.ranking[i] = deadPlayer;
 
 				// check if only one player is still alive
 				if (this.ranking[1].id != '') {

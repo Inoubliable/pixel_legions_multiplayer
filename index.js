@@ -80,7 +80,7 @@ let upgradesArray = [
 	{
 		id: 'range_legion',
 		name: 'Legion range',
-		icon: 'assets/range_legion.svg',
+		icon: 'assets/wax_badge.svg',
 		description: 'Increase range of your legion by 3%.',
 		cost: 'N/A',
 		available: false
@@ -88,7 +88,7 @@ let upgradesArray = [
 	{
 		id: 'range_king',
 		name: 'King range',
-		icon: 'assets/range_king.svg',
+		icon: 'assets/wax_badge.svg',
 		description: 'Increase range of your king by 3%.',
 		cost: 'N/A',
 		available: false
@@ -144,6 +144,9 @@ app.engine('hbs', hbs({
 		},
 		indexToPlace: function(index, options) {
 			return parseInt(index) + 1;
+		},
+		get: function(array, index, options) {
+			return array[index];
 		}
 	}
 }));
@@ -351,7 +354,7 @@ function waitingConnection(socket) {
 
 	dbConnection.getPlayerById(playerId, function(playerDB) {
 		dbConnection.updatePlayer(playerId, {roomId: room.id});
-		room.allPlayers.push(new Player(playerId, playerDB.name, playerDB.rating, false));
+		room.allPlayers.push(new Player(playerId, playerDB.name, playerDB.rating, playerDB.upgrades, playerDB.coins, false));
 
 		let humanPlayersCount = room.allPlayers.length;
 		setTimeout(function() {
@@ -389,7 +392,7 @@ function fillWithAI(room, playerCount) {
 		let aggressiveness = room.availableAIObjects[AIIndex].aggressiveness;
 		let rating = c.STARTING_RATING;
 
-		let newPlayer = new Player(AIid, name, rating, true);
+		let newPlayer = new Player(AIid, name, rating, null, null, true);
 		room.allPlayers.push(newPlayer);
 		room.availableAIObjects.splice(AIIndex, 1);
 		newPlayer.initiatePlayer(room, aggressiveness);
@@ -398,11 +401,11 @@ function fillWithAI(room, playerCount) {
 
 function gameConnection(socket) {
 	let playerId = socket.request.session.playerId;
-	dbConnection.getPlayerById(playerId, function(player) {
-		let room = allRooms.find(r => r.id == player.roomId);
-		socket.join(player.roomId);
+	dbConnection.getPlayerById(playerId, function(playerDB) {
+		let room = allRooms.find(r => r.id == playerDB.roomId);
+		socket.join(playerDB.roomId);
 		
-		let newPlayer = new Player(playerId, player.name, player.rating, false);
+		let newPlayer = new Player(playerId, playerDB.name, playerDB.rating, playerDB.upgrades, playerDB.coins, false);
 		room.allPlayers.push(newPlayer);
 		newPlayer.initiatePlayer(room, null);
 
@@ -412,7 +415,12 @@ function gameConnection(socket) {
 				(function loop() {
 					let player = room.allPlayers[i];
 					let playerId = player.id;
-					let legionAttack = (1 + player.upgrades['attack_legion']*0.01) * c.LEGION_ATTACK;
+
+					let legionAttack = c.LEGION_ATTACK;
+			        if (this.upgrades) {
+				        legionAttack = (1 + player.upgrades['attack_legion']*0.01) * c.LEGION_ATTACK;
+				    }
+
 					let spawnTimeout = c.SPAWN_INTERVAL + Math.round(Math.random() * c.SPAWN_INTERVAL * c.SPAWN_ITERVAL_RANDOM_PART);
 					
 					setTimeout(function() {

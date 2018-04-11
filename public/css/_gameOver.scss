@@ -1,29 +1,30 @@
 .place-sentence {
 	margin-top: 30px;
 	margin-left: 30px;
+	font-size: 22px;
 }
 
 .ranking {
-	font-size: 20px;
+	font-size: 24px;
 	margin-top: 30px;
 	margin-left: 30px;
 
 	li {
-		margin-top: 5px;
+		margin-top: 12px;
+		width: 400px;
 
 		.prize {
-			padding: 20px;
-			font-size: 26px;
+			font-size: 24px;
 			font-weight: 200;
+			float: right;
 
 			.coin {
 				display: inline-block;
 				background: url('../assets/coin.svg') no-repeat top left;
 				background-size: contain;
-				width: 34px;
-				height: 34px;
-				margin-left: 12px;
-				margin-bottom: 8px;
+				width: 28px;
+				height: 28px;
+				margin-left: 8px;
 				vertical-align: middle;
 			}
 		}
@@ -32,8 +33,9 @@
 
 .rating-change {
 	display: inline-block;
-	font-size: 30px;
+	font-size: 32px;
 	margin-left: 50%;
+	margin-top: 50px;
 	transform: translateX(-50%);
 }
 

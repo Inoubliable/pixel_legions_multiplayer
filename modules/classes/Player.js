@@ -7,11 +7,12 @@ let King = require('./King');
 let Legion = require('./Legion');
 
 class Player {
-	constructor(id, name, rating, upgrades, isAI) {
+	constructor(id, name, rating, upgrades, coins, isAI) {
 		this.id = id;
 		this.name = name;
 		this.rating = rating;
 		this.upgrades = upgrades;
+		this.coins = coins;
 		this.isAI = isAI;
 	}
 
@@ -54,7 +55,11 @@ class Player {
 	            legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
 	        }
 
-	        let legionAttack = (1 + this.upgrades['attack_legion']*0.01) * c.LEGION_ATTACK;
+	        let legionAttack = c.LEGION_ATTACK;
+	        if (this.upgrades) {
+		        legionAttack = (1 + this.upgrades['attack_legion']*0.01) * c.LEGION_ATTACK;
+		    }
+
 	        room.allLegions.push(new Legion(this.id, legionX, legionY, c.LEGION_COUNT, legionAttack, color, false, 0, 0, this.isAI));
 	    }
 

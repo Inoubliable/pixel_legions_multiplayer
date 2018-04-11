@@ -11,7 +11,7 @@
 
 		<ul class="ranking">
 			{{#each ranking}}
-				<li>{{indexToPlace @index}}. {{this.name}} <span class="prize">{{prizes.[@index]}} <span class="coin"></span></span></li>
+				<li>{{indexToPlace @index}}. {{this.name}} <span class="prize">{{get ../prizes @index}} <span class="coin"></span></span></li>
 			{{/each}}
 		</ul>
 
