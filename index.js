@@ -326,7 +326,7 @@ function gameConnection(socket) {
 					let playerId = player.id;
 
 					let legionCount = helpers.valueWithUpgrade(player.upgrades, c.ID_LEGION_HP, c.LEGION_BASE_COUNT);
-					let legionAttack = helpers.valueWithUpgrade(player.upgrades, c.ID_LEGION_BASE_ATTACK, c.LEGION_BASE_ATTACK);
+					let legionAttack = helpers.valueWithUpgrade(player.upgrades, c.ID_LEGION_ATTACK, c.LEGION_BASE_ATTACK);
 
 					let spawnTimeout = c.SPAWN_INTERVAL + Math.round(Math.random() * c.SPAWN_INTERVAL * c.SPAWN_ITERVAL_RANDOM_PART);
 					

@@ -50,7 +50,7 @@ class Player {
 	    for (let i = 0; i < c.INITIAL_LEGIONS_NUM; i++) {
 
 			let legionCount = helpers.valueWithUpgrade(this.upgrades, c.ID_LEGION_HP, c.LEGION_BASE_COUNT);
-			let legionAttack = helpers.valueWithUpgrade(this.upgrades, c.ID_LEGION_BASE_ATTACK, c.LEGION_BASE_ATTACK);
+			let legionAttack = helpers.valueWithUpgrade(this.upgrades, c.ID_LEGION_ATTACK, c.LEGION_BASE_ATTACK);
 
 	        let legionX = Math.random() * c.SPAWN_AREA_WIDTH + x - c.SPAWN_AREA_WIDTH/2;
 	        let legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
