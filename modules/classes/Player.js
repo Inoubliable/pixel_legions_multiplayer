@@ -7,6 +7,8 @@ let King = require('./King');
 let Legion = require('./Legion');
 
 class Player {
+
+
 	constructor(id, name, rating, upgrades, coins, isAI) {
 		this.id = id;
 		this.name = name;
@@ -38,8 +40,14 @@ class Player {
 	        }
 	    }
 
+        let kingAttack = c.KING_ATTACK;
+        if (this.upgrades) {
+			let upgradePerLevel = c.UPGRADES_ARRAY.find(u => u.id == c.ID_KING_ATTACK).upgradePerLevel;
+			kingAttack = (1 + this.upgrades[c.ID_KING_ATTACK]*upgradePerLevel) * c.KING_ATTACK;
+	    }
+
 	    // initiate king
-	    room.allKings.push(new King(this.id, x, y, c.KING_COUNT, color, this.isAI));
+	    room.allKings.push(new King(this.id, x, y, c.KING_COUNT, kingAttack, color, this.isAI));
 
 	    // initiate legions
 	    for (let i = 0; i < c.INITIAL_LEGIONS_NUM; i++) {
@@ -57,7 +65,8 @@ class Player {
 
 	        let legionAttack = c.LEGION_ATTACK;
 	        if (this.upgrades) {
-		        legionAttack = (1 + this.upgrades['attack_legion']*0.01) * c.LEGION_ATTACK;
+				let upgradePerLevel = c.UPGRADES_ARRAY.find(u => u.id == c.ID_LEGION_ATTACK).upgradePerLevel;
+				legionAttack = (1 + this.upgrades[c.ID_LEGION_ATTACK]*upgradePerLevel) * c.LEGION_ATTACK;
 		    }
 
 	        room.allLegions.push(new Legion(this.id, legionX, legionY, c.LEGION_COUNT, legionAttack, color, false, 0, 0, this.isAI));

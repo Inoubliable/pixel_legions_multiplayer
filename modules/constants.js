@@ -90,3 +90,117 @@ module.exports.AI_OBJECTS = [
 		aggressiveness: 0.30
 	}
 ];
+
+let ID_LEGION_SPEED = module.exports.ID_LEGION_SPEED = 'speed_legion';
+let ID_KING_SPEED = module.exports.ID_KING_SPEED = 'speed_king';
+let ID_LEGION_HP = module.exports.ID_LEGION_HP = 'hp_legion';
+let ID_KING_HP = module.exports.ID_KING_HP = 'hp_king';
+let ID_LEGION_ATTACK = module.exports.ID_LEGION_ATTACK = 'attack_legion';
+let ID_KING_ATTACK = module.exports.ID_KING_ATTACK = 'attack_king';
+let ID_LEGION_RANGE = module.exports.ID_LEGION_RANGE = 'range_legion';
+let ID_KING_RANGE = module.exports.ID_KING_RANGE = 'range_king';
+let ID_SPAWN_RATE = module.exports.ID_SPAWN_RATE = 'spawn_rate';
+let ID_AMBUSH_DAMAGE = module.exports.ID_AMBUSH_DAMAGE = 'ambush_damage';
+let ID_COIN_REVENUE = module.exports.ID_COIN_REVENUE = 'coin_revenue';
+
+module.exports.UPGRADES_ARRAY = [
+	{
+		id: ID_LEGION_SPEED,
+		name: 'Legion speed',
+		icon: 'assets/speed_legion.svg',
+		description: 'Increase speed of your legions by 1%.',
+		cost: [300, 350, 400, 450, 500],
+		upgradePerLevel: 0.01,
+		available: true
+	},
+	{
+		id: ID_KING_SPEED,
+		name: 'King speed',
+		icon: 'assets/speed_king.svg',
+		description: 'Increase speed of your king by 1%.',
+		cost: [200, 250, 300, 350, 400],
+		upgradePerLevel: 0.01,
+		available: true
+	},
+	{
+		id: ID_LEGION_HP,
+		name: 'Legion HP',
+		icon: 'assets/hp_legion.svg',
+		description: 'Increase hit points of your legions by 5%.',
+		cost: [350, 400, 450, 500, 550],
+		upgradePerLevel: 0.05,
+		available: true
+	},
+	{
+		id: ID_KING_HP,
+		name: 'King HP',
+		icon: 'assets/hp_king.svg',
+		description: 'Increase hit points of your king by 5%.',
+		cost: [500, 550, 600, 650, 700],
+		upgradePerLevel: 0.05,
+		available: true
+	},
+	{
+		id: ID_LEGION_ATTACK,
+		name: 'Legion attack',
+		icon: 'assets/attack_legion.svg',
+		description: 'Increase attack of your legion by 3%.',
+		cost: [650, 700, 750, 800, 850],
+		upgradePerLevel: 0.03,
+		available: true
+	},
+	{
+		id: ID_KING_ATTACK,
+		name: 'King attack',
+		icon: 'assets/attack_king.svg',
+		description: 'Increase attack of your king by 3%.',
+		cost: [550, 600, 650, 700, 750],
+		upgradePerLevel: 0.03,
+		available: true
+	},
+	{
+		id: ID_LEGION_RANGE,
+		name: 'Legion range',
+		icon: 'assets/wax_badge.svg',
+		description: 'Increase range of your legion by 2%.',
+		cost: 'N/A',
+		upgradePerLevel: 0.02,
+		available: false
+	},
+	{
+		id: ID_KING_RANGE,
+		name: 'King range',
+		icon: 'assets/wax_badge.svg',
+		description: 'Increase range of your king by 2%.',
+		cost: 'N/A',
+		upgradePerLevel: 0.02,
+		available: false
+	},
+	{
+		id: ID_SPAWN_RATE,
+		name: 'Spawn rate',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A',
+		upgradePerLevel: 0.01,
+		available: false
+	},
+	{
+		id: ID_AMBUSH_DAMAGE,
+		name: 'Ambush damage',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A',
+		upgradePerLevel: 0.01,
+		available: false
+	},
+	{
+		id: ID_COIN_REVENUE,
+		name: 'Coin revenue',
+		icon: 'assets/wax_badge.svg',
+		description: 'Not yet available.',
+		cost: 'N/A',
+		upgradePerLevel: 0.01,
+		available: false
+	}
+];

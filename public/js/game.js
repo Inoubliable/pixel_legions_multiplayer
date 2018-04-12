@@ -626,8 +626,8 @@ $(document).ready(function() {
 
 					if (legionsDistanceX < BATTLE_DISTANCE && legionsDistanceY < BATTLE_DISTANCE) {
 						battleBeams.push([legion2.x, legion2.y, legion1.x, legion1.y]);
-						legion2.count -= BATTLE_COUNT_LOSE;
-						legion1.count -= BATTLE_COUNT_LOSE;
+						legion2.count -= legion1.attack;
+						legion1.count -= legion2.attack;
 
 						// find nearby enemies position
 						let enemyHalfWidth = legionCountToWidth(legion1.count) / 2;
@@ -689,8 +689,8 @@ $(document).ready(function() {
 		
 					if (kingDistanceX < BATTLE_DISTANCE && kingDistanceY < BATTLE_DISTANCE) {
 						battleBeams.push([king.x, king.y, legion1.x, legion1.y]);				
-						king.count -= BATTLE_COUNT_LOSE;
-						legion1.count -= BATTLE_COUNT_LOSE;
+						king.count -= legion1.attack;
+						legion1.count -= king.attack;
 
 						king.isUnderAttack = true;
 					}

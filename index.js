@@ -28,97 +28,6 @@ let Legion = require('./modules/classes/Legion');
 
 let public = __dirname + '/public/';
 
-let upgradesArray = [
-	{
-		id: 'speed_legion',
-		name: 'Legion speed',
-		icon: 'assets/speed_legion.svg',
-		description: 'Increase speed of your legions by 1%.',
-		cost: [300, 350, 400, 450, 500],
-		available: true
-	},
-	{
-		id: 'speed_king',
-		name: 'King speed',
-		icon: 'assets/speed_king.svg',
-		description: 'Increase speed of your king by 1%.',
-		cost: [200, 250, 300, 350, 400],
-		available: true
-	},
-	{
-		id: 'hp_legion',
-		name: 'Legion HP',
-		icon: 'assets/hp_legion.svg',
-		description: 'Increase hit points of your legions by 5.',
-		cost: [350, 400, 450, 500, 550],
-		available: true
-	},
-	{
-		id: 'hp_king',
-		name: 'King HP',
-		icon: 'assets/hp_king.svg',
-		description: 'Increase hit points of your king by 5.',
-		cost: [500, 550, 600, 650, 700],
-		available: true
-	},
-	{
-		id: 'attack_legion',
-		name: 'Legion attack',
-		icon: 'assets/attack_legion.svg',
-		description: 'Increase attack of your legion by 2%.',
-		cost: [650, 700, 750, 800, 850],
-		available: true
-	},
-	{
-		id: 'attack_king',
-		name: 'King attack',
-		icon: 'assets/attack_king.svg',
-		description: 'Increase attack of your king by 2%.',
-		cost: [550, 600, 650, 700, 750],
-		available: true
-	},
-	{
-		id: 'range_legion',
-		name: 'Legion range',
-		icon: 'assets/wax_badge.svg',
-		description: 'Increase range of your legion by 3%.',
-		cost: 'N/A',
-		available: false
-	},
-	{
-		id: 'range_king',
-		name: 'King range',
-		icon: 'assets/wax_badge.svg',
-		description: 'Increase range of your king by 3%.',
-		cost: 'N/A',
-		available: false
-	},
-	{
-		id: 'spawn_rate',
-		name: 'Spawn rate',
-		icon: 'assets/wax_badge.svg',
-		description: 'Not yet available.',
-		cost: 'N/A',
-		available: false
-	},
-	{
-		id: 'ambush_damage',
-		name: 'Ambush damage',
-		icon: 'assets/wax_badge.svg',
-		description: 'Not yet available.',
-		cost: 'N/A',
-		available: false
-	},
-	{
-		id: 'coin_revenue',
-		name: 'Coin revenue',
-		icon: 'assets/wax_badge.svg',
-		description: 'Not yet available.',
-		cost: 'N/A',
-		available: false
-	}
-];
-
 
 app.engine('hbs', hbs({
 	extname: 'hbs',
@@ -206,7 +115,7 @@ app.post('/login', (req, res) => {
 app.get('/home', (req, res) => {
 	let playerId = req.session.playerId;
 	dbConnection.getPlayerById(playerId, function(player) {
-		let upgradeArrayWithLevels = upgradesArray.map(u => {
+		let upgradeArrayWithLevels = c.UPGRADES_ARRAY.map(u => {
 			let upgradeLevel = player.upgrades[u.id];
 			u.level = upgradeLevel;
 
@@ -220,7 +129,7 @@ app.get('/home', (req, res) => {
 app.get('/upgrades', (req, res) => {
 	let playerId = req.session.playerId;
 	dbConnection.getPlayerById(playerId, function(player) {
-		res.json({upgradesArray: upgradesArray, player: player});
+		res.json({upgradesArray: c.UPGRADES_ARRAY, player: player});
 	});
 });
 
@@ -229,7 +138,7 @@ app.post('/buyUpgrade', (req, res) => {
 	let upgradeId = req.body.upgradeId;
 	dbConnection.getPlayerById(playerId, function(player) {
 		let playerUpgrades = player.upgrades;
-		let upgradeCost = upgradesArray.find(u => u.id == upgradeId).cost[playerUpgrades[upgradeId]];
+		let upgradeCost = c.UPGRADES_ARRAY.find(u => u.id == upgradeId).cost[playerUpgrades[upgradeId]];
 		let remainingCoins = player.coins - upgradeCost;
 
 		if (remainingCoins >= 0) {
@@ -309,7 +218,7 @@ app.post('/register', (req, res) => {
 	dbConnection.getPlayerByName(playerName, function(player) {
 		if (!player) {
 			let upgradesObject = {};
-			upgradesArray.map(u => upgradesObject[u.id] = 0);
+			c.UPGRADES_ARRAY.map(u => upgradesObject[u.id] = 0);
 			let newPlayer = {
 				name: playerName,
 				password: playerPassword,
@@ -417,9 +326,10 @@ function gameConnection(socket) {
 					let playerId = player.id;
 
 					let legionAttack = c.LEGION_ATTACK;
-			        if (this.upgrades) {
-				        legionAttack = (1 + player.upgrades['attack_legion']*0.01) * c.LEGION_ATTACK;
-				    }
+					if (this.upgrades) {
+						let upgradePerLevel = c.UPGRADES_ARRAY.find(u => u.id == c.ID_LEGION_ATTACK).upgradePerLevel;
+						legionAttack = (1 + player.upgrades[c.ID_LEGION_ATTACK]*upgradePerLevel) * c.LEGION_ATTACK;
+					}
 
 					let spawnTimeout = c.SPAWN_INTERVAL + Math.round(Math.random() * c.SPAWN_INTERVAL * c.SPAWN_ITERVAL_RANDOM_PART);
 					
@@ -578,42 +488,43 @@ function battle(room) {
 
 		// battle with king
 		for (let k = room.allKings.length-1; k >= 0; k--) {
+			let king = room.allKings[k];
 			if (i == 0) {
-				room.allKings[k].isUnderAttack = false;
+				king.isUnderAttack = false;
 			}
-			if (room.allKings[k].playerId != legion1.playerId) {
-				let kingDistanceX = Math.abs(room.allKings[k].x - legion1.x);
-				let kingDistanceY = Math.abs(room.allKings[k].y - legion1.y);
+			if (king.playerId != legion1.playerId) {
+				let kingDistanceX = Math.abs(king.x - legion1.x);
+				let kingDistanceY = Math.abs(king.y - legion1.y);
 	
 				if (kingDistanceX < c.BATTLE_DISTANCE && kingDistanceY < c.BATTLE_DISTANCE) {
-					room.allKings[k].count -= legion1.attack;
-					legion1.count -= c.KING_ATTACK;
+					king.count -= legion1.attack;
+					legion1.count -= king.attack;
 
-					if (room.allKings[k].isAI) {
+					if (king.isAI) {
 						// get legions to defend
-						let vecX = room.allKings[k].x - legion1.x;
-						let vecY = room.allKings[k].y - legion1.y;
+						let vecX = king.x - legion1.x;
+						let vecY = king.y - legion1.y;
 						let vecLength = Math.sqrt(vecX**2 + vecY**2);
 						// vector length to king's frame speed
-						let newX = room.allKings[k].x + (vecX/vecLength) * c.KING_PX_PER_FRAME;
-						let newY = room.allKings[k].y + (vecY/vecLength) * c.KING_PX_PER_FRAME;
+						let newX = king.x + (vecX/vecLength) * c.KING_PX_PER_FRAME;
+						let newY = king.y + (vecY/vecLength) * c.KING_PX_PER_FRAME;
 						let width = c.KING_WIDTH;
 						let height = c.KING_WIDTH;
 						if (helpers.isInsidePlayfieldX(newX, width)) {
-							room.allKings[k].x = newX;
+							king.x = newX;
 						}
 						if (helpers.isInsidePlayfieldY(newY, height)) {
-							room.allKings[k].y = newY;
+							king.y = newY;
 						}
 
-						AI.AIDefend(room.allKings[k].playerId, legion1.x, legion1.y, room.allLegions);
+						AI.AIDefend(king.playerId, legion1.x, legion1.y, room.allLegions);
 					}
 
-					room.allKings[k].isUnderAttack = true;
+					king.isUnderAttack = true;
 				}
 
-				if (room.allKings[k].count <= 0) {
-					let deadPlayerId = room.allKings[k].playerId;
+				if (king.count <= 0) {
+					let deadPlayerId = king.playerId;
 					deadPlayersIds.push(deadPlayerId);
 					room.allKings.splice(k, 1);
 

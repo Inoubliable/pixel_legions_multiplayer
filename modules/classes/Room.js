@@ -36,7 +36,6 @@ class Room {
 				if (!deadPlayer.isAI) {
 					let prize = c.PRIZES[i];
 					let coins = deadPlayer.coins + prize;
-					console.log(deadPlayer);
 					dbConnection.updatePlayer(deadPlayerId, {rating: deadPlayer.newRating, coins: coins});
 				}
 
