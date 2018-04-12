@@ -40,20 +40,21 @@ class Player {
 	        }
 	    }
 
-        let kingAttack = c.KING_ATTACK;
-        if (this.upgrades) {
-			let upgradePerLevel = c.UPGRADES_ARRAY.find(u => u.id == c.ID_KING_ATTACK).upgradePerLevel;
-			kingAttack = (1 + this.upgrades[c.ID_KING_ATTACK]*upgradePerLevel) * c.KING_ATTACK;
-	    }
+		let kingCount = helpers.valueWithUpgrade(this.upgrades, c.ID_KING_HP, c.KING_BASE_COUNT);
+		let kingAttack = helpers.valueWithUpgrade(this.upgrades, c.ID_KING_ATTACK, c.KING_BASE_ATTACK);
 
 	    // initiate king
-	    room.allKings.push(new King(this.id, x, y, c.KING_COUNT, kingAttack, color, this.isAI));
+	    room.allKings.push(new King(this.id, x, y, kingCount, kingAttack, color, this.isAI));
 
 	    // initiate legions
 	    for (let i = 0; i < c.INITIAL_LEGIONS_NUM; i++) {
+
+			let legionCount = helpers.valueWithUpgrade(this.upgrades, c.ID_LEGION_HP, c.LEGION_BASE_COUNT);
+			let legionAttack = helpers.valueWithUpgrade(this.upgrades, c.ID_LEGION_BASE_ATTACK, c.LEGION_BASE_ATTACK);
+
 	        let legionX = Math.random() * c.SPAWN_AREA_WIDTH + x - c.SPAWN_AREA_WIDTH/2;
 	        let legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
-	        let legW = helpers.legionCountToWidth(c.LEGION_COUNT);
+	        let legW = helpers.legionCountToWidth(legionCount);
 
 	        // check if it spawns over playfield border
 	        while (!helpers.isInsidePlayfieldX(legionX, legW)) {
@@ -63,13 +64,7 @@ class Player {
 	            legionY = Math.random() * c.SPAWN_AREA_WIDTH + y - c.SPAWN_AREA_WIDTH/2;
 	        }
 
-	        let legionAttack = c.LEGION_ATTACK;
-	        if (this.upgrades) {
-				let upgradePerLevel = c.UPGRADES_ARRAY.find(u => u.id == c.ID_LEGION_ATTACK).upgradePerLevel;
-				legionAttack = (1 + this.upgrades[c.ID_LEGION_ATTACK]*upgradePerLevel) * c.LEGION_ATTACK;
-		    }
-
-	        room.allLegions.push(new Legion(this.id, legionX, legionY, c.LEGION_COUNT, legionAttack, color, false, 0, 0, this.isAI));
+	        room.allLegions.push(new Legion(this.id, legionX, legionY, legionCount, legionAttack, color, false, 0, 0, this.isAI));
 	    }
 
 	    this.aggressiveness = aggressiveness;

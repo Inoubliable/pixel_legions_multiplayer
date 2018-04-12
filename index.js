@@ -51,10 +51,10 @@ app.engine('hbs', hbs({
 			else
 				return opts.inverse(this);
 		},
-		indexToPlace: function(index, options) {
+		indexToPlace: function(index, opts) {
 			return parseInt(index) + 1;
 		},
-		get: function(array, index, options) {
+		get: function(array, index, opts) {
 			return array[index];
 		}
 	}
@@ -325,11 +325,8 @@ function gameConnection(socket) {
 					let player = room.allPlayers[i];
 					let playerId = player.id;
 
-					let legionAttack = c.LEGION_ATTACK;
-					if (this.upgrades) {
-						let upgradePerLevel = c.UPGRADES_ARRAY.find(u => u.id == c.ID_LEGION_ATTACK).upgradePerLevel;
-						legionAttack = (1 + player.upgrades[c.ID_LEGION_ATTACK]*upgradePerLevel) * c.LEGION_ATTACK;
-					}
+					let legionCount = helpers.valueWithUpgrade(player.upgrades, c.ID_LEGION_HP, c.LEGION_BASE_COUNT);
+					let legionAttack = helpers.valueWithUpgrade(player.upgrades, c.ID_LEGION_BASE_ATTACK, c.LEGION_BASE_ATTACK);
 
 					let spawnTimeout = c.SPAWN_INTERVAL + Math.round(Math.random() * c.SPAWN_INTERVAL * c.SPAWN_ITERVAL_RANDOM_PART);
 					
@@ -349,7 +346,7 @@ function gameConnection(socket) {
 									let startX = king.x;
 									let startY = king.y;
 									let color = king.spawnedColor;
-									let legW = helpers.legionCountToWidth(c.LEGION_COUNT);
+									let legW = helpers.legionCountToWidth(legionCount);
 									let spawnX = Math.random() * c.SPAWN_AREA_WIDTH + king.x - c.SPAWN_AREA_WIDTH/2;
 									while (!(spawnX > (legW*c.LEGION_OVER_BORDER) && spawnX < (c.PLAYFIELD_WIDTH - legW*c.LEGION_OVER_BORDER))) {
 										spawnX = Math.random() * c.SPAWN_AREA_WIDTH + king.x - c.SPAWN_AREA_WIDTH/2;
@@ -359,7 +356,7 @@ function gameConnection(socket) {
 										spawnY = Math.random() * c.SPAWN_AREA_WIDTH + king.y - c.SPAWN_AREA_WIDTH/2;
 									}
 									let isAI = king.isAI;
-									room.allLegions.push(new Legion(king.playerId, startX, startY, c.LEGION_COUNT, legionAttack, color, true, spawnX, spawnY, isAI));
+									room.allLegions.push(new Legion(king.playerId, startX, startY, legionCount, legionAttack, color, true, spawnX, spawnY, isAI));
 								}
 							}
 

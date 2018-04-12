@@ -142,7 +142,6 @@ $(document).ready(function() {
 	const KING_PX_PER_FRAME = 0.7;
 	const LEGION_PX_PER_FRAME = 3;
 
-	const LEGION_COUNT = 25;
 	const LEGION_COUNT_TO_WIDTH = 1.7;
 	const LEGION_MINIMAL_PX = 40;
 	const LEGION_BORDER_WIDTH = 3;
@@ -158,7 +157,6 @@ $(document).ready(function() {
 
 	const HULL_SPACE_PX = 10;
 
-	const BATTLE_COUNT_LOSE = 0.04;
 	const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 	const BATTLE_DISTANCE = 100;
 

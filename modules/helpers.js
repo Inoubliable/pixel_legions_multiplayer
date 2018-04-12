@@ -109,11 +109,23 @@ function isInsidePlayfieldY(y, height) {
     return false;
 }
 
+function valueWithUpgrade(upgrades, upgradeId, baseValue) {
+    if (upgrades) {
+        let upgradePerLevel = c.UPGRADES_ARRAY.find(u => u.id == upgradeId).upgradePerLevel;
+        value = (1 + upgrades[upgradeId]*upgradePerLevel) * baseValue;
+
+        return value;
+    }
+
+    return baseValue;
+}
+
 module.exports = {
     legionCountToWidth: legionCountToWidth,
     calculateHull: calculateHull,
     calculateRating: calculateRating,
     pushIfNotIn: pushIfNotIn,
     isInsidePlayfieldX: isInsidePlayfieldX,
-    isInsidePlayfieldY: isInsidePlayfieldY
+    isInsidePlayfieldY: isInsidePlayfieldY,
+    valueWithUpgrade: valueWithUpgrade
 }

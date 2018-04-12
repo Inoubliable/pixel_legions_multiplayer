@@ -12,13 +12,15 @@ module.exports.WAIT_TIME_BEFORE_AI_FILL = 1 * 1000;
 module.exports.PLAYFIELD_WIDTH = 1000;
 module.exports.PLAYFIELD_HEIGHT = 550;
 
-module.exports.KING_COUNT = 50;
+module.exports.KING_BASE_ATTACK = 0.04;
+module.exports.KING_BASE_COUNT = 50;
 module.exports.KING_WIDTH = 30;
 
 module.exports.KING_PX_PER_FRAME = 0.7;
 
 module.exports.INITIAL_LEGIONS_NUM = 2;
-module.exports.LEGION_COUNT = 25;
+module.exports.LEGION_BASE_ATTACK = 0.04;
+module.exports.LEGION_BASE_COUNT = 25;
 module.exports.LEGION_COUNT_TO_WIDTH = 1.6;
 module.exports.LEGION_MINIMAL_PX = 30;
 module.exports.LEGION_OVER_BORDER = 0.2;
@@ -34,8 +36,6 @@ module.exports.SPAWN_ITERVAL_RANDOM_PART = 0.1;
 
 module.exports.SPAWN_AREA_WIDTH = 200;
 
-module.exports.KING_ATTACK = 0.04;
-module.exports.LEGION_ATTACK = 0.04;
 module.exports.BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 module.exports.BATTLE_DISTANCE = 100;
 
