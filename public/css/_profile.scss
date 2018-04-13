@@ -1,0 +1,37 @@
+.player-info-container {
+	padding: 50px;
+	margin-top: 10px;
+
+	.player-name {
+		font-size: 24px;
+	}
+
+	.player-rating {
+		font-size: 22px;
+	}
+}
+
+.achievements {
+	.achievement {
+		border: 2px solid #555;
+		border-radius: 4px;
+		display: inline-block;
+		width: 140px;
+		padding: 10px;
+		height: 140px;
+		line-height: 140px;
+		margin: 13px;
+		float: left;
+		position: relative;
+
+		&:hover {
+			cursor: pointer;
+			border: 2px solid $bluish-hover;
+		}
+
+		img {
+			height: 100%;
+			width: 100%;
+		}
+	}
+}

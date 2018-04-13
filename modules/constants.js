@@ -204,3 +204,26 @@ module.exports.UPGRADES_ARRAY = [
 		available: false
 	}
 ];
+
+module.exports.ACHIEVEMENTS_ARRAY = [
+	{
+		id: 'first_game',
+		icon: 'assets/first_game.svg',
+		description: 'First game played'
+	},
+	{
+		id: 'first_king_kill',
+		icon: 'assets/king_kill.svg',
+		description: 'First king kill'
+	},
+	{
+		id: 'first_win',
+		icon: 'assets/first_win.svg',
+		description: 'First win'
+	},
+	{
+		id: 'rating_over_1600',
+		icon: 'assets/rating_over_1600.svg',
+		description: 'Rating over 1600'
+	}
+];

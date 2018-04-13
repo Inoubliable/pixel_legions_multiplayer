@@ -80,7 +80,7 @@ app.use((req, res, next) => {
 	if (playerId || urlEnd == '/login' || urlEnd == '/register') {
 		next();
 	} else {
-		res.redirect('login');
+		res.redirect('/login');
 	}
 });
 
@@ -207,6 +207,13 @@ app.get('/leaderboard', (req, res) => {
 	});
 });
 
+app.get('/profile/:name', (req, res) => {
+	let playerName = req.params.name;
+	dbConnection.getPlayerByName(playerName, function(player) {
+		res.render(path.join(public + 'profile.hbs'), {player: player});
+	});
+});
+
 app.get('/register', (req, res) => {
 	res.render(path.join(public + 'register.hbs'));
 });
@@ -219,12 +226,15 @@ app.post('/register', (req, res) => {
 		if (!player) {
 			let upgradesObject = {};
 			c.UPGRADES_ARRAY.map(u => upgradesObject[u.id] = 0);
+			let achievementsObject = {};
+			c.ACHIEVEMENTS_ARRAY.map(u => achievementsObject[u.id] = false);
 			let newPlayer = {
 				name: playerName,
 				password: playerPassword,
 				rating: c.STARTING_RATING,
 				coins: c.STARTING_COINS,
-				upgrades: upgradesObject
+				upgrades: upgradesObject,
+				achievements: achievementsObject
 			};
 			dbConnection.insertPlayer(newPlayer, function(data) {
 				req.session.playerId = data.insertedIds[0];
