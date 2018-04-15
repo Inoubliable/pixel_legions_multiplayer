@@ -9,6 +9,24 @@
 	.player-rating {
 		font-size: 22px;
 	}
+
+	.player-country {
+		margin-top: 10px;
+		line-height: 30px;
+
+		.flag-icon {
+			height: 26px;
+			width: 32px;
+			vertical-align: middle;
+		}
+
+		.name {
+			display: inline-block;
+			vertical-align: middle;
+			margin-left: 7px;
+			font-size: 18px;
+		}
+	}
 }
 
 .achievements {
@@ -23,6 +41,11 @@
 		margin: 13px;
 		float: left;
 		position: relative;
+		opacity: 0.3;
+
+		.enabled {
+			opacity: 1;
+		}
 
 		&:hover {
 			cursor: pointer;

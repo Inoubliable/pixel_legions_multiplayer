@@ -10,11 +10,15 @@
 		<div class="player-info-container">
 			<div class="player-name">{{player.name}}</div>
 			<div class="player-rating">{{player.rating}}</div>
+			<div class="player-country">
+				<span class="flag-icon flag-icon-{{player.country.code}}"></span>
+				<div class="name">{{player.country.name}}</div>
+			</div>
 		</div>
 
 		<div class="achievements">
 			{{#each player.achievements}}
-				<div class="achievement" id={{this.id}}>
+				<div class="achievement {{#if this}}enabled{{/if}}" id={{this.id}}>
 					<img src={{this.icon}}>
 				</div>
 			{{/each}}

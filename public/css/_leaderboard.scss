@@ -1,23 +1,23 @@
 .leaderboard {
 	color: #fff;
-	font-size: 20px;
-	margin: 0 auto;
+	font-size: 22px;
+	margin: 30px auto 0px auto;
 	width: 60%;
 
 	.player {
 		display: flex;
 		margin-bottom: 8px;
-		line-height: $badge-size;
+		line-height: 50px;
 		border: 1px solid #ddd;
 		border-radius: 5px;
-		padding: 7px;
+		padding: 10px 4px;
 
 		.place {
-			width: 20%;
+			width: 15%;
 			text-align: center;
 
 			img {
-				max-height: $badge-size;
+				max-height: 50px;
 				vertical-align: middle;
 			}
 		}
@@ -27,8 +27,19 @@
 			text-align: left;
 		}
 
+		.country {
+			width: 20%;
+			vertical-align: middle;
+			text-align: center;
+
+			.flag-icon {
+				height: 26px;
+				width: 32px;
+			}
+		}
+
 		.rating {
-			width: 30%;
+			width: 20%;
 			text-align: center;
 		}
 	}

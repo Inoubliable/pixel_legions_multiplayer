@@ -210,6 +210,14 @@ app.get('/leaderboard', (req, res) => {
 app.get('/profile/:name', (req, res) => {
 	let playerName = req.params.name;
 	dbConnection.getPlayerByName(playerName, function(player) {
+		let achievementsArray = c.ACHIEVEMENTS_ARRAY.map(a => {
+			let isAchievementWon = player.achievements[a.id];
+			a.won = isAchievementWon;
+
+			return a;
+		});
+		player.achievements = achievementsArray;
+
 		res.render(path.join(public + 'profile.hbs'), {player: player});
 	});
 });
@@ -222,8 +230,10 @@ app.post('/register', (req, res) => {
 	// check if name already exists
 	let playerName = req.body.name;
 	let playerPassword = req.body.password;
+	let playerCountryName = req.body.country;
 	dbConnection.getPlayerByName(playerName, function(player) {
 		if (!player) {
+			let playerCountry = c.COUNTRIES.find(c => c.name == playerCountryName);
 			let upgradesObject = {};
 			c.UPGRADES_ARRAY.map(u => upgradesObject[u.id] = 0);
 			let achievementsObject = {};
@@ -231,6 +241,7 @@ app.post('/register', (req, res) => {
 			let newPlayer = {
 				name: playerName,
 				password: playerPassword,
+				country: playerCountry,
 				rating: c.STARTING_RATING,
 				coins: c.STARTING_COINS,
 				upgrades: upgradesObject,

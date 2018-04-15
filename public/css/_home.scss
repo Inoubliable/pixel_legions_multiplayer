@@ -87,15 +87,16 @@
 		height: 90%;
 		border-right: 1px solid #111;
 		float: left;
+		overflow-y: scroll;
 
 		.upgrade {
 			border: 2px solid #555;
 			border-radius: 4px;
 			display: inline-block;
-			width: 140px;
+			width: 120px;
 			padding: 10px;
-			height: 140px;
-			line-height: 140px;
+			height: 120px;
+			line-height: 120px;
 			margin: 13px;
 			float: left;
 			position: relative;
@@ -134,6 +135,12 @@
 		.upgrade-icon {
 			margin-top: 30px;
 			padding: 25px;
+			height: 200px;
+
+			img {
+				max-height: 100%;
+				max-width: 100%;
+			}
 		}
 
 		.upgrade-description {
@@ -162,10 +169,10 @@
 		}
 
 		.buy-btn {
-			font-size: 23px;
+			font-size: 21px;
 			font-variant: normal;
 			border-radius: 5px;
-			padding: 12px 34px;
+			padding: 10px 28px;
 			display: inline-block;
 			letter-spacing: 1px;
 
@@ -181,6 +188,7 @@
 		padding: 10px;
 		margin-left: 50%;
 		transform: translateX(-50%);
+		font-size: 30px;
 
 		&:hover {
 			cursor: pointer;

@@ -3,8 +3,9 @@
 	<head>
 		<title>Pixel Legions</title>
 		<link rel="stylesheet" href="/dist/styles.css">
+		<script src="http://www.geoplugin.net/javascript.gp"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-		<script src="/js/login.js"></script>
+		<script src="/js/register.js"></script>
 	</head>
 	<body>
 		<h1 class="main-header">PIXEL LEGIONS</h1>
@@ -12,6 +13,7 @@
 		<form id="register-form" action="/register" method="POST">
 			<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
 			<input type="text" class="password" name="password" placeholder="Password" maxlength="10" required>
+			<input type="hidden" class="country" name="country">
 			<input type="submit" class="register-btn btn-bluish" value="Register">
 		</form>
 
