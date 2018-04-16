@@ -143,7 +143,13 @@ app.post('/buyUpgrade', (req, res) => {
 
 		if (remainingCoins >= 0) {
 			playerUpgrades[upgradeId] = playerUpgrades[upgradeId] + 1;
-			dbConnection.updatePlayer(playerId, {coins: remainingCoins, upgrades: playerUpgrades}, function(pl) {
+			
+			let updateObject = {
+				coins: remainingCoins,
+				upgrades: playerUpgrades
+			};
+
+			dbConnection.updatePlayer(playerId, updateObject, function(pl) {
 				
 			});
 		}
