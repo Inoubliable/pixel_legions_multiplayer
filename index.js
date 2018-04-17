@@ -265,6 +265,11 @@ app.post('/register', (req, res) => {
 
 });
 
+app.get('/logout', (req, res) => {
+	req.session.playerId = null;
+	res.redirect('login');
+});
+
 
 let allRooms = [];
 
