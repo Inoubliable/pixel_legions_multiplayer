@@ -25,20 +25,29 @@
 }
 
 .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
 	background-color: #000;
 	opacity: 0.3;
 	height: 100%;
 	width: 100%;
 	z-index: 10;
+	display: none;
 }
 
 #game-over-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 	background-color: #333;
-	height: 70%;
-	width: 70%;
+	height: 80%;
+	width: 80%;
 	padding: 30px;
 	border-radius: 5px;
 	z-index: 100;
+	display: none;
 
 	.place-sentence {
 		margin-top: 30px;

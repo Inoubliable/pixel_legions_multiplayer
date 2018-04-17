@@ -6,13 +6,10 @@
 		font-size: 24px;
 	}
 
-	.player-rating {
-		font-size: 22px;
-	}
-
 	.player-country {
-		margin-top: 10px;
+		margin-top: 6px;
 		line-height: 30px;
+		display: inline-block;
 
 		.flag-icon {
 			height: 26px;
@@ -24,12 +21,20 @@
 			display: inline-block;
 			vertical-align: middle;
 			margin-left: 7px;
-			font-size: 18px;
+			font-size: 19px;
 		}
+	}
+
+	.player-rating {
+		font-size: 22px;
+		display: inline-block;
+		margin-left: 200px;
 	}
 }
 
 .achievements {
+	padding: 10px 30px;
+
 	.achievement {
 		border: 2px solid #555;
 		border-radius: 4px;
@@ -37,8 +42,7 @@
 		width: 140px;
 		padding: 10px;
 		height: 140px;
-		line-height: 140px;
-		margin: 13px;
+		margin: 12px;
 		float: left;
 		position: relative;
 		opacity: 0.3;
@@ -47,9 +51,22 @@
 			opacity: 1;
 		}
 
-		&:hover {
+		.overlay {
+			width: 100%;
+			height: 100%;
+			background-color: #000;
+			position: absolute;
+			top: 0;
+			left: 0;
+			text-align: center;
+			padding: 38% 10px;
+			opacity: 0;
+			transition: opacity 0.2s;
+		}
+
+		&:hover .overlay {
+			opacity: 1;
 			cursor: pointer;
-			border: 2px solid $bluish-hover;
 		}
 
 		img {

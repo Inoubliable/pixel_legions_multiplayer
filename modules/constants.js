@@ -213,17 +213,17 @@ module.exports.ACHIEVEMENTS_ARRAY = [
 	},
 	{
 		id: 'first_king_kill',
-		icon: '/assets/king_kill.svg',
+		icon: '/assets/wax_badge.svg',
 		description: 'First king kill'
 	},
 	{
 		id: 'first_win',
-		icon: '/assets/first_win.svg',
+		icon: '/assets/wax_badge.svg',
 		description: 'First win'
 	},
 	{
 		id: 'rating_over_1600',
-		icon: '/assets/rating_over_1600.svg',
+		icon: '/assets/wax_badge.svg',
 		description: 'Rating over 1600'
 	}
 ];

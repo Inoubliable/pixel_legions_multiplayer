@@ -223,7 +223,7 @@ $(document).ready(function() {
 		});
 
 		$('.overlay').fadeIn(300);
-		$('#game-over-modal').slideDown(500);
+		$('#game-over-modal').fadeIn(500);
 
 	}
 
