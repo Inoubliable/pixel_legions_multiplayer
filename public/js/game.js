@@ -177,11 +177,54 @@ $(document).ready(function() {
 	document.body.addEventListener("mouseup", onMouseUp, false);
 
 	function win() {
-		window.location.href = '/gameOver';
+		showGameOverModal();
 	}
 
 	function lose() {
-		window.location.href = '/gameOver';
+		showGameOverModal();
+	}
+
+	function showGameOverModal() {
+
+		$.get('gameOver', function(data) {
+
+			let myPlace = data.place;
+			$('.place-sentence .place').html(myPlace);
+
+			let ranking = data.ranking;
+			let prizes = data.prizes;
+
+			for (let i = 0; i < ranking.length; i++) {
+				let place = i + 1;
+				let name = ranking[i].name;
+				let prize = prizes[i];
+				$('.ranking').append('<li>' + place + '. ' + name + ' <span class="prize">' + prize + '<span class="coin"></span></span></li>');
+			}
+
+			let oldRating = data.oldRating;
+			let newRating = data.newRating;
+			let rating = oldRating;
+			let ratingChange = 0;
+			let isRatingPlus = (newRating - oldRating) > 0;
+
+			let ratingInterval = setInterval(function() {
+				ratingChange = rating - oldRating;
+				if (ratingChange > 0) {
+					ratingChange = '+' + ratingChange;
+				}
+				$('.rating-change').html('New rating: ' + rating + ' (' + ratingChange + ')');
+
+				if (rating == newRating) {
+					clearInterval(ratingInterval);
+				}
+
+				isRatingPlus ? rating++ : rating--;
+			}, 30);
+		});
+
+		$('.overlay').fadeIn(300);
+		$('#game-over-modal').slideDown(500);
+
 	}
 
 	function legionCountToWidth(count) {

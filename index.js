@@ -183,16 +183,11 @@ app.get('/gameOver', (req, res) => {
 
 			let playerRankingIndex = ranking.findIndex(r => r.id == playerId);
 			let playerRanking = ranking[playerRankingIndex];
-			let ratingDiff = playerRanking.newRating - playerRanking.rating;
-			if (ratingDiff > 0) {
-				ratingDiff = '+' + ratingDiff;
-			}
 
-			res.render(path.join(public + 'gameOver.hbs'), {
+			res.json({
 				ranking: ranking,
 				oldRating: playerRanking.rating,
 				newRating: playerRanking.newRating,
-				ratingDiff: ratingDiff,
 				place: playerRankingIndex+1,
 				prizes: c.PRIZES
 			});
