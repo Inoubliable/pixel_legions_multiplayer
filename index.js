@@ -89,7 +89,12 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-	res.render(path.join(public + 'login.hbs'));
+	if (req.session.justRegistered) {
+		req.session.justRegistered = false;
+		res.render(path.join(public + 'login.hbs'), {success: 'Registration completed successfully.'});
+	} else {
+		res.render(path.join(public + 'login.hbs'));
+	}
 });
 
 app.post('/login', (req, res) => {
@@ -103,10 +108,10 @@ app.post('/login', (req, res) => {
 				req.session.playerId = player._id;
 				res.redirect('home');
 			} else {
-				res.json({error: 'Wrong password.'});
+				res.render(path.join(public + 'login.hbs'), {error: 'Wrong password.'});
 			}
 		} else {
-			res.json({error: 'Player with that name does not exist.'});
+			res.render(path.join(public + 'login.hbs'), {error: 'Player with that name does not exist.'});
 		}
 	});
 
@@ -250,10 +255,11 @@ app.post('/register', (req, res) => {
 			};
 			dbConnection.insertPlayer(newPlayer, function(data) {
 				req.session.playerId = data.insertedIds[0];
+				req.session.justRegistered = true;
 				res.redirect('login');
 			});
 		} else {
-			res.json({error: 'Player with that name already exists.'});
+			res.render(path.join(public + 'register.hbs'), {error: 'Player with that name already exists.'});
 		}
 	});
 

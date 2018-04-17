@@ -80,3 +80,19 @@
 	border: none;
 	font-size: 18px;
 }
+
+.notification {
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	padding: 10px;
+	border-radius: 5px;
+
+	&.login-error {
+		background-color: $redish;
+	}
+
+	&.registration-success {
+		background-color: $greenish;
+	}
+}
