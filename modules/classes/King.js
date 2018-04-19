@@ -14,7 +14,7 @@ class King {
 		this.isPathVisible = false;
 		this.selected = false;
 		this.move = false;
-		this.color = c.COLORS[color].normal;
+		this.color = c.COLORS[color].hovered;
 		this.spawnedColor = color;
 		this.isAI = isAI;
 		this.isUnderAttack = false;

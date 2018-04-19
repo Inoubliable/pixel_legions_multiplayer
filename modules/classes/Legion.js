@@ -14,12 +14,12 @@ class Legion {
 		this.path = [];
 		this.isPathVisible = false;
 		this.selected = false;
+		this.hovered = false;
 		this.move = false;
 		this.pixels = createPixels(x, y, helpers.legionCountToWidth(count), helpers.legionCountToWidth(count), count);
 		this.hull = helpers.calculateHull(this.pixels, x, y);
 		this.nearbyEnemies = [];
-		this.borderNormal = c.COLORS[color].normal;
-		this.colorNormal = c.COLORS[color].normal.replace('1)', '0.5)');
+		this.colorHovered = c.COLORS[color].hovered.replace('1)', '0.3)');
 		this.borderSelected = c.COLORS[color].selected;
 		this.colorSelected = c.COLORS[color].selected.replace('1)', '0.5)');
 		this.spawning = spawning;

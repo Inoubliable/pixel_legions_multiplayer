@@ -330,6 +330,18 @@ $(document).ready(function() {
 		if (mousedown) {
 			pushToPath(e);
 		}
+
+		let mouseX = e.clientX - canvasContainer.offsetLeft;
+		let mouseY = e.clientY - canvasContainer.offsetTop;
+
+		for (let i = 0; i < myLegions.length; i++) {
+			let legionWidthHalf = legionCountToWidth(myLegions[i].count) / 2;
+			if (mouseX < myLegions[i].x + legionWidthHalf && mouseX > myLegions[i].x - legionWidthHalf && mouseY < myLegions[i].y + legionWidthHalf && mouseY > myLegions[i].y - legionWidthHalf) {
+				myLegions[i].hovered = true;
+			} else {
+				myLegions[i].hovered = false;
+			}
+		}
 	}
 
 	let mouseDownKingIndex = -1;
@@ -933,9 +945,26 @@ $(document).ready(function() {
 			if (myLegions[i].selected) {
 				ctx.strokeStyle = myLegions[i].borderSelected;
 				ctx.fillStyle = myLegions[i].colorSelected;
-			} else {
-				ctx.strokeStyle = myLegions[i].borderNormal;
-				ctx.fillStyle = myLegions[i].colorNormal;
+				ctx.lineWidth = LEGION_BORDER_WIDTH;
+
+				ctx.beginPath();
+				if (myLegions[i].hull) {
+					for (let h = 0; h < myLegions[i].hull.length; h++) {
+						ctx.lineTo(myLegions[i].hull[h][0], myLegions[i].hull[h][1]);
+					}
+				}
+				ctx.fill();
+				ctx.stroke();
+			} else if (myLegions[i].hovered) {
+				ctx.fillStyle = myLegions[i].colorHovered;
+
+				ctx.beginPath();
+				if (myLegions[i].hull) {
+					for (let h = 0; h < myLegions[i].hull.length; h++) {
+						ctx.lineTo(myLegions[i].hull[h][0], myLegions[i].hull[h][1]);
+					}
+				}
+				ctx.fill();
 			}
 
 			// for testing
@@ -944,20 +973,10 @@ $(document).ready(function() {
 				ctx.strokeRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
 				ctx.fillRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
 			}
-			
-			ctx.lineWidth = LEGION_BORDER_WIDTH;
-			ctx.beginPath();
-			if (myLegions[i].hull) {
-				for (let h = 0; h < myLegions[i].hull.length; h++) {
-					ctx.lineTo(myLegions[i].hull[h][0], myLegions[i].hull[h][1]);
-				}
-			}
-			ctx.fill();
-			ctx.stroke();
 
 			// draw pixels in legion
 			for (let p = 0; p < myLegions[i].pixels.length; p++) {
-				ctx.fillStyle = myLegions[i].colorNormal;
+				ctx.fillStyle = myLegions[i].borderSelected;
 				ctx.fillRect(myLegions[i].pixels[p][0] - PIXEL_SIZE_PX/2, myLegions[i].pixels[p][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
 		}
@@ -1022,8 +1041,6 @@ $(document).ready(function() {
 		for (let i = 0; i < enemyLegions.length; i++) {
 
 			let enemyLegionWidth = legionCountToWidth(enemyLegions[i].count);
-			ctx.strokeStyle = enemyLegions[i].borderNormal;
-			ctx.fillStyle = enemyLegions[i].colorNormal;
 			ctx.lineWidth = LEGION_BORDER_WIDTH;
 			ctx.beginPath();
 
@@ -1034,17 +1051,11 @@ $(document).ready(function() {
 				ctx.fillRect(enemyLegions[i].x - enemyLegionWidth/2, enemyLegions[i].y - enemyLegionWidth/2, enemyLegionWidth, enemyLegionWidth);
 			}
 
-			if (enemyLegions[i].hull) {
-				for (let h = 0; h < enemyLegions[i].hull.length; h++) {
-					ctx.lineTo(enemyLegions[i].hull[h][0], enemyLegions[i].hull[h][1]);
-				}
-			}
-			ctx.fill();
 			ctx.stroke();
 
 			// draw pixels in legion
 			for (let p = 0; p < enemyLegions[i].pixels.length; p++) {
-				ctx.fillStyle = enemyLegions[i].borderNormal;
+				ctx.fillStyle = enemyLegions[i].borderSelected;
 				ctx.fillRect(enemyLegions[i].pixels[p][0] - PIXEL_SIZE_PX/2, enemyLegions[i].pixels[p][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
 

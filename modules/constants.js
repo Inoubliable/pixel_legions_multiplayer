@@ -43,28 +43,28 @@ module.exports.AI_ATTACK_LEGION_CHANCE = 0.2;
 
 module.exports.COLORS = {
 	blue: {
-		normal: 'rgba(76, 103, 214, 1)',
-		selected: 'rgba(122, 143, 214, 1)'
+		selected: 'rgba(76, 103, 214, 1)',
+		hovered: 'rgba(122, 143, 214, 1)'
 	},
 	red: {
-		normal: 'rgba(248, 6, 42, 1)',
-		selected: 'rgba(254, 76, 112, 1)'
+		selected: 'rgba(248, 6, 42, 1)',
+		hovered: 'rgba(254, 76, 112, 1)'
 	},
 	green: {
-		normal: 'rgba(37, 177, 42, 1)',
-		selected: 'rgba(87, 217, 82, 1)'
+		selected: 'rgba(37, 177, 42, 1)',
+		hovered: 'rgba(87, 217, 82, 1)'
 	},
 	orange: {
-		normal: 'rgba(240, 100, 23, 1)',
-		selected: 'rgba(254, 140, 63, 1)'
+		selected: 'rgba(240, 100, 23, 1)',
+		hovered: 'rgba(254, 140, 63, 1)'
 	},
 	purple: {
-		normal: 'rgba(178, 50, 194, 1)',
-		selected: 'rgba(218, 90, 234, 1)'
+		selected: 'rgba(178, 50, 194, 1)',
+		hovered: 'rgba(218, 90, 234, 1)'
 	},
 	yellow: {
-		normal: 'rgba(244, 198, 28, 1)',
-		selected: 'rgba(254, 238, 68, 1)'
+		selected: 'rgba(244, 198, 28, 1)',
+		hovered: 'rgba(254, 238, 68, 1)'
 	}
 };
 
