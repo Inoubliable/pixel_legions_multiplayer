@@ -90,6 +90,7 @@ $(document).ready(function() {
 					foundLegion.count = allLegions[i].count;
 					allLegions[i] = foundLegion;
 				} else {
+					allLegions[i].springs = createSprings(allLegions[i].pixels);
 					myLegions.push(allLegions[i]);
 				}
 			} else {
@@ -100,9 +101,10 @@ $(document).ready(function() {
 					foundLegion.x = allLegions[i].x;
 					foundLegion.y = allLegions[i].y;
 					foundLegion.count = allLegions[i].count;
-					updatePixelsPosition(foundLegion.pixels, dx, dy);
+					updatePixelsPosition(foundLegion);
 					allLegions[i] = foundLegion;
 				} else {
+					allLegions[i].springs = createSprings(allLegions[i].pixels);
 					enemyLegions.push(allLegions[i]);
 				}
 			}
@@ -159,6 +161,8 @@ $(document).ready(function() {
 
 	const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 	const BATTLE_DISTANCE = 100;
+
+	const UPDATE_TIMESTEP = 1000/60;
 
 	let battleBeams = [];
 	let deadPixelsAnimations = [];
@@ -235,13 +239,6 @@ $(document).ready(function() {
 		return color.replace(/\d+\.?\d*\)/, (count / KING_COUNT) + ')');
 	}
 
-	function updatePixelsPosition(pixels, dx, dy) {
-		for (let i = 0; i < pixels.length; i++) {
-			pixels[i][0] += dx;
-			pixels[i][1] += dy;
-		}
-	}
-
     function calculateHull(points, x, y) {
     	let n = points.length;
         // There must be at least 3 points
@@ -254,8 +251,8 @@ $(document).ready(function() {
         let l = 0;
         let newArray = [];
         for (let i = 0; i < n; i++) {
-        	newArray.push([points[i][0], points[i][1]]);
-			if (points[i][0] < points[l][0]) {
+        	newArray.push([points[i].x, points[i].y]);
+			if (points[i].x < points[l].x) {
 				l = i;
 			}
 		}
@@ -308,7 +305,7 @@ $(document).ready(function() {
     }
 
 	function orientation(p, q, r) {
-        let val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
+        let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
       
         if (val == 0) return 0;	// collinear
         return (val > 0) ? 1 : 2;	// clock or counterclock wise
@@ -497,8 +494,6 @@ $(document).ready(function() {
 
 	function update() {
 
-		movePixels();
-
 		battle();
 
 		draw();
@@ -512,100 +507,108 @@ $(document).ready(function() {
 	// send my move loop
 	setInterval(function() {
 		emitMove();
-	}, 1000/60);
+	}, UPDATE_TIMESTEP);
 
 	function emitMove() {
 		socket.emit('move', {king: myKing, legions: myLegions});
 	}
 
-	function movePixels() {
-		// Move my legions' pixels
-		for (let i = 0; i < myLegions.length; i++) {
-			for (let j = 0; j < myLegions[i].pixels.length; j++) {
-				let pixel = myLegions[i].pixels[j];
-				let moveFor = 0.2;
+	class Spring {
 
-				// pixel[x, y, moveDirectionX, moveDirectionY]
-				// moveDirectionX: 0 => +, 1 => -
-				// moveDirectionY: 0 => +, 1 => -
-				if (pixel[2] == 0) {
-					pixel[0] += moveFor;
-				} else if (pixel[2] == 1) {
-					pixel[0] -= moveFor;
-				}
-				if (pixel[3] == 0) {
-					pixel[1] += moveFor;
-				} else if (pixel[3] == 1) {
-					pixel[1] -= moveFor;
-				}
+		constructor(point1, point2, restLengthX, restLengthY) {
+			this.point1 = point1;
+			this.point2 = point2;
+			this.restLengthX = restLengthX || (point1.x - point2.x);
+			this.restLengthY = restLengthY || (point1.y - point2.y);
+		}
+		
+	}
 
-				let x = myLegions[i].x;
-				let y = myLegions[i].y;
-				let w = legionCountToWidth(myLegions[i].count);
-				let h = legionCountToWidth(myLegions[i].count);
-				let disX = x - pixel[0];
-				let disY = y - pixel[1];
-				let dis = Math.sqrt(disX**2 + disY**2);
-				if (dis > w/2 - HULL_SPACE_PX) {
-					if (pixel[0] >= x + w/3 - HULL_SPACE_PX) {
-						pixel[2] = 1;
-					} else if (pixel[0] <= x - w/3 + HULL_SPACE_PX) {
-						pixel[2] = 0;
-					}
-					if (pixel[1] >= y + h/3 - HULL_SPACE_PX) {
-						pixel[3] = 1;
-					} else if (pixel[1] <= y - h/3 + HULL_SPACE_PX) {
-						pixel[3] = 0;
-					}
-				}
-			}
+	let m = 1;
+	let k = 10;
+	let damping = 1.2;
+	// create springs from center to all points
+	function createSprings(points) {
 
-			myLegions[i].hull = calculateHull(myLegions[i].pixels, myLegions[i].x, myLegions[i].y);
+		let springs = [];
+
+		let anchorPoint = points.find(p => p.isAnchor);
+
+		for (let i = 0; i < points.length; i++) {
+			springs.push(new Spring(anchorPoint, points[i]));
 		}
 
-		// Move enemy's pixels
-		for (let i = 0; i < enemyLegions.length; i++) {
-			for (let j = 0; j < enemyLegions[i].pixels.length; j++) {
-				let pixel = enemyLegions[i].pixels[j];
-				let moveFor = 0.2;
+		return springs;
 
-				// pixel[x, y, moveDirectionX, moveDirectionY]
-				// moveDirectionX: 0 => +, 1 => -
-				// moveDirectionY: 0 => +, 1 => -
-				if (pixel[2] == 0) {
-					pixel[0] += moveFor;
-				} else if (pixel[2] == 1) {
-					pixel[0] -= moveFor;
-				}
-				if (pixel[3] == 0) {
-					pixel[1] += moveFor;
-				} else if (pixel[3] == 1) {
-					pixel[1] -= moveFor;
-				}
+	}
 
-				let x = enemyLegions[i].x;
-				let y = enemyLegions[i].y;
-				let w = legionCountToWidth(enemyLegions[i].count);
-				let h = legionCountToWidth(enemyLegions[i].count);
-				let disX = x - pixel[0];
-				let disY = y - pixel[1];
-				let dis = Math.sqrt(disX**2 + disY**2);
-				if (dis > (w/2 - HULL_SPACE_PX)) {
-					if (pixel[0] >= x + w/3 - HULL_SPACE_PX) {
-						pixel[2] = 1;
-					} else if (pixel[0] <= x - w/3 + HULL_SPACE_PX) {
-						pixel[2] = 0;
-					}
-					if (pixel[1] >= y + h/3 - HULL_SPACE_PX) {
-						pixel[3] = 1;
-					} else if (pixel[1] <= y - h/3 + HULL_SPACE_PX) {
-						pixel[3] = 0;
-					}
-				}
+	function updatePixelsPosition(legion) {
+
+		let anchor = legion.pixels.find(p => p.isAnchor);
+		anchor.x = legion.x;
+		anchor.y = legion.y;
+
+		let springs = legion.springs;
+		let points = legion.pixels;
+
+		for (let i = 0; i < springs.length; i++) {
+			let spring = springs[i];
+
+			// spring length
+			let springLengthX = spring.point1.x - spring.point2.x;
+			let springLengthY = spring.point1.y - spring.point2.y;
+
+			// point1 spring force
+			let springForceX = -k * (springLengthX - spring.restLengthX);
+			let springForceY = -k * (springLengthY - spring.restLengthY);
+			let accelerationX = springForceX / m;
+			let accelerationY = springForceY / m;
+
+			// point1 damping
+			let dampingForceX1 = damping * (spring.point1.velocityX);
+			let dampingForceY1 = damping * (spring.point1.velocityY);
+
+			// point2 damping
+			let dampingForceX2 = damping * (spring.point2.velocityX);
+			let dampingForceY2 = damping * (spring.point2.velocityY);
+
+			// point1 net force
+			let forceX1 = springForceX - dampingForceX1;
+			let forceY1 = springForceY - dampingForceY1;
+
+			// point2 net force
+			let forceX2 = -springForceX - dampingForceX2;
+			let forceY2 = -springForceY - dampingForceY2;
+
+			// point1 acceleration
+			let accelerationX1 = forceX1 / m;
+			let accelerationY1 = forceY1 / m;
+
+			// point2 acceleration
+			let accelerationX2 = forceX2 / m;
+			let accelerationY2 = forceY2 / m;
+
+			// update points
+			if (!spring.point1.isAnchor) {
+				spring.point1.velocityX += accelerationX1 * UPDATE_TIMESTEP;
+				spring.point1.velocityY += accelerationY1 * UPDATE_TIMESTEP;
 			}
 
-			enemyLegions[i].hull = calculateHull(enemyLegions[i].pixels, enemyLegions[i].x, enemyLegions[i].y);
+			if (!spring.point2.isAnchor) {
+				spring.point2.velocityX += accelerationX2 * UPDATE_TIMESTEP;
+				spring.point2.velocityY += accelerationY2 * UPDATE_TIMESTEP;
+			}
+
 		}
+
+		for (let i = 0; i < points.length; i++) {
+			let point = points[i];
+
+			// point position
+			point.x += point.velocityX * UPDATE_TIMESTEP;
+			point.y += point.velocityY * UPDATE_TIMESTEP;
+		}
+
 	}
 
 	function updateDeadPixelsAnimations() {
@@ -909,7 +912,7 @@ $(document).ready(function() {
 					dy = pos[1] - myLegions[i].y;
 					myLegions[i].y = pos[1];
 				}
-				updatePixelsPosition(myLegions[i].pixels, dx, dy);
+				updatePixelsPosition(myLegions[i]);
 			}
 
 			// move spawning legions
@@ -926,11 +929,11 @@ $(document).ready(function() {
 					// check if it gets over playfield border
 					if (newX > (legW*LEGION_OVER_BORDER) && newX < (PLAYFIELD_WIDTH - legW*LEGION_OVER_BORDER)) {
 						myLegions[i].x = newX;
-						updatePixelsPosition(myLegions[i].pixels, dx, 0);
+						updatePixelsPosition(myLegions[i]);
 					}
 					if (newY > (legH*LEGION_OVER_BORDER) && newY < (PLAYFIELD_HEIGHT - legH*LEGION_OVER_BORDER)) {
 						myLegions[i].y = newY;
-						updatePixelsPosition(myLegions[i].pixels, 0, dy);
+						updatePixelsPosition(myLegions[i]);
 					}
 				} else {
 					myLegions[i].spawning = false;
@@ -977,7 +980,7 @@ $(document).ready(function() {
 			// draw pixels in legion
 			for (let p = 0; p < myLegions[i].pixels.length; p++) {
 				ctx.fillStyle = myLegions[i].borderSelected;
-				ctx.fillRect(myLegions[i].pixels[p][0] - PIXEL_SIZE_PX/2, myLegions[i].pixels[p][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
+				ctx.fillRect(myLegions[i].pixels[p].x - PIXEL_SIZE_PX/2, myLegions[i].pixels[p].y - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
 		}
 
@@ -1056,7 +1059,7 @@ $(document).ready(function() {
 			// draw pixels in legion
 			for (let p = 0; p < enemyLegions[i].pixels.length; p++) {
 				ctx.fillStyle = enemyLegions[i].borderSelected;
-				ctx.fillRect(enemyLegions[i].pixels[p][0] - PIXEL_SIZE_PX/2, enemyLegions[i].pixels[p][1] - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
+				ctx.fillRect(enemyLegions[i].pixels[p].x - PIXEL_SIZE_PX/2, enemyLegions[i].pixels[p].y - PIXEL_SIZE_PX/2, PIXEL_SIZE_PX, PIXEL_SIZE_PX);
 			}
 
 		}

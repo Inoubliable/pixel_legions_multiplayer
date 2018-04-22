@@ -16,8 +16,8 @@ function calculateHull(points, x, y) {
     let l = 0;
     let newArray = [];
     for (let i = 0; i < n; i++) {
-    	newArray.push([points[i][0], points[i][1]]);
-		if (points[i][0] < points[l][0]) {
+    	newArray.push([points[i].x, points[i].y]);
+		if (points[i].x < points[l].x) {
 			l = i;
 		}
 	}
@@ -70,7 +70,7 @@ function calculateHull(points, x, y) {
 }
 
 function orientation(p, q, r) {
-    let val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1]);
+    let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
   
     if (val == 0) return 0;	// collinear
     return (val > 0) ? 1 : 2;	// clock or counterclock wise

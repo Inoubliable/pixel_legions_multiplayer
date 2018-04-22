@@ -3,6 +3,7 @@ let uuidv1 = require('uuid/v1');
 let c = require('../constants');
 
 class King {
+	
 	constructor(playerId, x, y, count, attack, color, isAI) {
 		this.id = uuidv1();
 		this.playerId = playerId;

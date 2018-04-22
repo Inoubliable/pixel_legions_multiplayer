@@ -7,8 +7,7 @@ let King = require('./King');
 let Legion = require('./Legion');
 
 class Player {
-
-
+	
 	constructor(id, name, rating, upgrades, coins, isAI) {
 		this.id = id;
 		this.name = name;

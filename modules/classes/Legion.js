@@ -4,6 +4,7 @@ let c = require('../constants');
 let helpers = require('../helpers');
 
 class Legion {
+	
 	constructor(playerId, x, y, count, attack, color, spawning, spawnX, spawnY, isAI) {
 		this.id = uuidv1();
 		this.playerId = playerId;
@@ -29,17 +30,28 @@ class Legion {
 	}
 }
 
+class Point {
+
+	constructor(x, y, isAnchor) {
+		this.x = x;
+		this.y = y;
+		this.velocityX = 0;
+		this.velocityY = 0;
+		this.isAnchor = isAnchor || false;
+	}
+	
+}
+
 function createPixels(x, y, w, h, count) {
 
 	let pixels = [];
+	pixels.push(new Point(x, y, true));
 	let num = count + c.PIXELS_NUM_MIN;
 
 	for (let i = 0; i < num; i++) {
 		let pixelX = Math.random() * (w - 2 * c.HULL_SPACE_PX) + x - w/2 + c.HULL_SPACE_PX;
 		let pixelY = Math.random() * h + y - h/2;
-		let pixelMoveDirectionX = Math.floor(Math.random() * 2);
-		let pixelMoveDirectionY = Math.floor(Math.random() * 2);
-		pixels.push([pixelX, pixelY, pixelMoveDirectionX, pixelMoveDirectionY]);
+		pixels.push(new Point(pixelX, pixelY));
 	}
 
 	return pixels;

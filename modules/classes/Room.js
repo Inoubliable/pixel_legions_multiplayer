@@ -6,6 +6,7 @@ let helpers = require('../helpers');
 let dbConnection = require('../../dbConnection');
 
 class Room {
+	
 	constructor() {
 		this.id = uuidv1();
 		this.allPlayers = [];
