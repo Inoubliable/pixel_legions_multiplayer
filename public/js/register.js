@@ -1,11 +1,12 @@
-$(document).ready(function() {
+import $ from 'jquery';
 
+export function login() {
+	
 	let userCountry = geoplugin_countryName();
-	console.log(userCountry);
 	$('input.country').val(userCountry);
 
 	$('#register-form').submit(function() {
 		return true;
 	});
 
-});
+};
