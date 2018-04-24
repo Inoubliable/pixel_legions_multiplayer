@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-export function login() {
+$(document).ready(function() {
 
 	console.log('hello');
 
@@ -8,4 +8,4 @@ export function login() {
 		return true;
 	});
 
-};
+});

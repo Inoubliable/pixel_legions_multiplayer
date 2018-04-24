@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-export function login() {
+$(document).ready(function() {
 	
 	let userCountry = geoplugin_countryName();
 	$('input.country').val(userCountry);
@@ -9,4 +9,4 @@ export function login() {
 		return true;
 	});
 
-};
+});

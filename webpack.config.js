@@ -4,15 +4,24 @@ const webpack = require('webpack');
 let public = __dirname + '/public/';
 
 module.exports = {
-    entry: public + 'js/main.js',
+    entry: {
+        'game': public + 'js/game.js',
+        'login': public + 'js/login.js',
+        'register': public + 'js/register.js',
+        'profile': public + 'js/profile.js',
+        'waitingRoom': public + 'js/profile.js',
+        'leaderboard': public + 'js/leaderboard.js',
+        'home': public + 'js/home.js'
+    },
     output: {
-        filename: 'bundle.js',
+        filename: '[name].js',
         path: path.resolve(public, './dist')
     },
     resolve: {
         alias: {
             $: "jquery/src/jquery",
-        }
+        },
+        extensions: ['.js']
     },
     module: {
         rules: [{
