@@ -1,4 +1,5 @@
 export const SHOW_BOUNDING_RECTANGLES = false;
+export const SHOW_SPRINGS = false;
 
 export const PLAYFIELD_WIDTH = 1000;
 export const PLAYFIELD_HEIGHT = 550;
@@ -20,7 +21,7 @@ export const LEGION_PX_PER_FRAME = 3;
 
 export const LEGION_COUNT_TO_WIDTH = 1.7;
 export const LEGION_MINIMAL_PX = 40;
-export const LEGION_BORDER_WIDTH = 3;
+export const LEGION_BORDER_WIDTH = 2;
 
 export const BATTLE_BEAM_COLOR = "#bbb";
 export const BATTLE_BEAM_WIDTH = 1;

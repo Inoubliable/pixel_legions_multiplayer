@@ -1,8 +1,10 @@
 import * as c from './constants';
 
 let m = 1;
-let k = 10;
-let damping = 1.2;
+let k = 15;
+let damping = 1;
+
+let timestep = c.UPDATE_TIMESTEP / 100;
 
 class Spring {
 
@@ -23,7 +25,9 @@ export function createSprings(points) {
 	let anchorPoint = points.find(p => p.isAnchor);
 
 	for (let i = 0; i < points.length; i++) {
-		springs.push(new Spring(anchorPoint, points[i]));
+		if (points[i] !== anchorPoint) {
+			springs.push(new Spring(anchorPoint, points[i]));
+		}
 	}
 
 	return springs;
@@ -31,9 +35,6 @@ export function createSprings(points) {
 }
 
 export function update(springs, points) {
-
-	console.log(springs);
-	console.log(points);
 
 	for (let i = 0; i < springs.length; i++) {
 		let spring = springs[i];
@@ -74,13 +75,13 @@ export function update(springs, points) {
 
 		// update points
 		if (!spring.point1.isAnchor) {
-			spring.point1.velocityX += accelerationX1 * c.UPDATE_TIMESTEP;
-			spring.point1.velocityY += accelerationY1 * c.UPDATE_TIMESTEP;
+			spring.point1.velocityX += accelerationX1 * timestep;
+			spring.point1.velocityY += accelerationY1 * timestep;
 		}
 
 		if (!spring.point2.isAnchor) {
-			spring.point2.velocityX += accelerationX2 * c.UPDATE_TIMESTEP;
-			spring.point2.velocityY += accelerationY2 * c.UPDATE_TIMESTEP;
+			spring.point2.velocityX += accelerationX2 * timestep;
+			spring.point2.velocityY += accelerationY2 * timestep;
 		}
 
 	}
@@ -89,8 +90,8 @@ export function update(springs, points) {
 		let point = points[i];
 
 		// point position
-		point.x += point.velocityX * c.UPDATE_TIMESTEP;
-		point.y += point.velocityY * c.UPDATE_TIMESTEP;
+		point.x += point.velocityX * timestep;
+		point.y += point.velocityY * timestep;
 	}
 
 }

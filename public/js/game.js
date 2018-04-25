@@ -653,6 +653,7 @@ $(document).ready(function() {
 					myLegions[i].y = pos[1];
 				}
 				updatePixelsPosition(myLegions[i]);
+				myLegions[i].hull = helpers.calculateHull(myLegions[i].pixels, myLegions[i].x, myLegions[i].y);
 			}
 
 			// move spawning legions
@@ -669,12 +670,13 @@ $(document).ready(function() {
 					// check if it gets over playfield border
 					if (newX > (legW*c.LEGION_OVER_BORDER) && newX < (c.PLAYFIELD_WIDTH - legW*c.LEGION_OVER_BORDER)) {
 						myLegions[i].x = newX;
-						updatePixelsPosition(myLegions[i]);
 					}
 					if (newY > (legH*c.LEGION_OVER_BORDER) && newY < (c.PLAYFIELD_HEIGHT - legH*c.LEGION_OVER_BORDER)) {
 						myLegions[i].y = newY;
-						updatePixelsPosition(myLegions[i]);
 					}
+
+					updatePixelsPosition(myLegions[i]);
+					myLegions[i].hull = helpers.calculateHull(myLegions[i].pixels, myLegions[i].x, myLegions[i].y);
 				} else {
 					myLegions[i].spawning = false;
 				}
@@ -715,6 +717,18 @@ $(document).ready(function() {
 				// drawing bounding rectangles
 				ctx.strokeRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
 				ctx.fillRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
+			}
+
+			if (c.SHOW_SPRINGS) {
+				// drawing springs
+				for (let j = 0; j < myLegions[i].springs.length; j++) {
+					let spring = myLegions[i].springs[j];
+
+					ctx.moveTo(spring.point1.x, spring.point1.y);
+					ctx.lineTo(spring.point2.x, spring.point2.y);
+					
+					ctx.stroke();
+				}
 			}
 
 			// draw pixels in legion
@@ -798,6 +812,7 @@ $(document).ready(function() {
 
 			// draw pixels in legion
 			for (let p = 0; p < enemyLegions[i].pixels.length; p++) {
+				ctx.lineWidth = 1;
 				ctx.fillStyle = enemyLegions[i].borderSelected;
 				ctx.fillRect(enemyLegions[i].pixels[p].x - c.PIXEL_SIZE_PX/2, enemyLegions[i].pixels[p].y - c.PIXEL_SIZE_PX/2, c.PIXEL_SIZE_PX, c.PIXEL_SIZE_PX);
 			}
