@@ -9,7 +9,7 @@ module.exports = {
         'login': public + 'js/login.js',
         'register': public + 'js/register.js',
         'profile': public + 'js/profile.js',
-        'waitingRoom': public + 'js/profile.js',
+        'waitingRoom': public + 'js/waitingRoom.js',
         'leaderboard': public + 'js/leaderboard.js',
         'home': public + 'js/home.js'
     },
@@ -38,6 +38,7 @@ module.exports = {
     },
     plugins: [
     ],
+    devtool: 'source-map',
     mode: 'production',
     watch: true
 };

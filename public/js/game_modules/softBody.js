@@ -1,3 +1,5 @@
+import * as c from './constants';
+
 let m = 1;
 let k = 10;
 let damping = 1.2;
@@ -28,7 +30,10 @@ export function createSprings(points) {
 
 }
 
-export function update(legions, points) {
+export function update(springs, points) {
+
+	console.log(springs);
+	console.log(points);
 
 	for (let i = 0; i < springs.length; i++) {
 		let spring = springs[i];

@@ -61,7 +61,7 @@ $(document).ready(function() {
 			} else {
 				// at the start, when myKing is not yet set
 				myKing = allKings[myKingFoundIndex];
-				helpers.showMe(myKing.x, myKing.y, showMeAnimation);
+				showMeAnimation = helpers.showMe(myKing.x, myKing.y);
 			}
 		} else if (timeElapsed > 2000) {
 			lose();
@@ -198,18 +198,6 @@ $(document).ready(function() {
 		$('.overlay').fadeIn(300);
 		$('#game-over-modal').fadeIn(500);
 
-	}
-
-	function addDeadPixelAnimation(x, y) {
-		let x1 = x;
-		let y1 = y - c.PIXEL_SIZE_PX;
-		let x2 = x + c.PIXEL_SIZE_PX;
-		let y2 = y;
-		let x3 = x;
-		let y3 = y + c.PIXEL_SIZE_PX;
-		let x4 = x - c.PIXEL_SIZE_PX;
-		let y4 = y;
-		deadPixelsAnimations.push([[x1, y1], [x2, y2], [x3, y3], [x4, y4]]);
 	}
 
 	function onMouseMove(e) {
@@ -519,7 +507,7 @@ $(document).ready(function() {
 			} else if (deadPixelsCount > 0) {
 				for (let d = 0; d < deadPixelsCount; d++) {
 					let deadPixel = allLegions[i].pixels.pop();
-					addDeadPixelAnimation(deadPixel[0], deadPixel[1]);
+					deadPixelsAnimations.push(helpers.createDeadPixelAnimation(deadPixel.x, deadPixel.y));
 				}
 				allLegions[i].hull = helpers.calculateHull(allLegions[i].pixels, allLegions[i].x, allLegions[i].y);
 			}

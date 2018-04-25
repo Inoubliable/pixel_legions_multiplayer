@@ -1,4 +1,4 @@
-import * as c from 'constants';
+import * as c from './constants';
 
 export function pushIfNotIn(array, value) {
 	if (array.indexOf(value) == -1) {
@@ -20,7 +20,9 @@ export function drawArrow(context, fromX, fromY, toX, toY) {
 	context.stroke();
 }
 	
-export function showMe(kingX, kingY, showMeAnimation) {
+export function showMe(kingX, kingY) {
+
+	let showMeAnimation = [];
 
 	// get arrow visible, depending on king's position
 	if (kingY < 50) {
@@ -46,6 +48,8 @@ export function showMe(kingX, kingY, showMeAnimation) {
 			}
 		}
 	}
+
+	return showMeAnimation;
 }
 
 export function legionCountToWidth(count) {
@@ -126,4 +130,18 @@ function orientation(p, q, r) {
   
     if (val == 0) return 0;	// collinear
     return (val > 0) ? 1 : 2;	// clock or counterclock wise
+}
+
+export function createDeadPixelAnimation(x, y) {
+
+	let x1 = x;
+	let y1 = y - c.PIXEL_SIZE_PX;
+	let x2 = x + c.PIXEL_SIZE_PX;
+	let y2 = y;
+	let x3 = x;
+	let y3 = y + c.PIXEL_SIZE_PX;
+	let x4 = x - c.PIXEL_SIZE_PX;
+	let y4 = y;
+
+	return [[x1, y1], [x2, y2], [x3, y3], [x4, y4]];
 }
