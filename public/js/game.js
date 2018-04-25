@@ -506,8 +506,8 @@ $(document).ready(function() {
 				allLegions.splice(i, 1);
 			} else if (deadPixelsCount > 0) {
 				for (let d = 0; d < deadPixelsCount; d++) {
-					let deadPixel = allLegions[i].pixels.pop();
-					deadPixelsAnimations.push(helpers.createDeadPixelAnimation(deadPixel.x, deadPixel.y));
+					let deadPixel = softBody.removePointAndSprings(allLegions[i]);
+					deadPixelsAnimations.push(helpers.createDeadPixelAnimation(deadPixel[0], deadPixel[1]));
 				}
 				allLegions[i].hull = helpers.calculateHull(allLegions[i].pixels, allLegions[i].x, allLegions[i].y);
 			}

@@ -17,7 +17,7 @@ class Legion {
 		this.selected = false;
 		this.hovered = false;
 		this.move = false;
-		this.pixels = createPixels(x, y, helpers.legionCountToWidth(count), helpers.legionCountToWidth(count), count);
+		this.pixels = createPolygonPoints(x, y, helpers.legionCountToWidth(count)/2, count);
 		this.hull = helpers.calculateHull(this.pixels, x, y);
 		this.nearbyEnemies = [];
 		this.colorHovered = c.COLORS[color].hovered.replace('1)', '0.3)');
@@ -42,19 +42,22 @@ class Point {
 	
 }
 
-function createPixels(x, y, w, h, count) {
+function createPolygonPoints(xCenter, yCenter, r, vertices) {
 
-	let pixels = [];
-	pixels.push(new Point(x, y, true));
-	let num = count + c.PIXELS_NUM_MIN;
+	let points = [];
+	
+	// anchor point in center
+	points.push(new Point(xCenter, yCenter, true));
 
-	for (let i = 0; i < num; i++) {
-		let pixelX = Math.random() * (w - 2 * c.HULL_SPACE_PX) + x - w/2 + c.HULL_SPACE_PX;
-		let pixelY = Math.random() * h + y - h/2;
-		pixels.push(new Point(pixelX, pixelY));
+	for (var i = 0; i < vertices; i++) {
+		let newX = r * Math.cos(2*Math.PI*i/vertices) + xCenter;
+		let newY = r * Math.sin(2*Math.PI*i/vertices) + yCenter;
+
+		newPoint = new Point(newX, newY);
+		points.push(newPoint);
 	}
 
-	return pixels;
+	return points;
 }
 
 module.exports = Legion;

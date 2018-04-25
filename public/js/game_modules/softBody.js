@@ -17,20 +17,44 @@ class Spring {
 	
 }
 
-// create springs from center to all points
 export function createSprings(points) {
 
 	let springs = [];
 
-	let anchorPoint = points.find(p => p.isAnchor);
+	let anchorPoint = points[0];
 
-	for (let i = 0; i < points.length; i++) {
-		if (points[i] !== anchorPoint) {
-			springs.push(new Spring(anchorPoint, points[i]));
+	for (let i = 2; i < points.length; i++) {
+		springs.push(new Spring(points[i], points[i-1]));
+		springs.push(new Spring(anchorPoint, points[i]));
+	}
+	springs.push(new Spring(points[points.length-1], points[1]));
+		springs.push(new Spring(anchorPoint, points[1]));
+
+	return springs;
+
+}
+
+export function removePointAndSprings(legion) {
+
+	let deadPoint = legion.pixels[legion.pixels.length-1];
+
+	// remove springs
+	for (let i = legion.springs.length-1; i >= 0; i--) {
+		if ((legion.springs[i].point1 == deadPoint) || (legion.springs[i].point2 == deadPoint)) {
+			legion.springs.splice(i, 1);
 		}
 	}
 
-	return springs;
+	// create new spring
+	let springLengthX = Math.abs(legion.pixels[legion.pixels.length-3].x - legion.pixels[legion.pixels.length-2].x);
+	let springLengthY = Math.abs(legion.pixels[legion.pixels.length-3].y - legion.pixels[legion.pixels.length-2].y);
+	legion.springs.push(new Spring(legion.pixels[1], legion.pixels[legion.pixels.length-2], springLengthX, springLengthY));
+
+	let deadPointX = deadPoint.x;
+	let deadPointY = deadPoint.y;
+	legion.pixels.pop();
+
+	return [deadPointX, deadPointY];
 
 }
 
