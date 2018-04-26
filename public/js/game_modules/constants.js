@@ -23,6 +23,9 @@ export const LEGION_COUNT_TO_WIDTH = 1.1;
 export const LEGION_MINIMAL_PX = 80;
 export const LEGION_BORDER_WIDTH = 2;
 
+export const SPRING_COLOR = "#bbb";
+export const SPRING_WIDTH = 1;
+
 export const BATTLE_BEAM_COLOR = "#bbb";
 export const BATTLE_BEAM_WIDTH = 1;
 
@@ -30,9 +33,7 @@ export const PATH_COLOR = "#fff";
 export const PATH_WIDTH = 2;
 
 export const PIXEL_SIZE_PX = 4;	// preferably even number
-export const PIXELS_NUM_MIN = 5;
-
-export const HULL_SPACE_PX = 10;
+export const PIXELS_NUM_MIN = 3;
 
 export const BATTLE_AMBUSH_COUNT_LOSE = 0.03;
 export const BATTLE_DISTANCE = 100;

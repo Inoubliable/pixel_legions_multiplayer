@@ -1,10 +1,23 @@
 import * as c from './constants';
+import * as helpers from './helpers';
 
 let m = 1;
 let k = 15;
 let damping = 1;
 
 let timestep = c.UPDATE_TIMESTEP / 100;
+
+class Point {
+
+    constructor(x, y, isAnchor) {
+        this.x = x;
+        this.y = y;
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.isAnchor = isAnchor || false;
+    }
+    
+}
 
 class Spring {
 
@@ -27,8 +40,8 @@ export function createSprings(points) {
 		springs.push(new Spring(points[i], points[i-1]));
 		springs.push(new Spring(anchorPoint, points[i]));
 	}
+	springs.push(new Spring(anchorPoint, points[1]));
 	springs.push(new Spring(points[points.length-1], points[1]));
-		springs.push(new Spring(anchorPoint, points[1]));
 
 	return springs;
 
@@ -38,24 +51,51 @@ export function removePointAndSprings(legion) {
 
 	let deadPoint = legion.pixels[legion.pixels.length-1];
 
+	let deadPointX = deadPoint.x;
+	let deadPointY = deadPoint.y;
+
 	// remove springs
 	for (let i = legion.springs.length-1; i >= 0; i--) {
 		if ((legion.springs[i].point1 == deadPoint) || (legion.springs[i].point2 == deadPoint)) {
 			legion.springs.splice(i, 1);
 		}
 	}
-
-	// create new spring
-	let springLengthX = Math.abs(legion.pixels[legion.pixels.length-3].x - legion.pixels[legion.pixels.length-2].x);
-	let springLengthY = Math.abs(legion.pixels[legion.pixels.length-3].y - legion.pixels[legion.pixels.length-2].y);
-	legion.springs.push(new Spring(legion.pixels[1], legion.pixels[legion.pixels.length-2], springLengthX, springLengthY));
-
-	let deadPointX = deadPoint.x;
-	let deadPointY = deadPoint.y;
 	legion.pixels.pop();
+
+	// create imaginary (legion.pixels.length - 1) sided polygon
+	let radius = helpers.legionCountToWidth(legion.count)/2;
+	let imaginaryPoints = createPolygonPoints(legion.x, legion.y, radius, legion.pixels.length - 1);
+	let imaginarySprings = createSprings(imaginaryPoints);
+
+	// adjust springs' rest lengths according to imaginary polygon
+	for (let i = 0; i < legion.springs.length; i++) {
+		legion.springs[i].restLengthX = imaginarySprings[i].restLengthX;
+		legion.springs[i].restLengthY = imaginarySprings[i].restLengthY;
+	}
+
+	// add spring between first and last point
+	let newSpring = new Spring(legion.pixels[legion.pixels.length-1], legion.pixels[1], imaginarySprings[imaginarySprings.length-1].restLengthX, imaginarySprings[imaginarySprings.length-1].restLengthY);
+	legion.springs.push(newSpring);
 
 	return [deadPointX, deadPointY];
 
+}
+
+function createPolygonPoints(xCenter, yCenter, r, vertices) {
+
+    let points = [];
+    
+    // anchor point in center
+    points.push(new Point(xCenter, yCenter, true));
+
+    for (let i = 0; i < vertices; i++) {
+        let newX = r * Math.cos(2*Math.PI*i/vertices) + xCenter;
+        let newY = r * Math.sin(2*Math.PI*i/vertices) + yCenter;
+
+        points.push(new Point(newX, newY));
+    }
+
+    return points;
 }
 
 export function update(springs, points) {

@@ -504,13 +504,16 @@ $(document).ready(function() {
 
 			if (allLegions[i].count <= 0) {
 				allLegions.splice(i, 1);
+				continue;
 			} else if (deadPixelsCount > 0) {
 				for (let d = 0; d < deadPixelsCount; d++) {
 					let deadPixel = softBody.removePointAndSprings(allLegions[i]);
 					deadPixelsAnimations.push(helpers.createDeadPixelAnimation(deadPixel[0], deadPixel[1]));
 				}
-				allLegions[i].hull = helpers.calculateHull(allLegions[i].pixels, allLegions[i].x, allLegions[i].y);
+				allLegions[i].hull = helpers.calculateHull(allLegions[i].x, allLegions[i].y, helpers.legionCountToWidth(allLegions[i].count)/2, allLegions[i].pixels.length-1);
 			}
+
+			updatePixelsPosition(allLegions[i]);
 		}
 	}
 
@@ -653,7 +656,7 @@ $(document).ready(function() {
 					myLegions[i].y = pos[1];
 				}
 				updatePixelsPosition(myLegions[i]);
-				myLegions[i].hull = helpers.calculateHull(myLegions[i].pixels, myLegions[i].x, myLegions[i].y);
+				myLegions[i].hull = helpers.calculateHull(myLegions[i].x, myLegions[i].y, helpers.legionCountToWidth(myLegions[i].count)/2, myLegions[i].pixels.length-1);
 			}
 
 			// move spawning legions
@@ -676,7 +679,7 @@ $(document).ready(function() {
 					}
 
 					updatePixelsPosition(myLegions[i]);
-					myLegions[i].hull = helpers.calculateHull(myLegions[i].pixels, myLegions[i].x, myLegions[i].y);
+					myLegions[i].hull = helpers.calculateHull(myLegions[i].x, myLegions[i].y, helpers.legionCountToWidth(myLegions[i].count)/2, myLegions[i].pixels.length-1);
 				} else {
 					myLegions[i].spawning = false;
 				}
@@ -698,6 +701,7 @@ $(document).ready(function() {
 						ctx.lineTo(myLegions[i].hull[h][0], myLegions[i].hull[h][1]);
 					}
 				}
+				ctx.lineTo(myLegions[i].hull[0][0], myLegions[i].hull[0][1]);
 				ctx.fill();
 				ctx.stroke();
 			} else if (myLegions[i].hovered) {
@@ -709,6 +713,7 @@ $(document).ready(function() {
 						ctx.lineTo(myLegions[i].hull[h][0], myLegions[i].hull[h][1]);
 					}
 				}
+				ctx.lineTo(myLegions[i].hull[0][0], myLegions[i].hull[0][1]);
 				ctx.fill();
 			}
 
@@ -721,6 +726,9 @@ $(document).ready(function() {
 
 			if (c.SHOW_SPRINGS) {
 				// drawing springs
+				ctx.strokeStyle = c.SPRING_COLOR;
+				ctx.lineWidth = c.SPRING_WIDTH;
+
 				for (let j = 0; j < myLegions[i].springs.length; j++) {
 					let spring = myLegions[i].springs[j];
 

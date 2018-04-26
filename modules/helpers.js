@@ -4,76 +4,19 @@ function legionCountToWidth(count) {
 	return count * c.LEGION_COUNT_TO_WIDTH + c.LEGION_MINIMAL_PX;
 }
 
-function calculateHull(points, x, y) {
-	let n = points.length;
-    // There must be at least 3 points
-    if (n < 3) return;
-  
-    // Initialize Result
+function calculateHull(xCenter, yCenter, r, vertices) {
     let hull = [];
-  
-    // Find the leftmost point
-    let l = 0;
-    let newArray = [];
-    for (let i = 0; i < n; i++) {
-    	newArray.push([points[i].x, points[i].y]);
-		if (points[i].x < points[l].x) {
-			l = i;
-		}
-	}
-  
-    // Start from leftmost point, keep moving 
-    // counterclockwise until reach the start point
-    // again. This loop runs O(h) times where h is
-    // number of points in result or output.
-    let p = l, q;
-    do {
-    	// Move point outwards
-        if (newArray[p][0] > x) {
-        	newArray[p][0] += c.HULL_SPACE_PX;
-        } else if (newArray[p][0] < x) {
-        	newArray[p][0] -= c.HULL_SPACE_PX;
-        }
-        if (newArray[p][1] > y) {
-        	newArray[p][1] += c.HULL_SPACE_PX;
-        } else if (newArray[p][1] < y) {
-        	newArray[p][1] -= c.HULL_SPACE_PX;
-        }
-        // Add current point to result
-        hull.push(newArray[p]);
-  
-        // Search for a point 'q' such that 
-        // orientation(p, x, q) is counterclockwise 
-        // for all points 'x'. The idea is to keep 
-        // track of last visited most counterclock-
-        // wise point in q. If any point 'i' is more 
-        // counterclock-wise than q, then update q.
-        q = (p + 1) % n;
-         
-        for (let i = 0; i < n; i++) {
-			// If i is more counterclockwise than 
-			// current q, then update q
-			if (orientation(points[p], points[i], points[q]) == 2) {
-				q = i;
-			}
-        }
-  
-        // Now q is the most counterclockwise with
-        // respect to p. Set p as q for next iteration, 
-        // so that q is added to result 'hull'
-        p = q;
-  
-    } while (p != l);  // While we don't come to first point
-    hull.push(hull[0]);
+
+    r *= 1.2;
+
+    for (let i = 0; i < vertices; i++) {
+        let newX = r * Math.cos(2*Math.PI*i/vertices) + xCenter;
+        let newY = r * Math.sin(2*Math.PI*i/vertices) + yCenter;
+
+        hull.push([newX, newY]);
+    }
 
     return hull;
-}
-
-function orientation(p, q, r) {
-    let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
-  
-    if (val == 0) return 0;	// collinear
-    return (val > 0) ? 1 : 2;	// clock or counterclock wise
 }
 
 function calculateRating(rating, place, allPlayers) {
@@ -120,12 +63,42 @@ function valueWithUpgrade(upgrades, upgradeId, baseValue) {
     return baseValue;
 }
 
+class Point {
+
+    constructor(x, y, isAnchor) {
+        this.x = x;
+        this.y = y;
+        this.velocityX = 0;
+        this.velocityY = 0;
+        this.isAnchor = isAnchor || false;
+    }
+    
+}
+
+function createPolygonPoints(xCenter, yCenter, r, vertices) {
+
+    let points = [];
+    
+    // anchor point in center
+    points.push(new Point(xCenter, yCenter, true));
+
+    for (let i = 0; i < vertices; i++) {
+        let newX = r * Math.cos(2*Math.PI*i/vertices) + xCenter;
+        let newY = r * Math.sin(2*Math.PI*i/vertices) + yCenter;
+
+        points.push(new Point(newX, newY));
+    }
+
+    return points;
+}
+
 module.exports = {
-    legionCountToWidth: legionCountToWidth,
-    calculateHull: calculateHull,
-    calculateRating: calculateRating,
-    pushIfNotIn: pushIfNotIn,
-    isInsidePlayfieldX: isInsidePlayfieldX,
-    isInsidePlayfieldY: isInsidePlayfieldY,
-    valueWithUpgrade: valueWithUpgrade
+    legionCountToWidth,
+    calculateHull,
+    calculateRating,
+    pushIfNotIn,
+    isInsidePlayfieldX,
+    isInsidePlayfieldY,
+    valueWithUpgrade,
+    createPolygonPoints
 }

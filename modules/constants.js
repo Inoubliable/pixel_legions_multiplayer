@@ -21,14 +21,12 @@ module.exports.KING_PX_PER_FRAME = 0.7;
 module.exports.INITIAL_LEGIONS_NUM = 2;
 module.exports.LEGION_BASE_ATTACK = 0.04;
 module.exports.LEGION_BASE_COUNT = 25;
-module.exports.LEGION_COUNT_TO_WIDTH = 1.6;
-module.exports.LEGION_MINIMAL_PX = 30;
+module.exports.LEGION_COUNT_TO_WIDTH = 1.1;
+module.exports.LEGION_MINIMAL_PX = 80;
 module.exports.LEGION_OVER_BORDER = 0.2;
 
 module.exports.PIXEL_SIZE_PX = 4;	// preferably even number
-module.exports.PIXELS_NUM_MIN = 8;
-
-module.exports.HULL_SPACE_PX = 10;
+module.exports.PIXELS_NUM_MIN = 3;
 
 module.exports.AI_LOOP_INTERVAL = 2 * 1000;
 module.exports.SPAWN_INTERVAL = 10 * 1000;
