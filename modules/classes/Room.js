@@ -45,13 +45,17 @@ class Room {
 				// check if only one player is still alive
 				if (this.ranking[1].id != '') {
 					let winnerKing = this.allKings.find(k => k.count > 0);
-					this.ranking[0] = this.allPlayers.find(p => p.id == winnerKing.playerId);
-					this.ranking[0].newRating = helpers.calculateRating(this.ranking[0].rating, 1, this.allPlayers);
+					let winner = this.allPlayers.find(p => p.id == winnerKing.playerId);
+					winner.newRating = helpers.calculateRating(winner.rating, 1, this.allPlayers);
 
 					// save new rating to db
-					if (!this.ranking[0].isAI) {
-						dbConnection.updatePlayer(winnerKing.playerId, {rating: this.ranking[0].newRating});
+					if (!winner.isAI) {
+						let prize = c.PRIZES[0];
+						let coins = winner.coins + prize;
+						dbConnection.updatePlayer(winnerKing.playerId, {rating: winner.newRating, coins: coins});
 					}
+
+					this.ranking[0] = winner;
 				}
 				break;
 			}

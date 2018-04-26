@@ -692,8 +692,8 @@ $(document).ready(function() {
 			
 			if (myLegions[i].selected) {
 				ctx.strokeStyle = myLegions[i].borderSelected;
-				ctx.fillStyle = myLegions[i].colorSelected;
 				ctx.lineWidth = c.LEGION_BORDER_WIDTH;
+				ctx.fillStyle = myLegions[i].colorSelected;
 
 				ctx.beginPath();
 				if (myLegions[i].hull) {
@@ -729,14 +729,15 @@ $(document).ready(function() {
 				ctx.strokeStyle = c.SPRING_COLOR;
 				ctx.lineWidth = c.SPRING_WIDTH;
 
+				ctx.beginPath();
 				for (let j = 0; j < myLegions[i].springs.length; j++) {
 					let spring = myLegions[i].springs[j];
 
 					ctx.moveTo(spring.point1.x, spring.point1.y);
 					ctx.lineTo(spring.point2.x, spring.point2.y);
 					
-					ctx.stroke();
 				}
+				ctx.stroke();
 			}
 
 			// draw pixels in legion
