@@ -23,7 +23,7 @@ export const LEGION_COUNT_TO_WIDTH = 1.1;
 export const LEGION_MINIMAL_PX = 80;
 export const LEGION_BORDER_WIDTH = 2;
 
-export const SPRING_COLOR = "#bbb";
+export const SPRING_COLOR = "#888";
 export const SPRING_WIDTH = 1;
 
 export const BATTLE_BEAM_COLOR = "#bbb";

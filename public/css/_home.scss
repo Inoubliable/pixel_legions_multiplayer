@@ -17,39 +17,38 @@
 
 	.ffa-btn,
 	.team-btn {
-		width: 200px;
-		height: 320px;
-		border-radius: 5px;
-		background-color: #6187a9;
+		display: inline-block;
+		width: 230px;
+		height: 300px;
+		border-radius: 7px;
+		background-color: #315779;
 		color: white;
-		border: none;
-		font-size: 22px;
 		position: relative;
-		border: 1px solid #444;
+		padding: 20px 15px 35px;
 
 		&:hover {
 			cursor: pointer;
-			background-color: $bluish-hover;
-			border: 1px solid $bluish-hover;
+			background-color: #517799;
 		}
 
 		.caption {
 			position: absolute;
 			bottom: 0;
+			left: 0;
 			width: 100%;
-			padding: 20px;
+			text-align: center;
+			padding: 10px;
+			font-size: 22px;
+		}
+
+		img {
+			height: 100%;
+			width: 100%;
 		}
 	}
 
 	.ffa-btn {
 		margin-right: 90px;
-		background: url('../assets/pl_ffa.svg') no-repeat top left;
-		background-size: contain;
-	}
-
-	.team-btn {
-		background: url('../assets/pl_team.svg') no-repeat top left;
-		background-size: contain;
 	}
 }
 

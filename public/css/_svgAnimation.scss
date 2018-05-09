@@ -1,0 +1,27 @@
+@keyframes slashLeft {
+	30% {
+		opacity: 1;
+		transform: translateX(25px) rotate(8deg);
+	}
+}
+
+@keyframes slashRight {
+	30% {
+		opacity: 1;
+		transform: translateX(-25px) translateY(27px) rotate(-8deg);
+	}
+}
+
+#battle-swords {
+	&:hover {
+		cursor: pointer;
+	}
+
+	&:hover #left-sword {
+		animation: slashLeft 2.2s ease;
+	}
+
+	&:hover #right-sword {
+		animation: slashRight 2.2s ease;
+	}
+}
