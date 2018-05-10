@@ -31,6 +31,10 @@
 			background-color: #517799;
 		}
 
+		object {
+			pointer-events: none;
+		}
+
 		.caption {
 			position: absolute;
 			bottom: 0;

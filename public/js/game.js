@@ -717,13 +717,6 @@ $(document).ready(function() {
 				ctx.fill();
 			}
 
-			// for testing
-			if (c.SHOW_BOUNDING_RECTANGLES) {
-				// drawing bounding rectangles
-				ctx.strokeRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
-				ctx.fillRect(myLegions[i].x - legW/2, myLegions[i].y - legW/2, legW, legW);
-			}
-
 			if (c.SHOW_SPRINGS) {
 				// drawing springs
 				ctx.strokeStyle = c.SPRING_COLOR;
@@ -808,16 +801,23 @@ $(document).ready(function() {
 
 			let enemyLegionWidth = helpers.legionCountToWidth(enemyLegions[i].count);
 			ctx.lineWidth = c.LEGION_BORDER_WIDTH;
-			ctx.beginPath();
 
-			// for testing
-			if (c.SHOW_BOUNDING_RECTANGLES) {
-				// drawing bounding rectangles
-				ctx.strokeRect(enemyLegions[i].x - enemyLegionWidth/2, enemyLegions[i].y - enemyLegionWidth/2, enemyLegionWidth, enemyLegionWidth);
-				ctx.fillRect(enemyLegions[i].x - enemyLegionWidth/2, enemyLegions[i].y - enemyLegionWidth/2, enemyLegionWidth, enemyLegionWidth);
+			if (c.SHOW_SPRINGS) {
+				// drawing springs
+				ctx.strokeStyle = c.SPRING_COLOR;
+				ctx.lineWidth = c.SPRING_WIDTH;
+
+				ctx.beginPath();
+				console.log(enemyLegions[i].springs);
+				for (let j = 0; j < enemyLegions[i].springs.length; j++) {
+					let spring = enemyLegions[i].springs[j];
+
+					ctx.moveTo(spring.point1.x, spring.point1.y);
+					ctx.lineTo(spring.point2.x, spring.point2.y);
+					
+				}
+				ctx.stroke();
 			}
-
-			ctx.stroke();
 
 			// draw pixels in legion
 			for (let p = 0; p < enemyLegions[i].pixels.length; p++) {

@@ -4,7 +4,7 @@
 
 <svg version="1.1" id="battle-swords" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="200px" height="200px" viewBox="0 0 200 200" enable-background="new 0 0 200 200" xml:space="preserve">
-	<g id="left-sword">
+	<g>
 		<rect x="39.582" y="110.832" transform="matrix(-0.7793 -0.6266 0.6266 -0.7793 -3.9113 284.7916)" fill="#764E2B" width="17.214" height="64.505"/>
 		<polygon fill="#473424" points="46.227,131.781 64.659,136.328 59.642,142.57 41.46,137.71"/>
 		<polygon fill="#473424" points="56.011,119.614 74.444,124.161 69.427,130.4 51.243,125.543"/>
@@ -18,7 +18,7 @@
 		<path fill="#E7B857" d="M27.974,168.218l6.707,5.395l-1.596,6.936l-1.218,6.488c0,0-8.818,3.199-16.763-2.81L27.974,168.218"/>
 	</g>
 
-	<g id="right-sword">	
+	<g>	
 		<rect x="144.155" y="110.384" transform="matrix(0.7657 -0.6432 0.6432 0.7657 -56.309 131.9299)" fill="#764E2B" width="17.542" height="65.737"/>
 		<polygon fill="#473424" points="159.665,137.629 141.245,142.979 135.997,136.729 154.68,131.691"/>
 		<polygon fill="#473424" points="149.431,125.445 131.011,130.791 125.762,124.545 144.443,119.51"/>
