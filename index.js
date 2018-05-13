@@ -32,6 +32,7 @@ let public = __dirname + '/public/';
 app.engine('hbs', hbs({
 	extname: 'hbs',
 	layoutsDir: public,
+	partialsDir: public + 'partials/',
 	helpers: {
 		if_eq: function (a, b, opts) {
 			if(a == b)
@@ -77,23 +78,49 @@ app.use(bodyParser.json());
 app.use((req, res, next) => {
 	let playerId = req.session.playerId;
 	let urlEnd = req.originalUrl;
-	if (playerId || urlEnd == '/login' || urlEnd == '/register') {
-		next();
+
+	next();
+});
+
+app.get('/isLoggedIn', (req, res) => {
+	let playerId = req.session.playerId;
+
+	if (playerId) {
+		res.json({isLoggedIn: true});
 	} else {
-		res.redirect('/login');
+		res.json({isLoggedIn: false});
 	}
 });
 
 app.get('/', (req, res) => {
-	res.render(path.join(public + 'login.hbs'));
-});
+	let playerId = req.session.playerId;
 
-app.get('/login', (req, res) => {
-	if (req.session.justRegistered) {
-		req.session.justRegistered = false;
-		res.render(path.join(public + 'login.hbs'), {success: 'Registration completed successfully.'});
+	if (playerId) {
+		// user is logged in
+		dbConnection.getPlayerById(playerId, function(player) {
+			let upgradeArrayWithLevels = c.UPGRADES_ARRAY.map(u => {
+				let upgradeLevel = player.upgrades[u.id];
+				u.level = upgradeLevel;
+
+				return u;
+			});
+
+			dbConnection.getLeaderboard(function(leaderboard) {
+				res.render(path.join(public + 'main.hbs'), {
+					upgradesArray: upgradeArrayWithLevels,
+					leaderboard: leaderboard,
+					logged: true
+				});
+			});
+		});
 	} else {
-		res.render(path.join(public + 'login.hbs'));
+		// user is not logged in
+		if (req.session.justRegistered) {
+			req.session.justRegistered = false;
+			res.render(path.join(public + 'main.hbs'), {success: 'Registration completed successfully.'});
+		} else {
+			res.render(path.join(public + 'main.hbs'));
+		}
 	}
 });
 
@@ -106,29 +133,15 @@ app.post('/login', (req, res) => {
 		if (player) {
 			if (player.password == playerPassword) {
 				req.session.playerId = player._id;
-				res.redirect('home');
+				res.json({isLoggedIn: true});
 			} else {
-				res.render(path.join(public + 'login.hbs'), {error: 'Wrong password.'});
+				res.json({error: 'Wrong password.'});
 			}
 		} else {
-			res.render(path.join(public + 'login.hbs'), {error: 'Player with that name does not exist.'});
+			res.json({error: 'Player with that name does not exist.'});
 		}
 	});
 
-});
-
-app.get('/home', (req, res) => {
-	let playerId = req.session.playerId;
-	dbConnection.getPlayerById(playerId, function(player) {
-		let upgradeArrayWithLevels = c.UPGRADES_ARRAY.map(u => {
-			let upgradeLevel = player.upgrades[u.id];
-			u.level = upgradeLevel;
-
-			return u;
-		});
-
-		res.render(path.join(public + 'home.hbs'), {upgradesArray: upgradeArrayWithLevels});
-	});
 });
 
 app.get('/upgrades', (req, res) => {
@@ -159,10 +172,6 @@ app.post('/buyUpgrade', (req, res) => {
 			});
 		}
 	});
-});
-
-app.get('/waitingRoom', (req, res) => {
-	res.render(path.join(public + 'waitingRoom.hbs'));
 });
 
 app.get('/game', (req, res) => {
@@ -207,12 +216,6 @@ app.get('/getPlayer', (req, res) => {
 	});
 });
 
-app.get('/leaderboard', (req, res) => {
-	dbConnection.getLeaderboard(function(leaderboard) {
-		res.render(path.join(public + 'leaderboard.hbs'), {leaderboard: leaderboard});
-	});
-});
-
 app.get('/profile/:name', (req, res) => {
 	let playerName = req.params.name;
 	dbConnection.getPlayerByName(playerName, function(player) {
@@ -228,9 +231,6 @@ app.get('/profile/:name', (req, res) => {
 	});
 });
 
-app.get('/register', (req, res) => {
-	res.render(path.join(public + 'register.hbs'));
-});
 app.post('/register', (req, res) => {
 
 	// check if name already exists

@@ -808,7 +808,6 @@ $(document).ready(function() {
 				ctx.lineWidth = c.SPRING_WIDTH;
 
 				ctx.beginPath();
-				console.log(enemyLegions[i].springs);
 				for (let j = 0; j < enemyLegions[i].springs.length; j++) {
 					let spring = enemyLegions[i].springs[j];
 

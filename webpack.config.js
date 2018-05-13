@@ -5,6 +5,7 @@ let public = __dirname + '/public/';
 
 module.exports = {
     entry: {
+        'main': public + 'js/main.js',
         'game': public + 'js/game.js',
         'login': public + 'js/login.js',
         'register': public + 'js/register.js',

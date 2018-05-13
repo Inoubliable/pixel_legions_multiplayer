@@ -1,9 +1,24 @@
 import $ from 'jquery';
 
-$(document).ready(function() {
+export default function loginJS(user) {
 
-	$('#login-form').submit(function() {
-		return true;
+	$(document).ready(function() {
+
+		$('.login-btn').click(function(event) {
+			let name = $('.name').val();
+			let password = $('.password').val();
+
+			$.post('login', {name: name, password: password}, function(data) {
+				// temporary
+				// change this, it is reloading page, not really SPA
+				if (data.isLoggedIn) {
+					window.location.replace('/');
+				} else {
+					// display error
+				}
+			});
+		});
+
 	});
 
-});
+}
