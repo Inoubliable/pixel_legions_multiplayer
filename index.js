@@ -115,12 +115,7 @@ app.get('/', (req, res) => {
 		});
 	} else {
 		// user is not logged in
-		if (req.session.justRegistered) {
-			req.session.justRegistered = false;
-			res.render(path.join(public + 'main.hbs'), {success: 'Registration completed successfully.'});
-		} else {
-			res.render(path.join(public + 'main.hbs'));
-		}
+		res.render(path.join(public + 'main.hbs'));
 	}
 });
 
@@ -227,7 +222,7 @@ app.get('/profile/:name', (req, res) => {
 		});
 		player.achievements = achievementsArray;
 
-		res.render(path.join(public + 'profile.hbs'), {player: player});
+		res.json({player: player});
 	});
 });
 
@@ -256,10 +251,10 @@ app.post('/register', (req, res) => {
 			dbConnection.insertPlayer(newPlayer, function(data) {
 				req.session.playerId = data.insertedIds[0];
 				req.session.justRegistered = true;
-				res.redirect('login');
+				res.json({success: 'Registration completed successfully.'});
 			});
 		} else {
-			res.render(path.join(public + 'register.hbs'), {error: 'Player with that name already exists.'});
+			res.json({error: 'Player with that name already exists.'});
 		}
 	});
 

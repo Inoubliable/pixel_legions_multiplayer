@@ -59,7 +59,7 @@ function renderLogin() {
 	$('.page').removeClass('visible');
 	$('#login-page').addClass('visible');
 
-	loginJS(user);
+	loginJS();
 }
 
 function renderRegister() {

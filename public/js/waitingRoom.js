@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import io from 'socket.io-client';
 
 export default function waitingRoomJS() {
 

@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-export default function loginJS(user) {
+export default function loginJS() {
 
 	$(document).ready(function() {
 
@@ -9,8 +9,7 @@ export default function loginJS(user) {
 			let password = $('.password').val();
 
 			$.post('login', {name: name, password: password}, function(data) {
-				// temporary
-				// change this, it is reloading page, not really SPA
+				// reloading page
 				if (data.isLoggedIn) {
 					window.location.replace('/');
 				} else {

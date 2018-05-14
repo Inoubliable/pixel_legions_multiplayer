@@ -1,35 +1,25 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Pixel Legions</title>
-		<link rel="stylesheet" href="/dist/styles.css">
-		<script src="/dist/login.js"></script>
-	</head>
-	<body>
-		<!--
-		<video autoplay muted loop id="bgVideo">
-			<source src="assets/myVideo.mp4" type="video/mp4">
-		</video>
+<!--
+<video autoplay muted loop id="bgVideo">
+	<source src="assets/myVideo.mp4" type="video/mp4">
+</video>
 
-		<h1 class="main-header">PIXEL LEGIONS</h1>
-		-->
+<h1 class="main-header">PIXEL LEGIONS</h1>
+-->
 
-		{{#if success}}
-			<div class="notification registration-success">{{success}}</div>
-		{{/if}}
+{{#if success}}
+	<div class="notification registration-success">{{success}}</div>
+{{/if}}
 
-		{{#if error}}
-			<div class="notification login-error">{{error}}</div>
-		{{/if}}
+{{#if error}}
+	<div class="notification login-error">{{error}}</div>
+{{/if}}
 
-		<form id="login-form" action="/login" method="POST">
-			<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
-			<input type="text" class="password" name="password" placeholder="Password" maxlength="10" required>
-			<input type="button" class="login-btn btn-bluish" value="Play">
-		</form>
+<form id="login-form" action="/login" method="POST">
+	<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
+	<input type="text" class="password" name="password" placeholder="Password" maxlength="10" required>
+	<input type="button" class="login-btn btn-bluish" value="Play">
+</form>
 
-		<a href="register">
-			<button class="register-btn-link btn-bluish">Register</button>
-		</a>
-	</body>
-</html>
+<a href="register">
+	<button class="register-btn-link btn-bluish">Register</button>
+</a>

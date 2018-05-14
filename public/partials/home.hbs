@@ -1,55 +1,44 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Pixel Legions</title>
-		<link rel="stylesheet" href="/dist/styles.css">
-		<script src="/dist/home.js"></script>
-	</head>
-	<body>
-		<a href="logout">
-			<div class="logout-btn btn-bluish">Logout</div>
-		</a>
+<a href="logout">
+	<div class="logout-btn btn-bluish">Logout</div>
+</a>
 
-		<div class="game-btns-container">
-			<div class="ffa-btn btn" data-page="waitingRoom">
-				<object data="/assets/battle.svg" type="image/svg+xml"></object>
-				<div class="caption">FFA</div>
+<div class="game-btns-container">
+	<div class="ffa-btn btn" data-page="waitingRoom">
+		<object data="/assets/battle.svg" type="image/svg+xml"></object>
+		<div class="caption">FFA</div>
+	</div>
+	<div class="team-btn">
+		<object data="/assets/battle.svg" type="image/svg+xml"></object>
+		<div class="caption">Team</div>
+	</div>
+</div>
+
+<div class="statistics-btns-container">
+	<button class="upgrades-btn btn-bluish">Upgrades</button>
+	<button class="btn leaderboard-btn btn-bluish" data-page="leaderboard">Leaderboard</button>
+</div>
+
+<div class="upgrades-bar">
+	<div class="upgrades-bar-header">Upgrades</div>
+	<div class="player-coins"></div>
+	<div class="upgrades">
+		{{#each upgradesArray}}
+			<div class="upgrade" id={{this.id}}>
+				<img src={{this.icon}}>
+				{{#if_gt this.level 0}}
+					<div class="upgrade-level">{{this.level}}</div>
+				{{/if_gt}}
 			</div>
-			<div class="team-btn">
-				<object data="/assets/battle.svg" type="image/svg+xml"></object>
-				<div class="caption">Team</div>
-			</div>
+		{{/each}}
+	</div>
+	<div class="upgrades-info">
+		<div class="upgrade-name"></div>
+		<div class="upgrade-icon">
+			<img src="">
 		</div>
+		<div class="upgrade-description"></div>
+		<div class="upgrade-cost"></div>
 
-		<div class="statistics-btns-container">
-			<button class="upgrades-btn btn-bluish">Upgrades</button>
-			<button class="btn leaderboard-btn btn-bluish" data-page="leaderboard">Leaderboard</button>
-		</div>
-
-		<div class="upgrades-bar">
-			<div class="upgrades-bar-header">Upgrades</div>
-			<div class="player-coins"></div>
-			<div class="upgrades">
-				{{#each upgradesArray}}
-					<div class="upgrade" id={{this.id}}>
-						<img src={{this.icon}}>
-						{{#if_gt this.level 0}}
-							<div class="upgrade-level">{{this.level}}</div>
-						{{/if_gt}}
-					</div>
-				{{/each}}
-			</div>
-			<div class="upgrades-info">
-				<div class="upgrade-name"></div>
-				<div class="upgrade-icon">
-					<img src="">
-				</div>
-				<div class="upgrade-description"></div>
-				<div class="upgrade-cost"></div>
-
-				<div class="buy-btn btn-bluish">BUY</div>
-			</div>
-		</div>
-
-	</body>
-</html>
+		<div class="buy-btn btn-bluish">BUY</div>
+	</div>
+</div>

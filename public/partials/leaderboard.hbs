@@ -1,33 +1,23 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Pixel Legions</title>
-		<link rel="stylesheet" href="/dist/styles.css">
-		<script src="/dist/leaderboard.js"></script>
-	</head>
-	<body>
-		<ul class="leaderboard">
-			{{#each leaderboard}}
-				<a class="player" href="profile/{{this.name}}">
-					{{#if_eq @index 0}}
-						<span class="place"><img src="assets/pl_first_place.svg"></span>
-					{{/if_eq}}
-					{{#if_eq @index 1}}
-						<span class="place"><img src="assets/pl_second_place.svg"></span>
-					{{/if_eq}}
-					{{#if_eq @index 2}}
-						<span class="place"><img src="assets/pl_third_place.svg"></span>
-					{{/if_eq}}
-					{{#if_gt @index 2}}
-						<span class="place">{{indexToPlace @index}}</span>
-					{{/if_gt}}
-					<span class="name">{{this.name}}</span>
-					<span class="country">
-						<span class="flag-icon flag-icon-{{this.country.code}}"></span>
-					</span>
-					<span class="rating">{{this.rating}}</span>
-				</a>
-			{{/each}}
-		</ul>
-	</body>
-</html>
+<ul class="leaderboard">
+	{{#each leaderboard}}
+		<a class="player" href="profile/{{this.name}}">
+			{{#if_eq @index 0}}
+				<span class="place"><img src="assets/pl_first_place.svg"></span>
+			{{/if_eq}}
+			{{#if_eq @index 1}}
+				<span class="place"><img src="assets/pl_second_place.svg"></span>
+			{{/if_eq}}
+			{{#if_eq @index 2}}
+				<span class="place"><img src="assets/pl_third_place.svg"></span>
+			{{/if_eq}}
+			{{#if_gt @index 2}}
+				<span class="place">{{indexToPlace @index}}</span>
+			{{/if_gt}}
+			<span class="name">{{this.name}}</span>
+			<span class="country">
+				<span class="flag-icon flag-icon-{{this.country.code}}"></span>
+			</span>
+			<span class="rating">{{this.rating}}</span>
+		</a>
+	{{/each}}
+</ul>

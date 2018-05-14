@@ -1,27 +1,16 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Pixel Legions</title>
-		<link rel="stylesheet" href="/dist/styles.css">
-		<script src="http://www.geoplugin.net/javascript.gp"></script>
-		<script src="/dist/register.js"></script>
-	</head>
-	<body>
-		<h1 class="main-header">PIXEL LEGIONS</h1>
+<h1 class="main-header">PIXEL LEGIONS</h1>
 
-		{{#if error}}
-			<div class="notification login-error">{{error}}</div>
-		{{/if}}
+{{#if error}}
+	<div class="notification login-error">{{error}}</div>
+{{/if}}
 
-		<form id="register-form" action="/register" method="POST">
-			<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
-			<input type="text" class="password" name="password" placeholder="Password" maxlength="10" required>
-			<input type="hidden" class="country" name="country">
-			<input type="submit" class="register-btn btn-bluish" value="Register">
-		</form>
+<form id="register-form" action="/register" method="POST">
+	<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
+	<input type="text" class="password" name="password" placeholder="Password" maxlength="10" required>
+	<input type="hidden" class="country" name="country">
+	<input type="submit" class="register-btn btn-bluish" value="Register">
+</form>
 
-		<a href="login">
-			<button class="login-btn-link btn-bluish">Login</button>
-		</a>
-	</body>
-</html>
+<a href="login">
+	<button class="login-btn-link btn-bluish">Login</button>
+</a>
