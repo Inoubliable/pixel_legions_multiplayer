@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-export default function homeJS() {
+function homeJS() {
 
 	$(document).ready(function() {
 
@@ -85,4 +85,12 @@ export default function homeJS() {
 
 	});
 
+}
+
+export default function renderHome() {
+	$('.page').removeClass('visible');
+	
+	$('#home-page').addClass('visible');
+	
+	homeJS();
 }

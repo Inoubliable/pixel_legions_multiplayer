@@ -1,9 +1,10 @@
 import $ from 'jquery';
 
-import loginJS from './login';
-import registerJS from './register';
-import homeJS from './home';
-import waitingRoomJS from './waitingRoom';
+import renderLogin from './login';
+import renderRegister from './register';
+import renderHome from './home';
+import renderWaitingRoom from './waitingRoom';
+import renderGame from './game';
 
 let user = {
 	isLoggedIn: false
@@ -42,6 +43,9 @@ function renderInitialPage() {
 				case 'waitingRoom':
 					renderWaitingRoom();
 					break;
+				case 'game':
+					renderGame();
+					break;
 				case 'leaderboard':
 					renderLeaderboard();
 					break;
@@ -53,42 +57,4 @@ function renderInitialPage() {
 		});
 
 	});
-}
-
-function renderLogin() {
-	$('.page').removeClass('visible');
-	$('#login-page').addClass('visible');
-
-	loginJS();
-}
-
-function renderRegister() {
-	$('.page').removeClass('visible');
-	$('#register-page').addClass('visible');
-
-	registerJS();
-}
-
-function renderHome() {
-	$('.page').removeClass('visible');
-	$('#home-page').addClass('visible');
-
-	homeJS();
-}
-
-function renderWaitingRoom() {
-	$('.page').removeClass('visible');
-	$('#waitingRoom-page').addClass('visible');
-
-	waitingRoomJS();
-}
-
-function renderLeaderboard() {
-	$('.page').removeClass('visible');
-	$('#leaderboard-page').addClass('visible');
-}
-
-function renderProfile() {
-	$('.page').removeClass('visible');
-	$('#profile-page').addClass('visible');
 }

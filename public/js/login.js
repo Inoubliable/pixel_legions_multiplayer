@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-export default function loginJS() {
+function loginJS() {
 
 	$(document).ready(function() {
 
@@ -20,4 +20,12 @@ export default function loginJS() {
 
 	});
 
+}
+
+export default function renderLogin() {
+	$('.page').removeClass('visible');
+	
+	$('#login-page').addClass('visible');
+	
+	loginJS();
 }

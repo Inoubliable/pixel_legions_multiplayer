@@ -1,7 +1,9 @@
 import $ from 'jquery';
 import io from 'socket.io-client';
 
-export default function waitingRoomJS() {
+import renderGame from './game';
+
+function waitingRoomJS() {
 
 	$(document).ready(function() {
 
@@ -27,11 +29,19 @@ export default function waitingRoomJS() {
 				if (count < 0) {
 					// send player to game
 					clearInterval(countdownInterval);
-					window.location.href = '/game';
+					renderGame();
 				}
 			}, 1000);
 		});
 
 	});
 
+}
+
+export default function renderWaitingRoom() {
+	$('.page').removeClass('visible');
+	
+	$('#waitingRoom-page').addClass('visible');
+
+	waitingRoomJS();
 }

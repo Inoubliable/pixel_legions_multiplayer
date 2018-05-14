@@ -1,8 +1,11 @@
 import $ from 'jquery';
+import io from 'socket.io-client';
 
 import * as c from './game_modules/constants';
 import * as helpers from './game_modules/helpers';
 import * as softBody from './game_modules/softBody';
+
+function gameJS() {
 
 $(document).ready(function() {
 
@@ -851,3 +854,13 @@ $(document).ready(function() {
 	}
 
 });
+
+}
+
+export default function renderGame() {
+	$('.page').removeClass('visible');
+	
+	$('#game-page').addClass('visible');
+	
+	gameJS();
+}

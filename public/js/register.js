@@ -1,6 +1,6 @@
 import $ from 'jquery';
 
-export default function registerJS() {
+function registerJS() {
 
 	$(document).ready(function() {
 		
@@ -13,4 +13,12 @@ export default function registerJS() {
 
 	});
 
+}
+
+export default function renderRegister() {
+	$('.page').removeClass('visible');
+	
+	$('#register-page').addClass('visible');
+	
+	registerJS();
 }
