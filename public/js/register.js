@@ -1,14 +1,27 @@
 import $ from 'jquery';
 
+import renderLogin from './login';
+
 function registerJS() {
 
 	$(document).ready(function() {
 		
 		let userCountry = geoplugin_countryName();
-		$('input.country').val(userCountry);
 
-		$('#register-form').submit(function() {
-			return true;
+		$('.register-btn').click(function(event) {
+			let name = $('#register-form').find('.name').val();
+			let password = $('#register-form').find('.password').val();
+
+			$.post('register', {name: name, password: password, country: userCountry}, function(data) {
+				
+				if (data.success) {
+					renderLogin(data.success);
+				} else if (data.error) {
+					$('.registration-error').text(data.error);
+					$('.registration-error').show(500);
+				}
+
+			});
 		});
 
 	});

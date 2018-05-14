@@ -121,7 +121,7 @@ app.get('/', (req, res) => {
 
 app.post('/login', (req, res) => {
 
-	// check if name already exists
+	// check if name exists
 	let playerName = req.body.name;
 	let playerPassword = req.body.password;
 	dbConnection.getPlayerByName(playerName, function(player) {
@@ -262,7 +262,6 @@ app.post('/register', (req, res) => {
 
 app.get('/logout', (req, res) => {
 	req.session.playerId = null;
-	res.redirect('login');
 });
 
 

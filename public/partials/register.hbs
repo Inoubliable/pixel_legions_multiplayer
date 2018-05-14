@@ -1,16 +1,12 @@
 <h1 class="main-header">PIXEL LEGIONS</h1>
 
-{{#if error}}
-	<div class="notification login-error">{{error}}</div>
-{{/if}}
+<div class="notification registration-error"></div>
 
 <form id="register-form" action="/register" method="POST">
 	<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
 	<input type="text" class="password" name="password" placeholder="Password" maxlength="10" required>
 	<input type="hidden" class="country" name="country">
-	<input type="submit" class="register-btn btn-bluish" value="Register">
+	<input type="button" class="register-btn btn-bluish" value="Register">
 </form>
 
-<a href="login">
-	<button class="login-btn-link btn-bluish">Login</button>
-</a>
+<button class="btn login-btn-link btn-bluish" data-page="login">Login</button>

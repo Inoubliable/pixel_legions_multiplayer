@@ -6,13 +6,9 @@
 <h1 class="main-header">PIXEL LEGIONS</h1>
 -->
 
-{{#if success}}
-	<div class="notification registration-success">{{success}}</div>
-{{/if}}
+<div class="notification registration-success"></div>
 
-{{#if error}}
-	<div class="notification login-error">{{error}}</div>
-{{/if}}
+<div class="notification login-error"></div>
 
 <form id="login-form" action="/login" method="POST">
 	<input type="text" class="name" name="name" placeholder="Name" maxlength="10" required>
@@ -20,6 +16,4 @@
 	<input type="button" class="login-btn btn-bluish" value="Play">
 </form>
 
-<a href="register">
-	<button class="register-btn-link btn-bluish">Register</button>
-</a>
+<button class="btn register-btn-link btn-bluish" data-page="register">Register</button>

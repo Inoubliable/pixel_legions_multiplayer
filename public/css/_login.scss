@@ -88,11 +88,14 @@
 	padding: 10px;
 	border-radius: 5px;
 
-	&.login-error {
+	&.login-error,
+	&.registration-error {
 		background-color: $redish;
+		display: none;
 	}
 
 	&.registration-success {
 		background-color: $greenish;
+		display: none;
 	}
 }
