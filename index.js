@@ -105,12 +105,9 @@ app.get('/', (req, res) => {
 				return u;
 			});
 
-			dbConnection.getLeaderboard(function(leaderboard) {
-				res.render(path.join(public + 'main.hbs'), {
-					upgradesArray: upgradeArrayWithLevels,
-					leaderboard: leaderboard,
-					logged: true
-				});
+			res.render(path.join(public + 'main.hbs'), {
+				upgradesArray: upgradeArrayWithLevels,
+				isLoggedIn: true
 			});
 		});
 	} else {
@@ -166,6 +163,12 @@ app.post('/buyUpgrade', (req, res) => {
 				
 			});
 		}
+	});
+});
+
+app.get('/leaderboard', (req, res) => {
+	dbConnection.getLeaderboard(function(leaderboard) {
+		res.json({leaderboard: leaderboard});
 	});
 });
 

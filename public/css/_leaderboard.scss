@@ -12,6 +12,10 @@
 		border-radius: 5px;
 		padding: 10px 4px;
 
+		&:hover {
+			cursor: pointer;
+		}
+
 		.place {
 			width: 15%;
 			text-align: center;
